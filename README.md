@@ -56,11 +56,11 @@ bru run flujo-tipico/01-validar-por-campos.bru --env produccion
 El entorno `produccion` (en `environments/produccion.bru`) trae dos variables con valor por
 defecto y una en blanco:
 
-| variable               | valor                                          |
-| ----------------------- | ------------------------------------------------------------------------------ |
-| `base_url`              | `https://api.veriko.mx/v1` — no hace falta cambiarlo                            |
-| `api_key`               | en blanco a propósito. Se obtiene en el panel ([app.veriko.mx](https://app.veriko.mx)) y empieza con `veriko_` |
-| `webhook_receiver_url`  | apunta a un receptor de prueba propio (por ejemplo, uno temporal de [webhook.site](https://webhook.site)) antes de correr las peticiones 7 a 9 |
+| variable               | valor                                                                                                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `base_url`             | `https://api.veriko.mx/v1` — no hace falta cambiarlo                                                                                           |
+| `api_key`              | en blanco a propósito. Se obtiene en el panel ([app.veriko.mx](https://app.veriko.mx)) y empieza con `veriko_`                                 |
+| `webhook_receiver_url` | apunta a un receptor de prueba propio (por ejemplo, uno temporal de [webhook.site](https://webhook.site)) antes de correr las peticiones 7 a 9 |
 
 `api_key` está declarada como variable secreta: Bruno la guarda sólo en tu máquina, nunca en este
 repositorio. No hay, ni debe haber, ninguna clave real ni de prueba versionada aquí.
