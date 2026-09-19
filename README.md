@@ -58,7 +58,7 @@ defecto y una en blanco:
 
 | variable               | valor                                                                                                                                          |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `base_url`             | `https://api.veriko.mx/v1` — no hace falta cambiarlo                                                                                           |
+| `base_url`             | `https://api.veriko.mx/v1`: no hace falta cambiarlo                                                                                            |
 | `api_key`              | en blanco a propósito. Se obtiene en el panel ([app.veriko.mx](https://app.veriko.mx)) y empieza con `veriko_`                                 |
 | `webhook_receiver_url` | apunta a un receptor de prueba propio (por ejemplo, uno temporal de [webhook.site](https://webhook.site)) antes de correr las peticiones 7 a 9 |
 
@@ -97,7 +97,7 @@ el catálogo de bancos y el estado de Banxico, dos peticiones sin cuerpo que se 
 ## La misma colección en Postman
 
 `postman/postman_collection.json` es una Collection v2.1 generada desde las peticiones de
-`flujo-tipico/` — mismas rutas, mismos cuerpos, y las tres variables que encadenan una petición con
+`flujo-tipico/`: mismas rutas, mismos cuerpos, y las tres variables que encadenan una petición con
 la siguiente traducidas a un test script equivalente. Se importa directamente en Postman; la
 variable de entorno se define ahí igual que en `environments/produccion.bru`.
 

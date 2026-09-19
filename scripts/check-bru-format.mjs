@@ -2,7 +2,9 @@
  * Formateador de `.bru`: prettier no entiende el formato, así que este
  * candado normaliza a mano lo que sí se puede exigir en cualquier archivo de
  * texto: saltos de línea LF, ausencia de espacios colgantes y un único salto
- * final. Falla si algún archivo se guardó distinto. `npm run format` con
+ * final.
+ *
+ * Falla si algún archivo se guardó distinto. `npm run format` con
  * `FIX=1` reescribe los archivos que fallan.
  */
 

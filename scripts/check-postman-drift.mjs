@@ -1,6 +1,8 @@
 /**
  * Candado: `postman/postman_collection.json` está al día con las peticiones
- * `.bru`. Mismo patrón que `check-generated-types.mjs` de veriko-js: se
+ * `.bru`.
+ *
+ * Mismo patrón que `check-generated-types.mjs` de veriko-js: se
  * regenera en un temporal y se compara, así nadie edita el export a mano ni
  * se olvida de regenerarlo tras cambiar una petición.
  */
