@@ -113,10 +113,10 @@ npm test
 
 Corre tres candados, ninguno hace una petición real:
 
-- `check:spec-public` — `spec/openapi.yaml` (una copia del spec público) no es el bundle interno.
-- `validate` — cada petición de `flujo-tipico/` existe en ese spec, con sus parámetros, cabeceras y
+- `check:spec-public`: `spec/openapi.yaml` (una copia del spec público) no es el bundle interno.
+- `validate`: Cada petición de `flujo-tipico/` existe en ese spec, con sus parámetros, cabeceras y
   campos del cuerpo declarados, y es de máquina a máquina.
-- `check:postman-fresh` — el candado de deriva descrito arriba.
+- `check:postman-fresh`: El candado de deriva descrito arriba.
 
 `npm run format:check` corre aparte, en el mismo CI: prettier para JSON, JavaScript y Markdown, y un
 formateador propio para los archivos `.bru` (que prettier no entiende). Ambos se corrigen con
