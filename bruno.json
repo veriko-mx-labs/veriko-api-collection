@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "name": "Veriko — validación SPEI contra el CEP",
+  "type": "collection",
+  "ignore": ["node_modules", ".git"]
+}

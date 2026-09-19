@@ -1,0 +1,23 @@
+meta {
+  name: 05 - Descargar el CEP
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{base_url}}/validations/{{queued_validation_id}}/cep?format=xml
+  body: none
+  auth: inherit
+}
+
+params:query {
+  format: xml
+}
+
+docs {
+  Descarga el comprobante oficial de Banxico de la validación de la
+  petición 3, una vez que su veredicto es `valid`.
+
+  `format` acepta `xml` (por defecto) o `pdf`. Sin comprobante disponible
+  para ese veredicto, la respuesta es 404 con `cep_not_available`.
+}

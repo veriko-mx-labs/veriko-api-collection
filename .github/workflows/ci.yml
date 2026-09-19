@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Formato, spec público y candado de Postman
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - run: npm ci
+
+      - name: prettier
+        run: npm run format:check
+
+      - name: El spec versionado es el público, no el bundle interno
+        run: npm run check:spec-public
+
+      - name: Cada petición existe en el spec público y es de máquina a máquina
+        run: npm run validate
+
+      - name: El export de Postman está al día con las peticiones .bru
+        run: npm run check:postman-fresh

@@ -1,0 +1,35 @@
+meta {
+  name: 02 - Validar desde la imagen del comprobante
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/validate-ocr
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+  }
+}
+
+tests {
+  test("responde 200 con el resultado del OCR", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+docs {
+  Extrae los datos por OCR de la imagen del comprobante y valida el resultado
+  contra el CEP, en un solo paso.
+
+  La imagen va en `image` (base64) o en `image_url`. Esta petición usa un
+  PNG mínimo de ejemplo: sustitúyelo por el comprobante real en base64, o
+  cambia el cuerpo por `image_url` si lo tienes alojado.
+
+  `cuenta_beneficiaria` es opcional y ayuda cuando la imagen no trae ese
+  dato completo.
+}

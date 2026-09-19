@@ -1,0 +1,17 @@
+meta {
+  name: 09 - Consultar el historial de entregas
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{base_url}}/webhooks/{{webhook_id}}/deliveries
+  body: none
+  auth: inherit
+}
+
+docs {
+  Intentos de entrega del endpoint de la petición 7, del más reciente al
+  más antiguo, con el código de estado HTTP y el tiempo de respuesta de
+  cada uno — incluida la entrega de prueba de la petición anterior.
+}

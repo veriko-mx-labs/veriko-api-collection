@@ -1,0 +1,26 @@
+meta {
+  name: 11 - Estado del servicio de Banxico
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{base_url}}/status/banxico
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responde 200 con el estado del servicio", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+docs {
+  Estado operativo del servicio de verificación de Banxico:
+  `operational`, `degraded`, `down` o `unknown`.
+
+  Útil antes de una corrida de validaciones síncronas: en `degraded` o
+  `down`, esas peticiones pueden responder 503 y conviene apoyarse en la
+  política de reintentos en vez de insistir a mano.
+}

@@ -1,0 +1,336 @@
+{
+  "info": {
+    "name": "Veriko — validación SPEI contra el CEP",
+    "description": "Las diez llamadas del flujo típico de integración con la API de Veriko, generadas desde la colección Bruno de este repositorio. Ver README.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{api_key}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Flujo típico",
+      "item": [
+        {
+          "name": "01 - Validar por campos",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validate"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fecha\": \"2025-03-15\",\n  \"monto\": 15000.5,\n  \"clave_rastreo\": \"MXBA20250315001234\",\n  \"referencia_numerica\": \"1234567\",\n  \"emisor\": \"BANCO NACIONAL DE MEXICO\",\n  \"receptor\": \"BBVA MEXICO\",\n  \"cuenta_beneficiaria\": \"012180004412345678\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "02 - Validar desde la imagen del comprobante",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validate-ocr",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validate-ocr"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "03 - Encolar una validación (modo asíncrono)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validate?async=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validate"
+              ],
+              "query": [
+                {
+                  "key": "async",
+                  "value": "1"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fecha\": \"2025-03-16\",\n  \"monto\": 8200,\n  \"clave_rastreo\": \"MXBA20250316007788\",\n  \"emisor\": \"BANCO NACIONAL DE MEXICO\",\n  \"receptor\": \"SCOTIABANK\",\n  \"cuenta_beneficiaria\": \"044180001122334455\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 - Consultar el veredicto",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "If-None-Match",
+                "value": "{{queued_validation_etag}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validations/{{queued_validation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{queued_validation_id}}"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const etag = pm.response.headers.get(\"ETag\");",
+                  "if (etag) {",
+                  "  pm.collectionVariables.set(\"queued_validation_etag\", etag);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 - Descargar el CEP",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations/{{queued_validation_id}}/cep?format=xml",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{queued_validation_id}}",
+                "cep"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "xml"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "06 - Listar el historial",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations?status=valid,not_found&from=2025-01-01&to=2025-03-31",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "valid,not_found"
+                },
+                {
+                  "key": "from",
+                  "value": "2025-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2025-03-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "07 - Registrar un endpoint de webhook",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"{{webhook_receiver_url}}\",\n  \"events\": [\"validation.completed\", \"validation.failed\"],\n  \"description\": \"Colección de peticiones — flujo de prueba\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"webhook_id\", pm.response.json().data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 - Enviar un evento de prueba",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks/{{webhook_id}}/test",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{webhook_id}}",
+                "test"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "09 - Consultar el historial de entregas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks/{{webhook_id}}/deliveries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{webhook_id}}",
+                "deliveries"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "10 - Catálogo de bancos SPEI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/public/banks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "banks"
+              ],
+              "query": []
+            }
+          }
+        },
+        {
+          "name": "11 - Estado del servicio de Banxico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/status/banxico",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "status",
+                "banxico"
+              ],
+              "query": []
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.veriko.mx/v1"
+    },
+    {
+      "key": "api_key",
+      "value": ""
+    },
+    {
+      "key": "webhook_receiver_url",
+      "value": "https://webhook.site/reemplaza-esto-con-tu-url-de-prueba"
+    }
+  ]
+}

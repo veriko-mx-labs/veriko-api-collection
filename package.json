@@ -1,0 +1,35 @@
+{
+  "name": "veriko-api-collection",
+  "version": "1.0.0",
+  "description": "Colección Bruno de la API de Veriko: valida transferencias SPEI contra el CEP de Banxico",
+  "private": true,
+  "type": "module",
+  "homepage": "https://docs.veriko.mx",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/veriko-mx-labs/veriko-api-collection.git"
+  },
+  "bugs": {
+    "url": "https://github.com/veriko-mx-labs/veriko-api-collection/issues"
+  },
+  "license": "MIT",
+  "author": "Veriko <soporte@veriko.mx>",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "check:spec-public": "node scripts/check-spec-is-public.mjs",
+    "validate": "node scripts/validate-requests.mjs",
+    "gen:postman": "node scripts/generate-postman.mjs",
+    "check:postman-fresh": "node scripts/check-postman-drift.mjs",
+    "check:bru-format": "node scripts/check-bru-format.mjs",
+    "format": "prettier --write . && node scripts/check-bru-format.mjs --fix",
+    "format:check": "prettier --check . && npm run check:bru-format",
+    "test": "npm run check:spec-public && npm run validate && npm run check:postman-fresh"
+  },
+  "devDependencies": {
+    "@usebruno/lang": "^0.39.0",
+    "prettier": "^3.9.8",
+    "yaml": "^2.9.1"
+  }
+}

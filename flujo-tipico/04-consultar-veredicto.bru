@@ -1,0 +1,41 @@
+meta {
+  name: 04 - Consultar el veredicto
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/validations/{{queued_validation_id}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  If-None-Match: {{queued_validation_etag}}
+}
+
+script:post-response {
+  const etag = res.getHeader("etag");
+  if (etag) {
+    bru.setVar("queued_validation_etag", etag);
+  }
+}
+
+tests {
+  test("responde 200 con el veredicto, o 304 si no cambió", function () {
+    expect([200, 304]).to.include(res.getStatus());
+  });
+}
+
+docs {
+  Sondea el resultado de la validación encolada en la petición anterior,
+  usando el identificador guardado en `queued_validation_id`.
+
+  Envía en `If-None-Match` el `ETag` de la última respuesta
+  (`queued_validation_etag`, vacía la primera vez). Ejecuta esta petición
+  dos veces seguidas: la primera trae el estado completo y guarda un ETag
+  nuevo; si el estado no avanzó, la segunda responde 304 sin cuerpo.
+
+  Repite la petición hasta un estado terminal (`valid`, `not_found`,
+  `cep_unavailable`, `returned`, `error`).
+}

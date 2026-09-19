@@ -1,0 +1,26 @@
+meta {
+  name: 10 - Catálogo de bancos SPEI
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{base_url}}/public/banks
+  body: none
+  auth: none
+}
+
+tests {
+  test("responde 200 con el catálogo", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+docs {
+  Catálogo de instituciones participantes del SPEI, actualizado
+  semanalmente desde Banxico. No requiere clave de API: es el único
+  recurso público de la colección.
+
+  La respuesta lleva `ETag`: enviarlo como `If-None-Match` en una petición
+  posterior ahorra la descarga si el catálogo no cambió.
+}
