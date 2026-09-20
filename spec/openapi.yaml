@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: Platform API
+  title: Veriko API
   description: |-
     REST API para validar transferencias SPEI mexicanas contra Banxico CEP. Soporta validación manual por campos, validación por OCR de comprobantes, importación masiva (CSV/XLSX/imágenes), gestión de beneficiarios, métricas de uso, finanzas y notificaciones.
 
@@ -8,16 +8,16 @@ info:
 
     Todas las fechas se emiten en UTC; cada respuesta lo confirma en `meta.datetime`.
 
-    Las integraciones programáticas se autentican mediante una clave de API (`Authorization: Bearer example_…`).
+    Las integraciones programáticas se autentican mediante una clave de API (`Authorization: Bearer veriko_…`).
   version: 1.59.1
   contact:
-    name: Platform Support
-    email: support@example.com
+    name: Veriko Support
+    email: soporte@veriko.mx
   license:
     name: Proprietary
   x-translations:
     en:
-      title: Platform API
+      title: Veriko API
       description: |-
         REST API to validate Mexican SPEI bank transfers against Banxico CEP. Supports field-based manual validation, OCR receipt validation, bulk import (CSV/XLSX/images), beneficiary management, usage metrics, finance and notifications.
 
@@ -25,9 +25,9 @@ info:
 
         All datetimes are emitted in UTC; each response confirms it in `meta.datetime`.
 
-        Programmatic integrations authenticate with an API key (`Authorization: Bearer example_…`).
+        Programmatic integrations authenticate with an API key (`Authorization: Bearer veriko_…`).
 servers:
-  - url: https://api.example.com/v1
+  - url: https://api.veriko.mx/v1
     description: Production — programmatic access via API key
     x-translations:
       en:
@@ -133,8 +133,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/users/me' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/users/me' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Información completa del usuario autenticado.
@@ -184,7 +184,7 @@ paths:
                         email_verified_at: '2026-04-30T10:15:00Z'
                         created_at: '2026-01-15T08:00:00Z'
                         api_key:
-                          prefix: example_a1b2
+                          prefix: veriko_a1b2
                           last_4: f9c2
                         subscription:
                           plan_slug: pro
@@ -290,7 +290,7 @@ paths:
         {% /callout %}
       operationId: validateDirect
       externalDocs:
-        url: https://docs.example.com/how-to/validate-spei
+        url: https://docs.veriko.mx/how-to/validate-spei
         description: 'How-to: validación manual de una transferencia SPEI'
       parameters:
         - $ref: '#/components/parameters/IdempotencyKeyHeader'
@@ -357,8 +357,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X POST 'https://api.example.com/v1/validate' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X POST 'https://api.veriko.mx/v1/validate' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json' \
               -d '{
                 "fecha": "2025-03-15",
@@ -616,7 +616,7 @@ paths:
         {% /callout %}
       operationId: validateOcr
       externalDocs:
-        url: https://docs.example.com/how-to/validate-ocr
+        url: https://docs.veriko.mx/how-to/validate-ocr
         description: Validate a SPEI transfer from a receipt image
       parameters:
         - $ref: '#/components/parameters/IdempotencyKeyHeader'
@@ -645,8 +645,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X POST 'https://api.example.com/v1/validate-ocr' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X POST 'https://api.veriko.mx/v1/validate-ocr' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json' \
               -d '{
                 "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
@@ -820,7 +820,7 @@ paths:
         Para el registro completo de una validación, con el estado detallado de sus reintentos, está `GET /v1/validations/{id}`.
       operationId: listValidations
       externalDocs:
-        url: https://docs.example.com/how-to/inspect-validations
+        url: https://docs.veriko.mx/how-to/inspect-validations
         description: Browse and manage validation records
       parameters:
         - name: page
@@ -978,8 +978,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/validations' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/validations' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Lista paginada de validaciones con metadatos de paginación.
@@ -1134,7 +1134,7 @@ paths:
         Acepta los mismos filtros que `GET /v1/validations`, con una excepción: `status` se admite pero no modifica los contadores (cada uno lleva ya su propio objetivo).
       operationId: validationStats
       externalDocs:
-        url: https://docs.example.com/how-to/inspect-validations
+        url: https://docs.veriko.mx/how-to/inspect-validations
         description: Browse and manage validation records
       parameters:
         - name: type
@@ -1269,8 +1269,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/validations/stats' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/validations/stats' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Estadísticas agregadas de las validaciones de la cuenta.
@@ -1417,7 +1417,7 @@ paths:
         La exportación admite hasta 100 000 filas, y `limit` permite reducir ese máximo.
       operationId: exportValidations
       externalDocs:
-        url: https://docs.example.com/how-to/inspect-validations
+        url: https://docs.veriko.mx/how-to/inspect-validations
         description: Browse and manage validation records
       parameters:
         - name: format
@@ -1587,8 +1587,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/validations/export' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/validations/export' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Archivo CSV o XLSX según `format`. El nombre del archivo es `<slug>_validaciones_<YYYY-MM-DD>.<ext>`, donde `<slug>` identifica al despliegue.
@@ -1674,7 +1674,7 @@ paths:
         {% /callout %}
       operationId: getValidation
       externalDocs:
-        url: https://docs.example.com/how-to/inspect-validations
+        url: https://docs.veriko.mx/how-to/inspect-validations
         description: Browse and manage validation records
       parameters:
         - $ref: '#/components/parameters/ValidationId'
@@ -1683,8 +1683,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/validations/{id}' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/validations/{id}' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Detalle de la validación. En estados pre-terminales (`queued`, `processing`) incluye la cabecera `Retry-After` y el campo `meta.next_poll_after_seconds` del cuerpo.
@@ -1862,7 +1862,7 @@ paths:
         La eliminación es lógica, no física. Lo que quiere decir que puede seguir apareciendo en las listas como `GET /v1/validations` si se usa el filtro `with_deleted` u otros.
       operationId: deleteValidation
       externalDocs:
-        url: https://docs.example.com/how-to/inspect-validations
+        url: https://docs.veriko.mx/how-to/inspect-validations
         description: Browse and manage validation records
       parameters:
         - $ref: '#/components/parameters/ValidationId'
@@ -1870,8 +1870,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X DELETE 'https://api.example.com/v1/validations/{id}' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X DELETE 'https://api.veriko.mx/v1/validations/{id}' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json'
       responses:
         '204':
@@ -1930,7 +1930,7 @@ paths:
         Si el comprobante, o el formato pedido, no está disponible, responde con un estado HTTP `404` (con `cep_not_available` en el cuerpo).
       operationId: downloadCep
       externalDocs:
-        url: https://docs.example.com/how-to/inspect-validations
+        url: https://docs.veriko.mx/how-to/inspect-validations
         description: Browse and manage validation records
       parameters:
         - $ref: '#/components/parameters/ValidationId'
@@ -1951,8 +1951,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/validations/{id}/cep' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/validations/{id}/cep' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Archivo del certificado CEP. El `Content-Type` es `application/xml` o `application/pdf` según el formato solicitado.
@@ -2042,7 +2042,7 @@ paths:
         - Sin la vinculación, responde con un estado HTTP `409` (con `telegram_not_linked` en el cuerpo).
       operationId: sendCepToTelegram
       externalDocs:
-        url: https://docs.example.com/how-to/inspect-validations
+        url: https://docs.veriko.mx/how-to/inspect-validations
         description: Browse and manage validation records
       parameters:
         - $ref: '#/components/parameters/ValidationId'
@@ -2050,8 +2050,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X POST 'https://api.example.com/v1/validations/{id}/cep/send-telegram' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X POST 'https://api.veriko.mx/v1/validations/{id}/cep/send-telegram' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json'
       responses:
         '202':
@@ -2166,7 +2166,7 @@ paths:
         Si la validación no tiene imagen disponible, responde con un estado HTTP `404` (con `image_not_available` en el cuerpo).
       operationId: getValidationImage
       externalDocs:
-        url: https://docs.example.com/how-to/inspect-validations
+        url: https://docs.veriko.mx/how-to/inspect-validations
         description: Browse and manage validation records
       parameters:
         - $ref: '#/components/parameters/ValidationId'
@@ -2174,8 +2174,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/validations/{id}/image' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/validations/{id}/image' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Imagen del comprobante. `Content-Type` indica `image/png`, `image/jpeg` o `image/webp` según el formato; cualquier otro contenido se entrega como `application/octet-stream`.
@@ -2283,7 +2283,7 @@ paths:
         Los criterios que originan estos intentos están descritos en {% concept slug="retry-policy" %}la política de reintentos{% /concept %}.
       operationId: listValidationRetryAttempts
       externalDocs:
-        url: https://docs.example.com/how-to/inspect-validations
+        url: https://docs.veriko.mx/how-to/inspect-validations
         description: Browse and manage validation records
       parameters:
         - $ref: '#/components/parameters/ValidationId'
@@ -2291,8 +2291,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/validations/{id}/retry-attempts' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/validations/{id}/retry-attempts' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Lista de intentos de reintento ordenada cronológicamente por `attempt_number` ascendente.
@@ -2418,7 +2418,7 @@ paths:
         El estado completo de una validación se obtiene con `GET /v1/validations/{id}`, y los límites están descritos en {% concept slug="retry-policy" %}la política de reintentos{% /concept %}.
       operationId: updateValidationRetryPolicy
       externalDocs:
-        url: https://docs.example.com/how-to/inspect-validations
+        url: https://docs.veriko.mx/how-to/inspect-validations
         description: Browse and manage validation records
       parameters:
         - $ref: '#/components/parameters/ValidationId'
@@ -2472,8 +2472,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X PUT 'https://api.example.com/v1/validations/{id}/retry-policy' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X PUT 'https://api.veriko.mx/v1/validations/{id}/retry-policy' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json' \
               -d '{
                 "retry_policy": {
@@ -2642,7 +2642,7 @@ paths:
         La cabecera opcional `Idempotency-Key` permite repetir la misma petición sin duplicar la cancelación.
       operationId: cancelValidationRetries
       externalDocs:
-        url: https://docs.example.com/how-to/inspect-validations
+        url: https://docs.veriko.mx/how-to/inspect-validations
         description: Browse and manage validation records
       parameters:
         - $ref: '#/components/parameters/ValidationId'
@@ -2651,8 +2651,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X POST 'https://api.example.com/v1/validations/{id}/cancel-retries' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X POST 'https://api.veriko.mx/v1/validations/{id}/cancel-retries' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json'
       responses:
         '200':
@@ -2748,18 +2748,18 @@ paths:
       x-codeSamples:
         - lang: curl
           label: Shell
-          source: curl -X GET 'https://api.example.com/v1/public/banks'
+          source: curl -X GET 'https://api.veriko.mx/v1/public/banks'
         - lang: python
           label: Python
           source: |
             import requests
 
-            response = requests.get("https://api.example.com/v1/public/banks")
+            response = requests.get("https://api.veriko.mx/v1/public/banks")
             print(response.json())
         - lang: javascript
           label: JavaScript
           source: |
-            fetch("https://api.example.com/v1/public/banks")
+            fetch("https://api.veriko.mx/v1/public/banks")
               .then(response => response.json())
               .then(data => console.log(data));
         - lang: php
@@ -2767,7 +2767,7 @@ paths:
           source: |
             <?php
 
-            $ch = curl_init("https://api.example.com/v1/public/banks");
+            $ch = curl_init("https://api.veriko.mx/v1/public/banks");
 
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $response = curl_exec($ch);
@@ -2896,21 +2896,21 @@ paths:
       x-codeSamples:
         - lang: curl
           label: Shell
-          source: curl -X GET 'https://api.example.com/v1/public/bin-lookup/{bin}'
+          source: curl -X GET 'https://api.veriko.mx/v1/public/bin-lookup/{bin}'
         - lang: python
           label: Python
           source: |
             import requests
 
             bin = "424242"
-            response = requests.get(f"https://api.example.com/v1/public/bin-lookup/{bin}")
+            response = requests.get(f"https://api.veriko.mx/v1/public/bin-lookup/{bin}")
             print(response.json())
         - lang: javascript
           label: JavaScript
           source: |
             const bin = "424242";
 
-            fetch(`https://api.example.com/v1/public/bin-lookup/${bin}`)
+            fetch(`https://api.veriko.mx/v1/public/bin-lookup/${bin}`)
               .then(response => response.json())
               .then(data => console.log(data));
         - lang: php
@@ -2919,7 +2919,7 @@ paths:
             <?php
 
             $bin = "424242";
-            $ch = curl_init("https://api.example.com/v1/public/bin-lookup/$bin");
+            $ch = curl_init("https://api.veriko.mx/v1/public/bin-lookup/$bin");
 
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $response = curl_exec($ch);
@@ -2972,7 +2972,7 @@ paths:
         **Los números de cuenta salen enmascarados (salvo la CLABE):** Una tarjeta se exporta como `4111 •••• •••• 1111` y un celular como `••••5678`; la CLABE se exporta completa. El criterio y el resto de las superficies enmascaradas están en {% concept slug="pii-masking" %}el enmascarado de datos{% /concept %}.
       operationId: exportBeneficiaries
       externalDocs:
-        url: https://docs.example.com/how-to/manage-beneficiaries
+        url: https://docs.veriko.mx/how-to/manage-beneficiaries
         description: Create, update, and export beneficiaries
       parameters:
         - name: with_archived
@@ -3019,8 +3019,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/beneficiaries/export' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/beneficiaries/export' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Archivo con la lista de beneficiarios según el filtro y formato solicitados.
@@ -3099,7 +3099,7 @@ paths:
         `POST /v1/beneficiaries/imports` da de alta varios beneficiarios a la vez, desde CSV o XLS.
       operationId: listBeneficiaries
       externalDocs:
-        url: https://docs.example.com/how-to/manage-beneficiaries
+        url: https://docs.veriko.mx/how-to/manage-beneficiaries
         description: Create, update, and export beneficiaries
       parameters:
         - name: with_archived
@@ -3120,8 +3120,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/beneficiaries' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/beneficiaries' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Lista completa de cuentas beneficiarias del usuario según el filtro.
@@ -3222,7 +3222,7 @@ paths:
         Si existe pero está archivada, el alta la **reactiva** y responde con un estado HTTP `200` (con `meta.reactivated=true` en el cuerpo).
       operationId: createBeneficiary
       externalDocs:
-        url: https://docs.example.com/how-to/manage-beneficiaries
+        url: https://docs.veriko.mx/how-to/manage-beneficiaries
         description: Create, update, and export beneficiaries
       requestBody:
         required: true
@@ -3260,8 +3260,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X POST 'https://api.example.com/v1/beneficiaries' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X POST 'https://api.veriko.mx/v1/beneficiaries' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json' \
               -d '{
                 "account_number": "4111111111111111",
@@ -3534,7 +3534,7 @@ paths:
         Un cuerpo sin ningún campo editable responde con un estado HTTP `422` (con `no_valid_fields` en el cuerpo).
       operationId: updateBeneficiary
       externalDocs:
-        url: https://docs.example.com/how-to/manage-beneficiaries
+        url: https://docs.veriko.mx/how-to/manage-beneficiaries
         description: Create, update, and export beneficiaries
       parameters:
         - name: id
@@ -3590,8 +3590,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X PUT 'https://api.example.com/v1/beneficiaries/{id}' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X PUT 'https://api.veriko.mx/v1/beneficiaries/{id}' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json' \
               -d '{
                 "data": {
@@ -3750,7 +3750,7 @@ paths:
         Los beneficiarios archivados se consultan con `GET /v1/beneficiaries?with_archived=1`.
       operationId: deleteBeneficiary
       externalDocs:
-        url: https://docs.example.com/how-to/manage-beneficiaries
+        url: https://docs.veriko.mx/how-to/manage-beneficiaries
         description: Create, update, and export beneficiaries
       parameters:
         - name: id
@@ -3767,8 +3767,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X DELETE 'https://api.example.com/v1/beneficiaries/{id}' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X DELETE 'https://api.veriko.mx/v1/beneficiaries/{id}' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json'
       responses:
         '204':
@@ -3832,8 +3832,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/beneficiaries/lookup' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/beneficiaries/lookup' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Cuenta encontrada en la lista del usuario; devuelve metadatos del banco.
@@ -4001,7 +4001,7 @@ paths:
         El idioma de los encabezados se negocia con la cabecera `Accept-Language`; de forma predeterminada se entregan en español, acepta después encabezados en ambos idiomas de forma insensible a acentos.
       operationId: downloadBeneficiaryImportTemplate
       externalDocs:
-        url: https://docs.example.com/how-to/beneficiary-import
+        url: https://docs.veriko.mx/how-to/beneficiary-import
         description: Asistente de importación de beneficiarios por lotes
       x-translations:
         en:
@@ -4038,8 +4038,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/beneficiaries/imports/template' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/beneficiaries/imports/template' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Archivo plantilla generado. El `Content-Type` varía por formato (`text/csv`, `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, `application/vnd.ms-excel`, `text/plain`, `application/json`).
@@ -4121,7 +4121,7 @@ paths:
         {% /callout %}
       operationId: createBeneficiaryImport
       externalDocs:
-        url: https://docs.example.com/how-to/beneficiary-import
+        url: https://docs.veriko.mx/how-to/beneficiary-import
         description: 'How-to: importación masiva de beneficiarios'
       requestBody:
         required: true
@@ -4138,8 +4138,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X POST 'https://api.example.com/v1/beneficiaries/imports' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X POST 'https://api.veriko.mx/v1/beneficiaries/imports' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json'
       responses:
         '202':
@@ -4245,7 +4245,7 @@ paths:
         El endpoint admite sondeo cada \~2s hasta que `status` sea `preview_ready`, `completed`, `failed` o `cancelled`.
       operationId: getBeneficiaryImport
       externalDocs:
-        url: https://docs.example.com/how-to/beneficiary-import
+        url: https://docs.veriko.mx/how-to/beneficiary-import
         description: Asistente de importación de beneficiarios por lotes
       parameters:
         - name: id
@@ -4262,8 +4262,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/beneficiaries/imports/{id}' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/beneficiaries/imports/{id}' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Estado actual de la importación con contadores por grupo.
@@ -4374,7 +4374,7 @@ paths:
         Las cuentas ya persistidas por una confirmación previo deben archivarse individualmente con `DELETE /v1/beneficiaries/{id}`.
       operationId: cancelBeneficiaryImport
       externalDocs:
-        url: https://docs.example.com/how-to/beneficiary-import
+        url: https://docs.veriko.mx/how-to/beneficiary-import
         description: Asistente de importación de beneficiarios por lotes
       parameters:
         - name: id
@@ -4391,8 +4391,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X DELETE 'https://api.example.com/v1/beneficiaries/imports/{id}' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X DELETE 'https://api.veriko.mx/v1/beneficiaries/imports/{id}' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json'
       responses:
         '204':
@@ -4462,7 +4462,7 @@ paths:
         {% /callout %}
       operationId: getBeneficiaryImportPreview
       externalDocs:
-        url: https://docs.example.com/how-to/beneficiary-import
+        url: https://docs.veriko.mx/how-to/beneficiary-import
         description: Asistente de importación de beneficiarios por lotes
       parameters:
         - name: id
@@ -4530,8 +4530,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/beneficiaries/imports/{id}/preview' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/beneficiaries/imports/{id}/preview' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Filas paginadas de la vista previa con metadatos de paginación y instantánea de la importación.
@@ -4713,7 +4713,7 @@ paths:
         {% /callout %}
       operationId: deleteBeneficiaryImportRow
       externalDocs:
-        url: https://docs.example.com/how-to/beneficiary-import
+        url: https://docs.veriko.mx/how-to/beneficiary-import
         description: Asistente de importación de beneficiarios
       parameters:
         - name: id
@@ -4740,8 +4740,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X DELETE 'https://api.example.com/v1/beneficiaries/imports/{id}/rows/{row_id}' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X DELETE 'https://api.veriko.mx/v1/beneficiaries/imports/{id}/rows/{row_id}' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json'
       responses:
         '204':
@@ -4813,7 +4813,7 @@ paths:
         {% /callout %}
       operationId: patchBeneficiaryImportRow
       externalDocs:
-        url: https://docs.example.com/how-to/beneficiary-import
+        url: https://docs.veriko.mx/how-to/beneficiary-import
         description: Asistente de importación de beneficiarios por lotes
       parameters:
         - name: id
@@ -4873,8 +4873,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X PATCH 'https://api.example.com/v1/beneficiaries/imports/{id}/rows/{row_id}' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X PATCH 'https://api.veriko.mx/v1/beneficiaries/imports/{id}/rows/{row_id}' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json' \
               -d '{
                 "parsed_account": "0121-8000-4412-3456-78"
@@ -5071,7 +5071,7 @@ paths:
         - Cuentas previamente archivadas con el mismo número: Se reactivan en lugar de duplicarse.
       operationId: commitBeneficiaryImport
       externalDocs:
-        url: https://docs.example.com/how-to/beneficiary-import
+        url: https://docs.veriko.mx/how-to/beneficiary-import
         description: Asistente de importación de beneficiarios por lotes
       parameters:
         - name: id
@@ -5088,8 +5088,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X POST 'https://api.example.com/v1/beneficiaries/imports/{id}/commit' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X POST 'https://api.veriko.mx/v1/beneficiaries/imports/{id}/commit' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json'
       responses:
         '202':
@@ -5180,7 +5180,7 @@ paths:
         {% /callout %}
       operationId: exportApiUsage
       externalDocs:
-        url: https://docs.example.com/how-to/monitor-usage
+        url: https://docs.veriko.mx/how-to/monitor-usage
         description: Track API quota and billing-cycle consumption
       parameters:
         - name: format
@@ -5232,8 +5232,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/api/usage/export' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/api/usage/export' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Archivo CSV (con BOM UTF-8) o XLSX según `format`.
@@ -5293,14 +5293,14 @@ paths:
         - Estado actual del servicio Banxico CEP.
       operationId: getApiUsage
       externalDocs:
-        url: https://docs.example.com/how-to/monitor-usage
+        url: https://docs.veriko.mx/how-to/monitor-usage
         description: Track API quota and billing-cycle consumption
       x-codeSamples:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/api/usage' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/api/usage' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Estadísticas de uso
@@ -5407,8 +5407,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/summary' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/summary' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Resumen del panel del usuario autenticado.
@@ -5468,14 +5468,14 @@ paths:
         impide activar reintentos.
       operationId: getMyRetryPolicy
       externalDocs:
-        url: https://docs.example.com/how-to/configure-retry-policy
+        url: https://docs.veriko.mx/how-to/configure-retry-policy
         description: Set account-level default política de reintentos
       x-codeSamples:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/users/me/retry-policy' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/users/me/retry-policy' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Política de reintentos por defecto de la cuenta autenticada.
@@ -5569,7 +5569,7 @@ paths:
         %}, que evita guardar dos veces lo mismo cuando la red obliga a reintentar.
       operationId: updateMyRetryPolicy
       externalDocs:
-        url: https://docs.example.com/how-to/configure-retry-policy
+        url: https://docs.veriko.mx/how-to/configure-retry-policy
         description: Set account-level default política de reintentos
       parameters:
         - $ref: '#/components/parameters/IdempotencyKeyHeader'
@@ -5605,8 +5605,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X PUT 'https://api.example.com/v1/users/me/retry-policy' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X PUT 'https://api.veriko.mx/v1/users/me/retry-policy' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json' \
               -d '{
                 "retry_policy": {
@@ -5767,8 +5767,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/status/banxico' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/status/banxico' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Estado actual del servicio de verificación de Banxico.
@@ -5952,8 +5952,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/status/banxico/timeseries' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/status/banxico/timeseries' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Puntos de datos de la serie temporal.
@@ -6076,14 +6076,14 @@ paths:
         {% /callout %}
       operationId: listWebhooks
       externalDocs:
-        url: https://docs.example.com/how-to/set-up-webhooks
+        url: https://docs.veriko.mx/how-to/set-up-webhooks
         description: Register, test, and monitor webhook deliveries
       x-codeSamples:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/webhooks' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/webhooks' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Lista de endpoints webhook del usuario con su estado, datos y eventos.
@@ -6159,7 +6159,7 @@ paths:
         {% /callout %}
       operationId: createWebhook
       externalDocs:
-        url: https://docs.example.com/how-to/set-up-webhooks
+        url: https://docs.veriko.mx/how-to/set-up-webhooks
         description: Register, test, and monitor webhook deliveries
       requestBody:
         required: true
@@ -6189,8 +6189,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X POST 'https://api.example.com/v1/webhooks' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X POST 'https://api.veriko.mx/v1/webhooks' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json' \
               -d '{
                 "url": "https://webhook.example.com/platform",
@@ -6555,7 +6555,7 @@ paths:
         {% /callout %}
       operationId: updateWebhook
       externalDocs:
-        url: https://docs.example.com/how-to/set-up-webhooks
+        url: https://docs.veriko.mx/how-to/set-up-webhooks
         description: Register, test, and monitor webhook deliveries
       parameters:
         - name: id
@@ -6584,8 +6584,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X PUT 'https://api.example.com/v1/webhooks/{id}' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X PUT 'https://api.veriko.mx/v1/webhooks/{id}' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json' \
               -d '{
                 "url": "https://webhook.example.com/platform",
@@ -6718,7 +6718,7 @@ paths:
         Para dejar de recibir entregas sin perder el historial, la vía es asignarle el estado `disabled` con `PUT /v1/webhooks/{id}`.
       operationId: deleteWebhook
       externalDocs:
-        url: https://docs.example.com/how-to/set-up-webhooks
+        url: https://docs.veriko.mx/how-to/set-up-webhooks
         description: Register, test, and monitor webhook deliveries
       parameters:
         - name: id
@@ -6736,8 +6736,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X DELETE 'https://api.example.com/v1/webhooks/{id}' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X DELETE 'https://api.veriko.mx/v1/webhooks/{id}' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json'
       responses:
         '204':
@@ -6797,7 +6797,7 @@ paths:
         {% /callout %}
       operationId: sendWebhookTest
       externalDocs:
-        url: https://docs.example.com/how-to/set-up-webhooks
+        url: https://docs.veriko.mx/how-to/set-up-webhooks
         description: Register, test, and monitor webhook deliveries
       parameters:
         - name: id
@@ -6815,8 +6815,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X POST 'https://api.example.com/v1/webhooks/{id}/test' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X POST 'https://api.veriko.mx/v1/webhooks/{id}/test' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json'
       responses:
         '200':
@@ -6892,7 +6892,7 @@ paths:
         Cada intento lleva: el código de estado HTTP con el que respondió el endpoint webhook, el tiempo de respuesta y el cuerpo de la respuesta truncado.
       operationId: listWebhookDeliveries
       externalDocs:
-        url: https://docs.example.com/how-to/set-up-webhooks
+        url: https://docs.veriko.mx/how-to/set-up-webhooks
         description: Register, test, and monitor webhook deliveries
       parameters:
         - name: id
@@ -6935,8 +6935,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/webhooks/{id}/deliveries' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/webhooks/{id}/deliveries' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Intentos de entrega paginados de este endpoint webhook, con el código de estado HTTP, el tiempo de respuesta y el cuerpo truncado.
@@ -7013,7 +7013,7 @@ paths:
       description: Descarga hasta 100 000 registros del historial de entregas de un endpoint específico, en formato `CSV` o `XLSX`.
       operationId: exportWebhookDeliveries
       externalDocs:
-        url: https://docs.example.com/how-to/set-up-webhooks
+        url: https://docs.veriko.mx/how-to/set-up-webhooks
         description: Register, test, and monitor webhook deliveries
       parameters:
         - name: id
@@ -7057,8 +7057,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/webhooks/{id}/deliveries/export' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/webhooks/{id}/deliveries/export' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Archivo CSV o XLSX con el historial de entregas del endpoint (hasta 100 000 filas).
@@ -7107,7 +7107,7 @@ paths:
         {% /callout %}
       operationId: regenerateWebhookSecret
       externalDocs:
-        url: https://docs.example.com/how-to/set-up-webhooks
+        url: https://docs.veriko.mx/how-to/set-up-webhooks
         description: Register, test, and monitor webhook deliveries
       parameters:
         - name: id
@@ -7125,8 +7125,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X POST 'https://api.example.com/v1/webhooks/{id}/regenerate-secret' \
-              -H 'Authorization: Bearer example_••••' \
+            curl -X POST 'https://api.veriko.mx/v1/webhooks/{id}/regenerate-secret' \
+              -H 'Authorization: Bearer veriko_••••' \
               -H 'Content-Type: application/json'
       responses:
         '200':
@@ -7190,7 +7190,7 @@ paths:
         Se puede filtrar por endpoint, estado y tipo de evento.
       operationId: listAllDeliveries
       externalDocs:
-        url: https://docs.example.com/how-to/set-up-webhooks
+        url: https://docs.veriko.mx/how-to/set-up-webhooks
         description: Register, test, and monitor webhook deliveries
       parameters:
         - name: page
@@ -7273,8 +7273,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/webhooks/deliveries' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/webhooks/deliveries' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Lista consolidada de entregas de todos los endpoints del usuario.
@@ -7349,7 +7349,7 @@ paths:
         lleva su historial por delante y no hay forma de recuperarlo.
       operationId: exportAllDeliveries
       externalDocs:
-        url: https://docs.example.com/how-to/set-up-webhooks
+        url: https://docs.veriko.mx/how-to/set-up-webhooks
         description: Register, test, and monitor webhook deliveries
       parameters:
         - name: endpoint_id
@@ -7442,8 +7442,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/webhooks/deliveries/export' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/webhooks/deliveries/export' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Archivo CSV o XLSX con el historial consolidado de entregas de todos los endpoints webhook (hasta 100 000 filas).
@@ -7531,7 +7531,7 @@ paths:
       x-codeSamples:
         - lang: curl
           label: Shell
-          source: curl -X GET 'https://api.example.com/v1/plans/public'
+          source: curl -X GET 'https://api.veriko.mx/v1/plans/public'
       responses:
         '200':
           description: Planes activos y públicos con precios y características activas embebidas.
@@ -7641,7 +7641,7 @@ paths:
       x-codeSamples:
         - lang: curl
           label: Shell
-          source: curl -X GET 'https://api.example.com/v1/plans/public/comparison'
+          source: curl -X GET 'https://api.veriko.mx/v1/plans/public/comparison'
       responses:
         '200':
           description: Matriz comparativa de los planes visibles.
@@ -7741,14 +7741,14 @@ paths:
         [`GET /v1/usage/limits`](/es/v1/usage/get-usage-limits).
       operationId: getUsageSummary
       externalDocs:
-        url: https://docs.example.com/how-to/monitor-usage
+        url: https://docs.veriko.mx/how-to/monitor-usage
         description: Track API quota and billing-cycle consumption
       x-codeSamples:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/usage/summary' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/usage/summary' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Instantánea de la cuota del mes en curso, con el porcentaje consumido y su nivel de aviso.
@@ -7867,7 +7867,7 @@ paths:
         {% /callout %}
       operationId: getUsageHistory
       externalDocs:
-        url: https://docs.example.com/how-to/monitor-usage
+        url: https://docs.veriko.mx/how-to/monitor-usage
         description: Track API quota and billing-cycle consumption
       parameters:
         - name: months
@@ -7886,8 +7886,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/usage/history' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/usage/history' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Historial de consumo mensual ordenado de más reciente a más antiguo.
@@ -7935,7 +7935,7 @@ paths:
         El parámetro `period` acepta `current` para el mes en curso o una cadena `YYYY-MM` para un mes específico.
       operationId: getUsageBreakdown
       externalDocs:
-        url: https://docs.example.com/how-to/monitor-usage
+        url: https://docs.veriko.mx/how-to/monitor-usage
         description: Track API quota and billing-cycle consumption
       parameters:
         - name: period
@@ -7952,8 +7952,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/usage/breakdown' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/usage/breakdown' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Conteos de consumo por tipo de operación para el período solicitado.
@@ -8020,14 +8020,14 @@ paths:
         {% /callout %}
       operationId: getUsageLimits
       externalDocs:
-        url: https://docs.example.com/how-to/monitor-usage
+        url: https://docs.veriko.mx/how-to/monitor-usage
         description: Track API quota and billing-cycle consumption
       x-codeSamples:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/usage/limits' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/usage/limits' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Configuración estática de límites de tasa por contexto.
@@ -8087,7 +8087,7 @@ paths:
         rellena la rejilla de 7×24 poniendo a cero las celdas que falten.
       operationId: getUsageHeatmap
       externalDocs:
-        url: https://docs.example.com/how-to/monitor-usage
+        url: https://docs.veriko.mx/how-to/monitor-usage
         description: Track API quota and billing-cycle consumption
       parameters:
         - name: days
@@ -8106,8 +8106,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/usage/heatmap' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/usage/heatmap' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Datos del mapa de calor agrupados por día y hora, incluyendo la cantidad de registros en cada intervalo.
@@ -8153,14 +8153,14 @@ paths:
         Incluye la distribución de veredictos de Banxico de los últimos 7 días.
       operationId: getUserInsightsOverview
       externalDocs:
-        url: https://docs.example.com/how-to/analyze-insights
+        url: https://docs.veriko.mx/how-to/analyze-insights
         description: Analyze validation trends and counterparty patterns
       x-codeSamples:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/insights/overview' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/insights/overview' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: KPIs propios del usuario y distribución de veredictos de Banxico de los últimos 7 días.
@@ -8223,7 +8223,7 @@ paths:
         La métrica `latency` devuelve los percentiles p50, p95 y p99.
       operationId: getUserInsightsTrends
       externalDocs:
-        url: https://docs.example.com/how-to/analyze-insights
+        url: https://docs.veriko.mx/how-to/analyze-insights
         description: Analyze validation trends and counterparty patterns
       parameters:
         - name: range
@@ -8264,8 +8264,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/insights/trends' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/insights/trends' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Intervalos de la serie temporal para el rango y la métrica solicitados.
@@ -8320,7 +8320,7 @@ paths:
       description: Lista los bancos usados en las validaciones del usuario autenticado durante los últimos 30 días, ordenados por volumen total o por tasa de error.
       operationId: getUserInsightsTopBanks
       externalDocs:
-        url: https://docs.example.com/how-to/analyze-insights
+        url: https://docs.veriko.mx/how-to/analyze-insights
         description: Analyze validation trends and counterparty patterns
       parameters:
         - name: metric
@@ -8352,8 +8352,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/insights/top-banks' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/insights/top-banks' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Bancos del usuario ordenados según la métrica solicitada (últimos 30 días).
@@ -8400,7 +8400,7 @@ paths:
         Cada entrada incluye la etiqueta del beneficiario, el banco receptor y los últimos 4 dígitos de la cuenta.
       operationId: getUserInsightsTopBeneficiaries
       externalDocs:
-        url: https://docs.example.com/how-to/analyze-insights
+        url: https://docs.veriko.mx/how-to/analyze-insights
         description: Analyze validation trends and counterparty patterns
       parameters:
         - name: limit
@@ -8419,8 +8419,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/insights/top-beneficiaries' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/insights/top-beneficiaries' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Beneficiarios más frecuentes en las validaciones de la cuenta de usuario (últimos 90 días).
@@ -8475,7 +8475,7 @@ paths:
         "Verificado" significa que Banxico devolvió `valid` y el CEP fue encontrado. Cualquier otro veredicto cuenta como no verificado.
       operationId: getFinanceSummary
       externalDocs:
-        url: https://docs.example.com/how-to/generate-finance-report
+        url: https://docs.veriko.mx/how-to/generate-finance-report
         description: Export financial statements and CEP archives
       parameters:
         - name: month
@@ -8505,8 +8505,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/finance/summary' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/finance/summary' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: KPIs mensuales del usuario con comparativa al mes anterior.
@@ -8570,7 +8570,7 @@ paths:
         Todas las variantes devuelven la cabecera `X-Finance-Folio` con el folio determinístico del periodo.
       operationId: getFinanceStatement
       externalDocs:
-        url: https://docs.example.com/how-to/generate-finance-report
+        url: https://docs.veriko.mx/how-to/generate-finance-report
         description: Export financial statements and CEP archives
       parameters:
         - name: month
@@ -8615,8 +8615,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/finance/statement' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/finance/statement' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Stream del estado de cuenta en el formato solicitado.
@@ -8743,7 +8743,7 @@ paths:
         Para más información sobre exportaciones consulta {% concept slug="exports-and-formats" %}exportaciones y formatos{% /concept %}.
       operationId: getFinanceMonthly
       externalDocs:
-        url: https://docs.example.com/how-to/generate-finance-report
+        url: https://docs.veriko.mx/how-to/generate-finance-report
         description: Export financial statements and CEP archives
       parameters:
         - name: month
@@ -8800,8 +8800,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/finance/monthly' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/finance/monthly' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Stream CSV/XLSX/PDF, o envelope JSON en modo vista previa.
@@ -8913,7 +8913,7 @@ paths:
         Para más información sobre exportaciones consulta {% concept slug="exports-and-formats" %}exportaciones y formatos{% /concept %}.
       operationId: getFinanceCounterparties
       externalDocs:
-        url: https://docs.example.com/how-to/generate-finance-report
+        url: https://docs.veriko.mx/how-to/generate-finance-report
         description: Export financial statements and CEP archives
       parameters:
         - name: month
@@ -8970,8 +8970,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/finance/counterparties' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/finance/counterparties' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Stream CSV/XLSX/PDF, o envelope JSON en modo vista previa.
@@ -9079,7 +9079,7 @@ paths:
         Para más información sobre exportaciones consulta {% concept slug="exports-and-formats" %}exportaciones y formatos{% /concept %}.
       operationId: getFinanceByBank
       externalDocs:
-        url: https://docs.example.com/how-to/generate-finance-report
+        url: https://docs.veriko.mx/how-to/generate-finance-report
         description: Export financial statements and CEP archives
       parameters:
         - name: month
@@ -9136,8 +9136,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/finance/by-bank' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/finance/by-bank' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Stream CSV/XLSX/PDF, o envelope JSON en modo vista previa.
@@ -9239,7 +9239,7 @@ paths:
         Para más información sobre exportaciones consulta {% concept slug="exports-and-formats" %}exportaciones y formatos{% /concept %}.
       operationId: getFinanceAccounting
       externalDocs:
-        url: https://docs.example.com/how-to/generate-finance-report
+        url: https://docs.veriko.mx/how-to/generate-finance-report
         description: Export financial statements and CEP archives
       parameters:
         - name: month
@@ -9309,8 +9309,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/finance/accounting' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/finance/accounting' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Stream CSV/XLSX/PDF, o envelope JSON en modo vista previa.
@@ -9406,7 +9406,7 @@ paths:
         {% /callout %}
       operationId: getFinanceCeps
       externalDocs:
-        url: https://docs.example.com/how-to/generate-finance-report
+        url: https://docs.veriko.mx/how-to/generate-finance-report
         description: Export financial statements and CEP archives
       parameters:
         - name: from
@@ -9450,8 +9450,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/finance/ceps' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/finance/ceps' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: ZIP con los XML/PDF de CEP y los manifiestos CSV + XLSX.
@@ -9595,8 +9595,8 @@ paths:
         - lang: curl
           label: Shell
           source: |-
-            curl -X GET 'https://api.example.com/v1/billing/subscription' \
-              -H 'Authorization: Bearer example_••••'
+            curl -X GET 'https://api.veriko.mx/v1/billing/subscription' \
+              -H 'Authorization: Bearer veriko_••••'
       responses:
         '200':
           description: Suscripción activa del usuario con plan, ciclo y cuota.
@@ -9698,10 +9698,10 @@ components:
       type: apiKey
       in: header
       name: Authorization
-      description: 'API key para acceso programático (M2M). Envía la cabecera `Authorization: Bearer example_<64 hex>`. Las API keys se generan en el dashboard del usuario.'
+      description: 'API key para acceso programático (M2M). Envía la cabecera `Authorization: Bearer veriko_<64 hex>`. Las API keys se generan en el dashboard del usuario.'
       x-translations:
         en:
-          description: 'API key for programmatic (M2M) access. Send `Authorization: Bearer example_<64 hex>`. API keys are minted from the user dashboard.'
+          description: 'API key for programmatic (M2M) access. Send `Authorization: Bearer veriko_<64 hex>`. API keys are minted from the user dashboard.'
   parameters:
     IdempotencyKeyHeader:
       name: Idempotency-Key
@@ -10148,15 +10148,15 @@ components:
               x-translations:
                 en:
                   description: First 8 characters of the API key, which identify it without revealing it.
-              example: example_a1b2
+              example: veriko_a1b2
             last_4:
               type:
                 - string
                 - 'null'
-              description: Últimos 4 caracteres de la clave de API, con los que se pinta enmascarada (`example_a1b2••••••f9c2`). `null` en las cuentas anteriores a ese campo, hasta que se rellena.
+              description: Últimos 4 caracteres de la clave de API, con los que se pinta enmascarada (`veriko_a1b2••••••f9c2`). `null` en las cuentas anteriores a ese campo, hasta que se rellena.
               x-translations:
                 en:
-                  description: Last 4 characters of the API key, used to render it masked (`example_a1b2••••••f9c2`). `null` for accounts predating that field, until it is backfilled.
+                  description: Last 4 characters of the API key, used to render it masked (`veriko_a1b2••••••f9c2`). `null` for accounts predating that field, until it is backfilled.
               example: f9c2
         subscription:
           type:
