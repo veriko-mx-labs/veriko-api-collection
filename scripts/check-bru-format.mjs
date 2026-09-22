@@ -1,6 +1,6 @@
 /**
  * Formateador de `.bru`: prettier no entiende el formato, así que este
- * candado normaliza a mano lo que sí se puede exigir en cualquier archivo de
+ * script normaliza a mano lo que sí se puede exigir en cualquier archivo de
  * texto: saltos de línea LF, ausencia de espacios colgantes y un único salto
  * final.
  *

@@ -1,13 +1,8 @@
 /**
- * Candado: `spec/openapi.yaml` es la versión pública, no el bundle interno.
+ * `spec/openapi.yaml` es la copia del spec de https://docs.veriko.mx/openapi.yaml, y de ahí
+ * se valida cada petición de la colección.
  *
- * El 2026-09-18, el primer endpoint que publicó el spec sirvió el bundle
- * crudo, con las 264 rutas `/admin/*` y sus schemas. La copia de este
- * repositorio sale de https://docs.veriko.mx/openapi.yaml, que ya está
- * filtrada por `x-visibility`, y de ahí se valida cada petición de la
- * colección.
- *
- * Este candado falla si alguien la sustituye por el bundle interno.
+ * Esta comprobación falla si la copia no cumple el contrato de esa API.
  */
 
 import { readFileSync } from 'node:fs';
@@ -40,4 +35,4 @@ if (fallos.length > 0) {
   process.exit(1);
 }
 
-console.log(`${SPEC}: ${rutas.length} rutas públicas, 0 rutas /admin.`);
+console.log(`${SPEC}: ${rutas.length} rutas públicas.`);

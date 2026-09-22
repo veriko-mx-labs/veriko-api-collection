@@ -1,7 +1,7 @@
 # Colección de peticiones para la API de Veriko
 
-Colección de peticiones para probar la API de [Veriko](https://veriko.mx) contra el CEP de Banco
-de México, antes de programar contra ella.
+Permite probar la API de [Veriko](https://veriko.mx) contra el CEP de Banco de México antes de
+programar contra ella.
 
 ## Qué es el CEP
 
@@ -31,14 +31,11 @@ JavaScript](https://github.com/veriko-mx-labs/veriko-js).
 
 ## Alcance de la colección
 
-Cubre sólo operaciones de máquina a máquina: las que aceptan la clave de API o son públicas sin
-autenticación. Las que sólo aceptan la cookie de sesión son de la interfaz web y no entran aquí, en
-ninguna versión — es el mismo criterio que aplican los dos SDK.
+Cubre sólo operaciones de máquina a máquina: las que aceptan la clave de API y son públicas.
 
 Se genera y valida contra el spec público de la API
-([docs.veriko.mx/openapi.yaml](https://docs.veriko.mx/openapi.yaml)), nunca contra el spec interno:
-`npm run validate` (ver [Cómo se prueba](#cómo-se-prueba)) falla si alguna petición se sale de esa
-superficie.
+([docs.veriko.mx/openapi.yaml](https://docs.veriko.mx/openapi.yaml)):
+`npm run validate` falla si alguna petición se sale de esa superficie.
 
 ## Cómo abrir la colección
 
@@ -111,12 +108,12 @@ npm install
 npm test
 ```
 
-Corre tres candados, ninguno hace una petición real:
+Corre tres comprobaciones, ninguna hace una petición real:
 
-- `check:spec-public`: `spec/openapi.yaml` (una copia del spec público) no es el bundle interno.
+- `check:spec-public`: `spec/openapi.yaml` cumple el contrato de la API.
 - `validate`: Cada petición de `flujo-tipico/` existe en ese spec, con sus parámetros, cabeceras y
   campos del cuerpo declarados, y es de máquina a máquina.
-- `check:postman-fresh`: El candado de deriva descrito arriba.
+- `check:postman-fresh`: El archivo versionado coincide con lo que el generador produce hoy.
 
 `npm run format:check` corre aparte, en el mismo CI: prettier para JSON, JavaScript y Markdown, y un
 formateador propio para los archivos `.bru` (que prettier no entiende). Ambos se corrigen con

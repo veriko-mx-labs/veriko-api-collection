@@ -9,5 +9,5 @@ versiones según [SemVer](https://semver.org/lang/es/).
 
 Primera versión: colección Bruno con las diez llamadas del flujo típico de integración:
 validación por campos y por imagen; modo asíncrono con sondeo por ETag; descarga del CEP;
-historial; webhooks; catálogo; export a Postman; candado de deriva contra ese export y contra el
+historial; webhooks; catálogo; export a Postman; comprobación de deriva contra ese export y contra el
 spec público.

@@ -1,7 +1,7 @@
 /**
  * Genera `postman/postman_collection.json` (Collection v2.1) a partir de las
  * peticiones `.bru` de `flujo-tipico/`. Se ejecuta a mano con
- * `npm run gen:postman`; `check-postman-drift.mjs` es el candado que exige
+ * `npm run gen:postman`; `check-postman-drift.mjs` es la comprobación que exige
  * que el resultado no se edite después a mano.
  *
  * Las tres peticiones que encadenan un identificador (`bru.setVar` en el

@@ -20,9 +20,7 @@ export function loadSpec() {
  * `true` si la operación se usa de máquina a máquina: acepta la clave de API
  * o es pública y no pide autenticación.
  *
- * La que sólo acepta la cookie es de
- * la interfaz y no entra en la colección. Misma regla que `acceptsApiKey` en
- * `veriko-js/test/operations.test.ts`.
+ * Misma regla que `acceptsApiKey` en `veriko-js/test/operations.test.ts`.
  */
 export function acceptsApiKey(operation, spec) {
   const schemes = operation.security ?? spec.security ?? [];

@@ -9,13 +9,19 @@ permissions:
   contents: read
 
 jobs:
+  autoria:
+    if: github.event_name == 'pull_request'
+    uses: veriko-mx-labs/.github/.github/workflows/autoria.yml@4cb712e8f7f8c56eee5aa07e89661ef306b55641
+    secrets:
+      config: ${{ secrets.VERIKO_LABS_AUTORIA_CONFIG }}
+
   test:
     name: Formato, spec público y candado de Postman
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
 
@@ -24,7 +30,7 @@ jobs:
       - name: prettier
         run: npm run format:check
 
-      - name: El spec versionado es el público, no el bundle interno
+      - name: El spec versionado cumple el contrato de la API
         run: npm run check:spec-public
 
       - name: Cada petición existe en el spec público y es de máquina a máquina

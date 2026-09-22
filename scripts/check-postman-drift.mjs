@@ -1,5 +1,5 @@
 /**
- * Candado: `postman/postman_collection.json` está al día con las peticiones
+ * Comprobación: `postman/postman_collection.json` está al día con las peticiones
  * `.bru`.
  *
  * Mismo patrón que `check-generated-types.mjs` de veriko-js: se

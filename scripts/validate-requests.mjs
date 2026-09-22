@@ -1,12 +1,11 @@
 /**
- * Candado: cada petición de `flujo-tipico/` es real contra
+ * Comprobación: cada petición de `flujo-tipico/` es real contra
  * `spec/openapi.yaml` (el spec público) y es de máquina a máquina.
  *
  * Por cada `.bru` comprueba que el método y la ruta existen en el spec, que
  * los parámetros de consulta y las cabeceras que envía están declarados,
- * que los campos del cuerpo existen en el schema de la operación, que la
- * operación acepta la clave de API (nunca sólo la cookie de sesión) y que
- * ninguna ruta es `/admin`. Ninguna petición sale a la red: esto es
+ * que los campos del cuerpo existen en el schema de la operación y que la
+ * operación acepta la clave de API. Ninguna petición sale a la red: esto es
  * análisis estático contra el archivo del spec, no una corrida.
  */
 
@@ -41,10 +40,7 @@ for (const request of requests) {
   const { template, operation } = located;
 
   if (!acceptsApiKey(operation, spec)) {
-    fallar(
-      request,
-      `${operation.operationId ?? template} sólo acepta la cookie de sesión; es de la interfaz, no de máquina a máquina`,
-    );
+    fallar(request, `${operation.operationId ?? template} no acepta la clave de API`);
   }
 
   const declaredQuery = new Set(declaredParameters(spec, template, operation, 'query'));
@@ -84,6 +80,4 @@ if (fallos.length > 0) {
   process.exit(1);
 }
 
-console.log(
-  `${requests.length} peticiones verificadas contra spec/openapi.yaml: todas M2M, ninguna /admin.`,
-);
+console.log(`${requests.length} peticiones verificadas contra spec/openapi.yaml: todas M2M.`);
