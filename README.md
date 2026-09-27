@@ -71,8 +71,8 @@ el catálogo de bancos y el estado de Banxico, dos peticiones sin cuerpo que se 
 
 1. **Validar por campos** — valida una transferencia manualmente y trae el veredicto en la misma
    respuesta.
-2. **Validar desde la imagen del comprobante** — el mismo veredicto, extrayendo los datos por OCR
-   de una imagen.
+2. **Validar desde el comprobante** — el mismo veredicto, extrayendo los datos por OCR de una
+   imagen o un PDF.
 3. **Encolar una validación (modo asíncrono)** — con `?async=1`, la respuesta es inmediata (202) y
    trae sólo el identificador; guarda `queued_validation_id` para las dos peticiones siguientes.
 4. **Consultar el veredicto** — sondea `queued_validation_id` enviando en `If-None-Match` el `ETag`
