@@ -28,8 +28,8 @@
     "test": "npm run check:spec-public && npm run validate && npm run check:postman-fresh"
   },
   "devDependencies": {
-    "@usebruno/lang": "^0.39.0",
-    "prettier": "^3.9.8",
+    "@usebruno/lang": "^0.40.0",
+    "prettier": "^3.9.9",
     "yaml": "^2.9.1"
   }
 }
