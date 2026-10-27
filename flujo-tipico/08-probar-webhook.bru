@@ -1,0 +1,26 @@
+meta {
+  name: 08 - Enviar un evento de prueba
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{base_url}}/webhooks/{{webhook_id}}/test
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responde 200 con el resultado del intento", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+docs {
+  Envía una entrega sintética al endpoint registrado en la petición
+  anterior (`webhook_id`), para confirmar que el receptor responde y que
+  valida la firma del cuerpo.
+
+  Un intento fallido no cuenta contra el contador de fallos consecutivos
+  del endpoint: se puede repetir sin riesgo de desactivarlo.
+}

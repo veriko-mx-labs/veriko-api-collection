@@ -1,0 +1,26 @@
+meta {
+  name: 06 - Listar el historial
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base_url}}/validations?status=valid,not_found&from=2025-01-01&to=2025-03-31
+  body: none
+  auth: inherit
+}
+
+params:query {
+  status: valid,not_found
+  from: 2025-01-01
+  to: 2025-03-31
+}
+
+docs {
+  Historial paginado de validaciones, con filtros combinables.
+
+  `status` acepta uno o varios valores separados por coma; `from`/`to`
+  acotan por fecha de creación (inclusive). El resto de los filtros del
+  endpoint (`type`, `search`, `bank`, `amount_min`/`amount_max`, entre
+  otros) están en la referencia.
+}

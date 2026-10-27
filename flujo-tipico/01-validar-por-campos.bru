@@ -1,0 +1,38 @@
+meta {
+  name: 01 - Validar por campos
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/validate
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "fecha": "2025-03-15",
+    "monto": 15000.5,
+    "clave_rastreo": "MXBA20250315001234",
+    "referencia_numerica": "1234567",
+    "emisor": "BANCO NACIONAL DE MEXICO",
+    "receptor": "BBVA MEXICO",
+    "cuenta_beneficiaria": "012180004412345678"
+  }
+}
+
+tests {
+  test("responde 200 con un veredicto", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body.data.attributes.status).to.be.a("string");
+  });
+}
+
+docs {
+  Validación manual y síncrona: la respuesta ya trae el veredicto final
+  (`valid`, `not_found`, `cep_unavailable`, `returned` o `error`).
+
+  Se requieren la fecha, el monto y al menos una de `clave_rastreo` o
+  `referencia_numerica`. Esta petición envía ambas para mayor precisión.
+}

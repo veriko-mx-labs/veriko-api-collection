@@ -1,0 +1,46 @@
+meta {
+  name: 03 - Encolar una validación (modo asíncrono)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/validate?async=1
+  body: json
+  auth: inherit
+}
+
+params:query {
+  async: 1
+}
+
+body:json {
+  {
+    "fecha": "2025-03-16",
+    "monto": 8200,
+    "clave_rastreo": "MXBA20250316007788",
+    "emisor": "BANCO NACIONAL DE MEXICO",
+    "receptor": "SCOTIABANK",
+    "cuenta_beneficiaria": "044180001122334455"
+  }
+}
+
+script:post-response {
+  bru.setVar("queued_validation_id", res.body.data.id);
+}
+
+tests {
+  test("responde 202 con el identificador de la validación", function () {
+    expect(res.getStatus()).to.equal(202);
+    expect(res.body.data.id).to.be.a("string");
+  });
+}
+
+docs {
+  Con `?async=1`, la validación se procesa en segundo plano: la respuesta es
+  inmediata (202) y trae el identificador de la validación, todavía sin
+  veredicto.
+
+  El identificador queda guardado en la variable `queued_validation_id`
+  para la siguiente petición, que sondea el resultado.
+}

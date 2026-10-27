@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  autoria:
+    if: github.event_name != 'workflow_dispatch'
+    uses: veriko-mx-labs/.github/.github/workflows/autoria.yml@82b993be09334e9bf3f05a57073d9b95e5a749af
+    secrets:
+      config: ${{ secrets.VERIKO_LABS_AUTORIA_CONFIG }}
+
+  test:
+    name: Formato, spec público y candado de Postman
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+
+      - run: npm ci
+
+      - name: prettier
+        run: npm run format:check
+
+      - name: El spec versionado cumple el contrato de la API
+        run: npm run check:spec-public
+
+      - name: Cada petición existe en el spec público y es de máquina a máquina
+        run: npm run validate
+
+      - name: El export de Postman está al día con las peticiones .bru
+        run: npm run check:postman-fresh
