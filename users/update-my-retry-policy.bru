@@ -1,0 +1,52 @@
+meta {
+  name: Update my default retry policy (destructive)
+  type: http
+  seq: 3
+  tags: [
+    destructive
+  ]
+}
+
+put {
+  url: {{base_url}}/users/me/retry-policy
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{$randomUUID}}
+}
+
+body:json {
+  {
+    "retry_policy": {
+      "enabled": true,
+      "max_retries": 3,
+      "interval_seconds": 600,
+      "outcomes": [
+        "not_found",
+        "cep_unavailable"
+      ]
+    }
+  }
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Sets the default retry policy for future validations.
+
+  Destructive request. Changes the account configuration. A value beyond a cap is rejected with `422 retry_policy_invalid`.
+
+  Reference: https://docs.veriko.mx/en/v1/users/update-my-retry-policy
+  Guide: https://docs.veriko.mx/en/how-to/configure-retry-policy
+}

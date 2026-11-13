@@ -1,0 +1,29 @@
+meta {
+  name: Get API usage
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/api/usage
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the API usage of the account: requests today and this month, quota, recent requests and Banxico status.
+
+  Reference: https://docs.veriko.mx/en/v1/usage/get-api-usage
+  Guide: https://docs.veriko.mx/en/how-to/monitor-usage
+}

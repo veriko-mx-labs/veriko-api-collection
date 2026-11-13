@@ -1,0 +1,33 @@
+meta {
+  name: Get the import status
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/beneficiaries/imports/{{import_id}}
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the status and counters of an import job.
+
+  Poll about every 2 seconds until `status` is `preview_ready`, `completed`, `failed` or `cancelled`.
+
+  Uses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/beneficiaries/get-beneficiary-import
+  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+}

@@ -1,0 +1,41 @@
+meta {
+  name: Download the CEP (XML)
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{base_url}}/validations/{{validation_id}}/cep?format=xml
+  body: none
+  auth: inherit
+}
+
+params:query {
+  format: xml
+}
+
+tests {
+  test("returns the CEP as XML", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getHeader("content-type")).to.include("xml");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Downloads the official Banxico CEP of a `valid` or `returned` validation as XML.
+
+  Responds `400 invalid_export_format` for an unknown format, `404 cep_not_available` when the verdict has no CEP, and `410` when the validation was purged.
+
+  Query parameters:
+  - `format` (optional): Certificate format: `xml` (default) or `pdf`.
+
+  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/validations/download-cep
+  Guide: https://docs.veriko.mx/en/how-to/inspect-validations
+}

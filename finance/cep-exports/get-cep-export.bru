@@ -1,0 +1,47 @@
+meta {
+  name: Poll a CEP export
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/finance/ceps/exports/{{cep_export_id}}
+  body: none
+  auth: inherit
+}
+
+script:post-response {
+  const TERMINAL_EXPORT = ["ready", "failed", "expired"];
+  const polls = Number(bru.getVar("cep_export_polls") || 0) + 1;
+  bru.setVar("cep_export_polls", String(polls));
+  const state = res.getStatus() === 200 ? res.body.data.attributes.status : "stop";
+  if (state !== "stop" && !TERMINAL_EXPORT.includes(state) && polls < 30) {
+    await bru.sleep(3000);
+    bru.runner.setNextRequest("Poll a CEP export");
+  } else {
+    bru.setVar("cep_export_polls", "0");
+  }
+}
+
+tests {
+  test("returns the export", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body.data.attributes.status).to.be.a("string");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the state of a CEP export and repeats in the runner until it is terminal.
+
+  The terminal states are `ready`, `failed` and `expired`. While the state is `queued` or `building`, the script waits 3 seconds and repeats the request, up to 30 times.
+
+  Uses `cep_export_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/finance/get-finance-cep-export
+  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+}

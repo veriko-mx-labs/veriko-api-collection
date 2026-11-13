@@ -1,0 +1,42 @@
+meta {
+  name: Export beneficiaries
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base_url}}/beneficiaries/export?format=csv
+  body: none
+  auth: inherit
+}
+
+params:query {
+  format: csv
+  ~with_archived: 0
+  ~limit: 1
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Downloads the beneficiaries as CSV or XLSX, up to 100,000 rows.
+
+  Account numbers are masked, except the CLABE.
+
+  Query parameters:
+  - `with_archived` (optional): Archived filter: empty or omitted = all; `0` = active only; `1` = archived only.
+  - `format` (optional): Output format.
+  - `limit` (optional): Trims the number of rows in the file.
+
+  Reference: https://docs.veriko.mx/en/v1/beneficiaries/export-beneficiaries
+  Guide: https://docs.veriko.mx/en/how-to/manage-beneficiaries
+}

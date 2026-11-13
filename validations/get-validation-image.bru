@@ -1,0 +1,33 @@
+meta {
+  name: Get the receipt image
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{base_url}}/validations/{{validation_id}}/image
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the receipt kept for an OCR validation.
+
+  Responds `404 image_not_available` without an image, and `410` when the validation was created with `retain_image=false`.
+
+  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/validations/get-validation-image
+  Guide: https://docs.veriko.mx/en/how-to/inspect-validations
+}

@@ -1,0 +1,4525 @@
+{
+  "info": {
+    "name": "Veriko API: SPEI transfer verification against the Banxico CEP",
+    "description": "Requests for every public machine-to-machine operation of the Veriko API, generated from the Bruno collection in this repository. Import the `Veriko production` environment, set `api_key` and start with the Getting started folder. Requests that validate a transfer consume quota. See README.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{api_key}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Getting started",
+      "description": "Guided flow. Run the requests in order, from 01 to 13.\n\nSteps 01 to 04 consume quota. Step 05 polls until the verdict is terminal and needs the Bruno runner or the Postman collection runner to repeat itself.\n\nStep 13 deletes the webhook endpoint created in step 08; leave it out of runs where you keep the endpoint.",
+      "item": [
+        {
+          "name": "01 Validate by fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$randomUUID}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validate"
+              ],
+              "query": [
+                {
+                  "key": "async",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Validates a SPEI transfer from its fields and returns the verdict in the same response.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nA `202` response with `meta.async_reason: sync_deadline` means Banxico took longer than 45 seconds. The validation continues in the background; continue with step 05.\n\nThe body holds example data. A transfer that does not exist returns `not_found`.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id` (on 202).\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-direct\nGuide: https://docs.veriko.mx/en/how-to/validate-spei",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"send_date\": \"2025-03-15\",\n  \"amount\": 15000.5,\n  \"tracking_key\": \"MXBA20250315001234\",\n  \"numeric_reference\": \"1234567\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"BBVA MEXICO\",\n  \"beneficiary_account\": \"012180004412345678\",\n  \"client_ref\": \"collection-example\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "} else if (pm.response.code === 202) {",
+                  "  // sync_deadline: Banxico took longer than 45 seconds. Poll the validation.",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
+                  "  pm.collectionVariables.set(\"poll_count\", \"0\");",
+                  "}",
+                  "pm.test(\"returns a verdict, or hands the validation off with 202 sync_deadline\", function () {",
+                  "  pm.expect([200, 202]).to.include(pm.response.code);",
+                  "  if (pm.response.code === 200) {",
+                  "    pm.expect(pm.response.json().data.attributes.status).to.be.a(\"string\");",
+                  "  } else if (pm.response.code === 202) {",
+                  "    pm.expect(pm.response.json().meta.async_reason).to.equal(\"sync_deadline\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 Validate by image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$randomUUID}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validate-ocr",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validate-ocr"
+              ],
+              "query": [
+                {
+                  "key": "async",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Validates a SPEI transfer from the image of its receipt, extracting the data by OCR.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nSends `image_url` from the `receipt_image_url` variable. Set it to a receipt you host over HTTPS, or replace the body with `image` (base64).\n\nA receipt that is not readable or not a SPEI receipt returns `422` and still consumes quota.\n\nA `202` response with `sync_deadline` continues in step 05.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id` (on 202).\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-ocr\nGuide: https://docs.veriko.mx/en/how-to/validate-ocr",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image_url\": \"{{receipt_image_url}}\",\n  \"client_ref\": \"collection-example-ocr\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "} else if (pm.response.code === 202) {",
+                  "  // sync_deadline: Banxico took longer than 45 seconds. Poll the validation.",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
+                  "  pm.collectionVariables.set(\"poll_count\", \"0\");",
+                  "}",
+                  "pm.test(\"returns a verdict, hands off with 202, or rejects the receipt with 422\", function () {",
+                  "  pm.expect([200, 202, 422]).to.include(pm.response.code);",
+                  "  if (pm.response.code === 202) {",
+                  "    pm.expect(pm.response.json().meta.async_reason).to.equal(\"sync_deadline\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 Enqueue by fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$randomUUID}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validate?async=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validate"
+              ],
+              "query": [
+                {
+                  "key": "async",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Queues the validation of a SPEI transfer and returns `202` at once, without a verdict.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nPoll the validation in step 05.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id`, `queued_validation_etag`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-direct\nGuide: https://docs.veriko.mx/en/how-to/validate-spei",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"send_date\": \"2025-03-16\",\n  \"amount\": 8200,\n  \"tracking_key\": \"MXBA20250316007788\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"SCOTIABANK\",\n  \"beneficiary_account\": \"044180001122334455\",\n  \"client_ref\": \"collection-example-async\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 202) {",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
+                  "  pm.collectionVariables.set(\"poll_count\", \"0\");",
+                  "}",
+                  "pm.test(\"accepts the validation and returns its identifier\", function () {",
+                  "  pm.expect([202]).to.include(pm.response.code);",
+                  "  if (pm.response.code === 202) {",
+                  "    pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
+                  "    pm.expect(pm.response.json().data.attributes.status).to.be.oneOf([\"queued\", \"processing\"]);",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 Enqueue by image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$randomUUID}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validate-ocr?async=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validate-ocr"
+              ],
+              "query": [
+                {
+                  "key": "async",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Queues the validation of a SPEI receipt image and returns `202` at once, without a verdict.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nSends `image_url` from the `receipt_image_url` variable. A receipt that is rejected returns `422` and still consumes quota.\n\nPoll the validation in step 05.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id`, `queued_validation_etag`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-ocr\nGuide: https://docs.veriko.mx/en/how-to/validate-ocr",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image_url\": \"{{receipt_image_url}}\",\n  \"client_ref\": \"collection-example-ocr\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 202) {",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
+                  "  pm.collectionVariables.set(\"poll_count\", \"0\");",
+                  "}",
+                  "pm.test(\"accepts the validation and returns its identifier\", function () {",
+                  "  pm.expect([202, 422]).to.include(pm.response.code);",
+                  "  if (pm.response.code === 202) {",
+                  "    pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
+                  "    pm.expect(pm.response.json().data.attributes.status).to.be.oneOf([\"queued\", \"processing\"]);",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 Poll the verdict",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "If-None-Match",
+                "value": "{{queued_validation_etag}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validations/{{queued_validation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{queued_validation_id}}"
+              ],
+              "query": []
+            },
+            "description": "Polls `queued_validation_id` until the validation reaches a terminal state.\n\nThe terminal states are `valid`, `not_found`, `cep_unavailable`, `invalid`, `returned`, `failed` and `error`. `queued` and `processing` are not terminal.\n\nHonors `Retry-After` and `meta.next_poll_after_seconds`. The script waits that long, sends the last `ETag` in `If-None-Match`, and repeats the request in the runner up to 30 times or until `expires_at`.\n\nA single send without the runner returns one reading.\n\nUses `queued_validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nSaves `queued_validation_etag`, `validation_status`.\n\nReference: https://docs.veriko.mx/en/v1/validations/get-validation\nGuide: https://docs.veriko.mx/en/concepts/async-validations"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const TERMINAL = [\"valid\", \"not_found\", \"cep_unavailable\", \"invalid\", \"returned\", \"failed\", \"error\"];",
+                  "const MAX_POLLS = 30;",
+                  "const etag = pm.response.headers.get(\"etag\");",
+                  "if (etag) {",
+                  "  pm.collectionVariables.set(\"queued_validation_etag\", etag);",
+                  "}",
+                  "let done = false;",
+                  "let waitSeconds = Number(pm.response.headers.get(\"retry-after\")) || 2;",
+                  "if (pm.response.code === 200) {",
+                  "  const attributes = pm.response.json().data.attributes;",
+                  "  pm.collectionVariables.set(\"validation_status\", attributes.status);",
+                  "  waitSeconds = Number(pm.response.headers.get(\"retry-after\")) || Number((pm.response.json().meta || {}).next_poll_after_seconds) || 2;",
+                  "  if (TERMINAL.includes(attributes.status)) {",
+                  "    done = true;",
+                  "  } else if (attributes.expires_at && Date.now() > Date.parse(attributes.expires_at)) {",
+                  "    done = true; // the validation expired (ttl_expired); stop polling",
+                  "  }",
+                  "} else if (pm.response.code !== 304) {",
+                  "  done = true; // 404, 422 and the rest do not change by polling",
+                  "}",
+                  "const polls = Number(pm.collectionVariables.get(\"poll_count\") || 0) + 1;",
+                  "pm.collectionVariables.set(\"poll_count\", String(polls));",
+                  "if (!done && polls < MAX_POLLS) {",
+                  "  await new Promise((resolve) => setTimeout(resolve, waitSeconds * 1000));",
+                  "  pm.execution.setNextRequest(\"05 Poll the verdict\");",
+                  "} else {",
+                  "  pm.collectionVariables.set(\"poll_count\", \"0\");",
+                  "}",
+                  "pm.test(\"returns the current state, or 304 when nothing changed\", function () {",
+                  "  pm.expect([200, 304]).to.include(pm.response.code);",
+                  "  if (pm.response.code === 200) {",
+                  "    pm.expect(pm.response.json().data.attributes.status).to.be.a(\"string\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 Download the CEP",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations/{{queued_validation_id}}/cep?format=xml",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{queued_validation_id}}",
+                "cep"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "xml"
+                }
+              ]
+            },
+            "description": "Downloads the official Banxico CEP of the polled validation as XML.\n\nResponds `404` with `cep_not_available` when the verdict has no CEP, which is the case for example data. Use `format=pdf` for the PDF.\n\nQuery parameters:\n- `format` (optional): Certificate format: `xml` (default) or `pdf`.\n\nUses `queued_validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/download-cep\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"returns the CEP, or 404 cep_not_available when the verdict has none\", function () {",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);",
+                  "  if (pm.response.code === 200) {",
+                  "    pm.expect(pm.response.headers.get(\"content-type\")).to.include(\"xml\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 List validations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations?page=1&per_page=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "50"
+                },
+                {
+                  "key": "status",
+                  "value": "valid,not_found",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "direct",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "2026-04-01",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-04-30",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "MXBA",
+                  "disabled": true
+                },
+                {
+                  "key": "client_ref",
+                  "value": "collection-example",
+                  "disabled": true
+                },
+                {
+                  "key": "playground",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "with_deleted",
+                  "value": "0",
+                  "disabled": true
+                },
+                {
+                  "key": "batch_id",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "bank",
+                  "value": "40012",
+                  "disabled": true
+                },
+                {
+                  "key": "banks",
+                  "value": "40012,40002",
+                  "disabled": true
+                },
+                {
+                  "key": "amount_min",
+                  "value": "1000",
+                  "disabled": true
+                },
+                {
+                  "key": "amount_max",
+                  "value": "50000",
+                  "disabled": true
+                },
+                {
+                  "key": "retry_state",
+                  "value": "pending",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lists the validation history, newest first, with combinable filters.\n\nQuery parameters:\n- `page` (optional): Requested page; values below `1` are adjusted to `1`.\n- `per_page` (optional): Items per page; adjusted to the `1` to `50` range.\n- `status` (optional): Lifecycle state.\n- `type` (optional): Mode: `direct` for manual validation or `ocr` for image-based validation.\n- `from` (optional): Inclusive start date, applied to the validation creation date.\n- `to` (optional): Inclusive end date, applied to the validation creation date.\n- `search` (optional): Case-insensitive text search over the submitted, normalized, and Banxico response data.\n- `client_ref` (optional): Exact match with the `client_ref` sent when validating.\n- `playground` (optional): Keeps only playground validations.\n- `with_deleted` (optional): Scope for withdrawn records: omitted includes active and withdrawn records; `0` keeps active records only and `1`, withdrawn records only.\n- `batch_id` (optional): Identifier of the import job that generated the validations.\n- `bank` (optional): SPEI code of the sending or receiving bank in the original request.\n- `banks` (optional): Comma-separated SPEI codes (up to 50); returns the validations whose sending or receiving bank is any of them.\n- `amount_min` (optional): Inclusive minimum amount, as a number.\n- `amount_max` (optional): Inclusive maximum amount, as a number.\n- `retry_state` (optional): Retry cycle state: `pending`, `resolved`, `exhausted`, or `cancelled`.\n\nReference: https://docs.veriko.mx/en/v1/validations/list-validations\nGuide: https://docs.veriko.mx/en/concepts/pagination"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"returns a page of validations\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().data).to.be.an(\"array\");",
+                  "  pm.expect(pm.response.json().meta.pagination.per_page).to.be.at.most(50);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 Register a webhook endpoint",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks"
+              ],
+              "query": []
+            },
+            "description": "Registers an HTTPS endpoint that receives the subscribed events.\n\n`url` must resolve to a public address. Set `webhook_receiver_url` in the environment to your own receiver, for example a temporary endpoint from webhook.site.\n\nThe signing `secret` appears only in this response. The script saves it as `webhook_secret`.\n\nSaves `webhook_id`, `webhook_secret`.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/create-webhook\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"{{webhook_receiver_url}}\",\n  \"events\": [\n    \"validation.completed\",\n    \"validation.failed\",\n    \"validation.error\",\n    \"validation.returned\",\n    \"validation.retry.scheduled\",\n    \"validation.retry.resolved\",\n    \"validation.retry.exhausted\"\n  ],\n  \"description\": \"veriko-api-collection example\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set(\"webhook_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"webhook_secret\", pm.response.json().data.attributes.secret);",
+                  "}",
+                  "pm.test(\"responds with 201\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 Test the webhook",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks/{{webhook_id}}/test",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{webhook_id}}",
+                "test"
+              ],
+              "query": []
+            },
+            "description": "Sends a synthetic delivery to the endpoint registered in step 08.\n\nThe response is `200` even when the receiver fails. The test checks `delivered`; when it is `false`, read `error` and `http_status`.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/send-webhook-test\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"the receiver answered with a 2xx status\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().data.attributes.delivered, pm.response.json().data.attributes.error || \"receiver did not answer 2xx\").to.equal(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 List webhook deliveries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks/{{webhook_id}}/deliveries?page=1&per_page=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{webhook_id}}",
+                "deliveries"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Lists the delivery attempts of the endpoint, including the test delivery.\n\nQuery parameters:\n- `page` (optional): Page requested, starting at 1.\n- `per_page` (optional): How many deliveries each page carries.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/list-webhook-deliveries\nGuide: https://docs.veriko.mx/en/concepts/webhooks-architecture"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11 List SPEI banks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "If-None-Match",
+                "value": "{{banks_etag}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public/banks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "banks"
+              ],
+              "query": []
+            },
+            "description": "Returns the catalog of banks that participate in SPEI. It does not need an API key.\n\nEnable `If-None-Match` to get `304` when the catalog did not change.\n\nSaves `banks_etag`.\n\nReference: https://docs.veriko.mx/en/v1/public/list-banks\nGuide: https://docs.veriko.mx/en/bank-directory",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const etag = pm.response.headers.get(\"etag\");",
+                  "if (etag) {",
+                  "  pm.collectionVariables.set(\"banks_etag\", etag);",
+                  "}",
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12 Banxico status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/status/banxico",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "status",
+                "banxico"
+              ],
+              "query": []
+            },
+            "description": "Returns the operational status of the Banxico validation service: `operational`, `degraded` or `down`.\n\nCheck it before a run of synchronous validations.\n\nReference: https://docs.veriko.mx/en/v1/banxico-status/banxico-public-status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 Delete the webhook endpoint (destructive)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks/{{webhook_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{webhook_id}}"
+              ],
+              "query": []
+            },
+            "description": "Deletes the endpoint registered in step 08.\n\nDestructive request. Deletes the endpoint and its whole delivery history. It cannot be undone.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/delete-webhook\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 204\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get my profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ],
+              "query": []
+            },
+            "description": "Returns the profile, API key prefix, subscription, 2FA state and effective permissions of the authenticated user.\n\nReference: https://docs.veriko.mx/en/v1/users/my-profile\nGuide: https://docs.veriko.mx/en/how-to/inspect-my-account"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get my default retry policy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/me/retry-policy",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "retry-policy"
+              ],
+              "query": []
+            },
+            "description": "Returns the retry policy that applies to every validation without its own `retry_policy`.\n\nReference: https://docs.veriko.mx/en/v1/users/get-my-retry-policy\nGuide: https://docs.veriko.mx/en/how-to/configure-retry-policy"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update my default retry policy (destructive)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$randomUUID}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/me/retry-policy",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "retry-policy"
+              ],
+              "query": []
+            },
+            "description": "Sets the default retry policy for future validations.\n\nDestructive request. Changes the account configuration. A value beyond a cap is rejected with `422 retry_policy_invalid`.\n\nReference: https://docs.veriko.mx/en/v1/users/update-my-retry-policy\nGuide: https://docs.veriko.mx/en/how-to/configure-retry-policy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"retry_policy\": {\n    \"enabled\": true,\n    \"max_retries\": 3,\n    \"interval_seconds\": 600,\n    \"outcomes\": [\n      \"not_found\",\n      \"cep_unavailable\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Validations",
+      "item": [
+        {
+          "name": "Validate by fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$randomUUID}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validate"
+              ],
+              "query": [
+                {
+                  "key": "async",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Validates a SPEI transfer from its fields and returns the verdict in the same response.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nThe body holds example data. A transfer that does not exist returns `not_found` and is billed like a `valid` one.\n\nA `202` response with `meta.async_reason: sync_deadline` means Banxico took longer than 45 seconds; poll `GET /v1/validations/{id}`.\n\nEnable `async` to queue the validation instead.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id` (on 202).\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-direct\nGuide: https://docs.veriko.mx/en/how-to/validate-spei",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"send_date\": \"2025-03-15\",\n  \"amount\": 15000.5,\n  \"tracking_key\": \"MXBA20250315001234\",\n  \"numeric_reference\": \"1234567\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"BBVA MEXICO\",\n  \"beneficiary_account\": \"012180004412345678\",\n  \"client_ref\": \"collection-example\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "} else if (pm.response.code === 202) {",
+                  "  // sync_deadline: Banxico took longer than 45 seconds. Poll the validation.",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
+                  "  pm.collectionVariables.set(\"poll_count\", \"0\");",
+                  "}",
+                  "pm.test(\"returns a verdict, or hands the validation off with 202 sync_deadline\", function () {",
+                  "  pm.expect([200, 202]).to.include(pm.response.code);",
+                  "  if (pm.response.code === 200) {",
+                  "    pm.expect(pm.response.json().data.attributes.status).to.be.a(\"string\");",
+                  "  } else if (pm.response.code === 202) {",
+                  "    pm.expect(pm.response.json().meta.async_reason).to.equal(\"sync_deadline\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validate by fields, queued",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$randomUUID}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validate?async=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validate"
+              ],
+              "query": [
+                {
+                  "key": "async",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Queues the validation of a SPEI transfer and returns `202` at once, without a verdict.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nPoll `GET /v1/validations/{id}` with `queued_validation_id`, or subscribe to the `validation.*` webhook events.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id`, `queued_validation_etag`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-direct\nGuide: https://docs.veriko.mx/en/how-to/validate-spei",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"send_date\": \"2025-03-16\",\n  \"amount\": 8200,\n  \"tracking_key\": \"MXBA20250316007788\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"SCOTIABANK\",\n  \"beneficiary_account\": \"044180001122334455\",\n  \"client_ref\": \"collection-example-async\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 202) {",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
+                  "  pm.collectionVariables.set(\"poll_count\", \"0\");",
+                  "}",
+                  "pm.test(\"accepts the validation and returns its identifier\", function () {",
+                  "  pm.expect([202]).to.include(pm.response.code);",
+                  "  if (pm.response.code === 202) {",
+                  "    pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
+                  "    pm.expect(pm.response.json().data.attributes.status).to.be.oneOf([\"queued\", \"processing\"]);",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validate by fields, idempotent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotency_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validate"
+              ],
+              "query": [
+                {
+                  "key": "async",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Sends the same validation twice under one `Idempotency-Key`. The second send replays the first response.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nSend this request twice. The first send creates the key in `idempotency_key`; the second reuses it and carries `Idempotent-Replayed: true`, without consuming quota again.\n\nA different body under the same key returns `422 idempotency_key_reused`; a send while the first is running returns `409 idempotency_key_in_progress`. Keys last 24 hours.\n\nClear `idempotency_key` to start over.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `idempotency_key`, `validation_id`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-direct\nGuide: https://docs.veriko.mx/en/how-to/validate-spei",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"send_date\": \"2025-03-15\",\n  \"amount\": 15000.5,\n  \"tracking_key\": \"MXBA20250315001234\",\n  \"numeric_reference\": \"1234567\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"BBVA MEXICO\",\n  \"beneficiary_account\": \"012180004412345678\",\n  \"client_ref\": \"collection-example-idempotent\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const replay = Boolean(pm.collectionVariables.get(\"idempotency_key\"));",
+                  "if (!replay) {",
+                  "  pm.collectionVariables.set(\"idempotency_key\", pm.variables.replaceIn(\"{{$randomUUID}}\"));",
+                  "}",
+                  "pm.collectionVariables.set(\"idempotency_replay\", replay ? \"yes\" : \"no\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "} else if (pm.response.code === 202) {",
+                  "  // sync_deadline: Banxico took longer than 45 seconds. Poll the validation.",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
+                  "  pm.collectionVariables.set(\"poll_count\", \"0\");",
+                  "}",
+                  "pm.test(\"replays the first response on the second send\", function () {",
+                  "  pm.expect([200, 202]).to.include(pm.response.code);",
+                  "  if (pm.collectionVariables.get(\"idempotency_replay\") === \"yes\") {",
+                  "    pm.expect(pm.response.headers.get(\"idempotent-replayed\")).to.equal(\"true\");",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validate by image URL",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$randomUUID}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validate-ocr",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validate-ocr"
+              ],
+              "query": [
+                {
+                  "key": "async",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Validates a SPEI transfer from the image or PDF of its receipt, extracting the data by OCR.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nSends `image_url` from the `receipt_image_url` variable. The host must serve the file over HTTPS.\n\nA receipt that is not readable or not a SPEI receipt returns `422` (`image_not_readable_receipt`, `image_not_spei_receipt`) and still consumes quota.\n\nEnable `async` to queue the validation instead.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id` (on 202).\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-ocr\nGuide: https://docs.veriko.mx/en/how-to/validate-ocr",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image_url\": \"{{receipt_image_url}}\",\n  \"client_ref\": \"collection-example-ocr\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "} else if (pm.response.code === 202) {",
+                  "  // sync_deadline: Banxico took longer than 45 seconds. Poll the validation.",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
+                  "  pm.collectionVariables.set(\"poll_count\", \"0\");",
+                  "}",
+                  "pm.test(\"returns a verdict, hands off with 202, or rejects the receipt with 422\", function () {",
+                  "  pm.expect([200, 202, 422]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validate by image (base64)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$randomUUID}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validate-ocr",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validate-ocr"
+              ],
+              "query": [
+                {
+                  "key": "async",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Validates a SPEI transfer from a receipt sent inline as base64 in `image`.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nSet `receipt_image_base64` in the environment to the base64 of your receipt, up to 12 MB.\n\nA receipt that is not readable or not a SPEI receipt returns `422` and still consumes quota.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-ocr\nGuide: https://docs.veriko.mx/en/how-to/validate-ocr",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image\": \"{{receipt_image_base64}}\",\n  \"client_ref\": \"collection-example-ocr-image\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "} else if (pm.response.code === 202) {",
+                  "  // sync_deadline: Banxico took longer than 45 seconds. Poll the validation.",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
+                  "  pm.collectionVariables.set(\"poll_count\", \"0\");",
+                  "}",
+                  "pm.test(\"returns a verdict, hands off with 202, or rejects the receipt with 422\", function () {",
+                  "  pm.expect([200, 202, 422]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validate by image URL, queued",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$randomUUID}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validate-ocr?async=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validate-ocr"
+              ],
+              "query": [
+                {
+                  "key": "async",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Queues the validation of a SPEI receipt image and returns `202` at once, without a verdict.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nA receipt that is rejected returns `422` and still consumes quota.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id`, `queued_validation_etag`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-ocr\nGuide: https://docs.veriko.mx/en/how-to/validate-ocr",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image_url\": \"{{receipt_image_url}}\",\n  \"client_ref\": \"collection-example-ocr\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 202) {",
+                  "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
+                  "  pm.collectionVariables.set(\"poll_count\", \"0\");",
+                  "}",
+                  "pm.test(\"accepts the validation and returns its identifier\", function () {",
+                  "  pm.expect([202, 422]).to.include(pm.response.code);",
+                  "  if (pm.response.code === 202) {",
+                  "    pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
+                  "    pm.expect(pm.response.json().data.attributes.status).to.be.oneOf([\"queued\", \"processing\"]);",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List validations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations?page=1&per_page=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "50"
+                },
+                {
+                  "key": "status",
+                  "value": "example",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "direct",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "2026-04-01",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-04-30",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "MXBA",
+                  "disabled": true
+                },
+                {
+                  "key": "client_ref",
+                  "value": "collection-example",
+                  "disabled": true
+                },
+                {
+                  "key": "playground",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "with_deleted",
+                  "value": "0",
+                  "disabled": true
+                },
+                {
+                  "key": "batch_id",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "bank",
+                  "value": "40012",
+                  "disabled": true
+                },
+                {
+                  "key": "banks",
+                  "value": "40012,40002",
+                  "disabled": true
+                },
+                {
+                  "key": "amount_min",
+                  "value": "1000",
+                  "disabled": true
+                },
+                {
+                  "key": "amount_max",
+                  "value": "50000",
+                  "disabled": true
+                },
+                {
+                  "key": "retry_state",
+                  "value": "pending",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lists the validation history, newest first, with combinable filters.\n\n`per_page` accepts 1 to 50.\n\nQuery parameters:\n- `page` (optional): Requested page; values below `1` are adjusted to `1`.\n- `per_page` (optional): Items per page; adjusted to the `1` to `50` range.\n- `status` (optional): Lifecycle state.\n- `type` (optional): Mode: `direct` for manual validation or `ocr` for image-based validation.\n- `from` (optional): Inclusive start date, applied to the validation creation date.\n- `to` (optional): Inclusive end date, applied to the validation creation date.\n- `search` (optional): Case-insensitive text search over the submitted, normalized, and Banxico response data.\n- `client_ref` (optional): Exact match with the `client_ref` sent when validating.\n- `playground` (optional): Keeps only playground validations.\n- `with_deleted` (optional): Scope for withdrawn records: omitted includes active and withdrawn records; `0` keeps active records only and `1`, withdrawn records only.\n- `batch_id` (optional): Identifier of the import job that generated the validations.\n- `bank` (optional): SPEI code of the sending or receiving bank in the original request.\n- `banks` (optional): Comma-separated SPEI codes (up to 50); returns the validations whose sending or receiving bank is any of them.\n- `amount_min` (optional): Inclusive minimum amount, as a number.\n- `amount_max` (optional): Inclusive maximum amount, as a number.\n- `retry_state` (optional): Retry cycle state: `pending`, `resolved`, `exhausted`, or `cancelled`.\n\nReference: https://docs.veriko.mx/en/v1/validations/list-validations\nGuide: https://docs.veriko.mx/en/concepts/pagination"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"returns a page of validations\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().data).to.be.an(\"array\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get validation statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "stats"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "direct",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "2026-04-01",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-04-30",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "MXBA",
+                  "disabled": true
+                },
+                {
+                  "key": "client_ref",
+                  "value": "collection-example",
+                  "disabled": true
+                },
+                {
+                  "key": "playground",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "with_deleted",
+                  "value": "0",
+                  "disabled": true
+                },
+                {
+                  "key": "batch_id",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "bank",
+                  "value": "40012",
+                  "disabled": true
+                },
+                {
+                  "key": "banks",
+                  "value": "40012,40002",
+                  "disabled": true
+                },
+                {
+                  "key": "amount_min",
+                  "value": "1000",
+                  "disabled": true
+                },
+                {
+                  "key": "amount_max",
+                  "value": "50000",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "example",
+                  "disabled": true
+                },
+                {
+                  "key": "retry_state",
+                  "value": "pending",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Returns aggregate counters of the account validations, with the same filters as the list.\n\nQuery parameters:\n- `type` (optional): Mode: `direct` for manual validation; `ocr` for image-based validation.\n- `from` (optional): Inclusive start date, applied to the validation creation date.\n- `to` (optional): Inclusive end date, applied to the validation creation date.\n- `search` (optional): Case-insensitive text search over the submitted, normalized, and Banxico response data.\n- `client_ref` (optional): Exact match with the `client_ref` sent when validating.\n- `playground` (optional): Keeps only playground validations.\n- `with_deleted` (optional): Scope for withdrawn records: omitted includes active and withdrawn records; `0` keeps active records only and `1`, withdrawn records only.\n- `batch_id` (optional): Identifier of the import job that generated the validations.\n- `bank` (optional): SPEI code of the sending or receiving bank in the original request.\n- `banks` (optional): Comma-separated SPEI codes (up to 50); returns the validations whose sending or receiving bank is any of them.\n- `amount_min` (optional): Inclusive minimum amount for the counted validations.\n- `amount_max` (optional): Inclusive maximum amount for the counted validations.\n- `status` (optional): Accepted for parity with `GET /v1/validations`, but it does not change any counter.\n- `retry_state` (optional): Retry cycle state: `pending`, `resolved`, `exhausted`, or `cancelled`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validation-stats\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Export validations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations/export?format=csv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "csv"
+                },
+                {
+                  "key": "status",
+                  "value": "example",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "direct",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "2026-04-01",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-04-30",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "MXBA",
+                  "disabled": true
+                },
+                {
+                  "key": "client_ref",
+                  "value": "collection-example",
+                  "disabled": true
+                },
+                {
+                  "key": "playground",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "with_deleted",
+                  "value": "0",
+                  "disabled": true
+                },
+                {
+                  "key": "batch_id",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "retry_state",
+                  "value": "pending",
+                  "disabled": true
+                },
+                {
+                  "key": "bank",
+                  "value": "40012",
+                  "disabled": true
+                },
+                {
+                  "key": "banks",
+                  "value": "40012,40002",
+                  "disabled": true
+                },
+                {
+                  "key": "amount_min",
+                  "value": "1000",
+                  "disabled": true
+                },
+                {
+                  "key": "amount_max",
+                  "value": "50000",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Downloads the validations that match the filters as CSV or XLSX, up to 100,000 rows.\n\nQuery parameters:\n- `format` (optional): File format: `csv` (default) or `xlsx`.\n- `status` (optional): Lifecycle state.\n- `type` (optional): Mode: `direct` for manual validation; `ocr` for image-based validation.\n- `from` (optional): Inclusive start date, applied to the validation creation date.\n- `to` (optional): Inclusive end date, applied to the validation creation date.\n- `search` (optional): Case-insensitive text search over the submitted, normalized, and Banxico response data.\n- `client_ref` (optional): Exact match with the `client_ref` sent when validating.\n- `playground` (optional): Keeps only playground validations.\n- `with_deleted` (optional): Scope for withdrawn records: omitted includes active and withdrawn records; `0` keeps active records only and `1`, withdrawn records only.\n- `batch_id` (optional): Identifier of the import job that generated the validations.\n- `retry_state` (optional): Retry cycle state: `pending`, `resolved`, `exhausted`, or `cancelled`.\n- `bank` (optional): SPEI code of the sending or receiving bank in the original request.\n- `banks` (optional): Comma-separated SPEI codes (up to 50); returns the validations whose sending or receiving bank is any of them.\n- `amount_min` (optional): Inclusive minimum amount.\n- `amount_max` (optional): Inclusive maximum amount.\n- `limit` (optional): Requested row maximum.\n\nReference: https://docs.veriko.mx/en/v1/validations/export-validations\nGuide: https://docs.veriko.mx/en/concepts/exports-and-formats"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get a validation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "If-None-Match",
+                "value": "{{validation_etag}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validations/{{validation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{validation_id}}"
+              ],
+              "query": []
+            },
+            "description": "Returns the full record of a validation: verdict, normalized data and retry state.\n\nWhile the state is `queued` or `processing`, `Retry-After` and `meta.next_poll_after_seconds` say when to poll again. Enable `If-None-Match` to get `304` when nothing changed.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nSaves `validation_etag`.\n\nReference: https://docs.veriko.mx/en/v1/validations/get-validation\nGuide: https://docs.veriko.mx/en/concepts/async-validations"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const etag = pm.response.headers.get(\"etag\");",
+                  "if (etag) {",
+                  "  pm.collectionVariables.set(\"validation_etag\", etag);",
+                  "}",
+                  "pm.test(\"returns the validation\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().data.attributes.status).to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Download the CEP (XML)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations/{{validation_id}}/cep?format=xml",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{validation_id}}",
+                "cep"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "xml"
+                }
+              ]
+            },
+            "description": "Downloads the official Banxico CEP of a `valid` or `returned` validation as XML.\n\nResponds `400 invalid_export_format` for an unknown format, `404 cep_not_available` when the verdict has no CEP, and `410` when the validation was purged.\n\nQuery parameters:\n- `format` (optional): Certificate format: `xml` (default) or `pdf`.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/download-cep\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"returns the CEP as XML\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.headers.get(\"content-type\")).to.include(\"xml\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Download the CEP (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations/{{validation_id}}/cep?format=pdf",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{validation_id}}",
+                "cep"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "pdf"
+                }
+              ]
+            },
+            "description": "Downloads the official Banxico CEP of a `valid` or `returned` validation as PDF.\n\nQuery parameters:\n- `format` (optional): Certificate format: `xml` (default) or `pdf`.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/download-cep\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"returns the CEP as PDF\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.headers.get(\"content-type\")).to.include(\"pdf\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get the receipt image",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations/{{validation_id}}/image",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{validation_id}}",
+                "image"
+              ],
+              "query": []
+            },
+            "description": "Returns the receipt kept for an OCR validation.\n\nResponds `404 image_not_available` without an image, and `410` when the validation was created with `retain_image=false`.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/get-validation-image\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List retry attempts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations/{{validation_id}}/retry-attempts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{validation_id}}",
+                "retry-attempts"
+              ],
+              "query": []
+            },
+            "description": "Returns the chronological history of the automatic retries of a validation.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/list-validation-retry-attempts\nGuide: https://docs.veriko.mx/en/concepts/retry-policy"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update the retry policy of a validation (destructive)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$randomUUID}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validations/{{validation_id}}/retry-policy",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{validation_id}}",
+                "retry-policy"
+              ],
+              "query": []
+            },
+            "description": "Activates an automatic retry policy for a validation with a `not_found`, `cep_unavailable` or `error` verdict.\n\nDestructive request. Changes the retry cycle of the validation. It is not accepted for validations from a bulk import, already resolved, or older than seven days.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/update-validation-retry-policy\nGuide: https://docs.veriko.mx/en/how-to/configure-retry-policy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"retry_policy\": {\n    \"enabled\": true,\n    \"max_retries\": 3,\n    \"interval_seconds\": 600,\n    \"outcomes\": [\n      \"not_found\",\n      \"cep_unavailable\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancel pending retries (destructive)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$randomUUID}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/validations/{{validation_id}}/cancel-retries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{validation_id}}",
+                "cancel-retries"
+              ],
+              "query": []
+            },
+            "description": "Cancels the active automatic retry cycle of a validation.\n\nDestructive request. Ends the retry cycle with `terminal_state: cancelled`. A cycle that is not active returns `422 retry_not_active`.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/cancel-validation-retries\nGuide: https://docs.veriko.mx/en/concepts/retry-policy"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Recheck a validation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations/{{validation_id}}/recheck",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{validation_id}}",
+                "recheck"
+              ],
+              "query": []
+            },
+            "description": "Queries Banxico again for the payment status of a `valid` validation and moves it to `returned` if the payment was returned.\n\nIt queries Banxico and does not consume quota.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/recheck-validation\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Send the CEP to Telegram",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations/{{validation_id}}/cep/send-telegram",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{validation_id}}",
+                "cep",
+                "send-telegram"
+              ],
+              "query": []
+            },
+            "description": "Starts the delivery of the CEP as a PDF to the Telegram chat linked to the account.\n\nResponds `409` with `cep_not_available` or `telegram_not_linked` when the CEP or the link is missing.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/send-cep-to-telegram\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 202\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(202);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Withdraw a validation (destructive)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations/{{validation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{validation_id}}"
+              ],
+              "query": []
+            },
+            "description": "Withdraws a validation from the history with a soft delete.\n\nDestructive request. The record keeps its result and reappears with `with_deleted=1`. For a permanent deletion use the purge requests.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/delete-validation\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 204\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Prepare the permanent deletion (destructive)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations/{{validation_id}}/purge/prepare",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{validation_id}}",
+                "purge",
+                "prepare"
+              ],
+              "query": []
+            },
+            "description": "Describes what the permanent deletion would remove and issues the `confirmation_token`.\n\nDestructive request. This step changes nothing, but it opens the irreversible purge. The token expires in 120 seconds and is saved as `purge_token`.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nSaves `purge_token`.\n\nReference: https://docs.veriko.mx/en/v1/validations/prepare-validation-purge\nGuide: https://docs.veriko.mx/en/how-to/purge-a-validation"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"purge_token\", pm.response.json().data.attributes.confirmation_token);",
+                  "}",
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Execute the permanent deletion (destructive)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/validations/{{validation_id}}/purge/execute",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "validations",
+                "{{validation_id}}",
+                "purge",
+                "execute"
+              ],
+              "query": []
+            },
+            "description": "Permanently deletes the content of a validation with the token from the prepare step.\n\nDestructive request. Deletes the receipt, the CEP and the stored data of the validation. It cannot be undone.\n\nUses `validation_id`, `purge_token`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/execute-validation-purge\nGuide: https://docs.veriko.mx/en/how-to/purge-a-validation",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"confirmation_token\": \"{{purge_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Beneficiaries",
+      "item": [
+        {
+          "name": "Imports",
+          "description": "Bulk import of beneficiaries: upload a file, review the preview, fix rows, then confirm.\n\nSample file: `samples/beneficiaries.csv`.",
+          "item": [
+            {
+              "name": "Download the import template",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/beneficiaries/imports/template?format=csv",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "beneficiaries",
+                    "imports",
+                    "template"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "csv"
+                    }
+                  ]
+                },
+                "description": "Returns the import template with the fixed headers `alias`, `cuenta` and `banco` and example rows.\n\nQuery parameters:\n- `format` (required): Format of the downloaded template.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/download-beneficiary-import-template\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"responds with 200\", function () {",
+                      "  pm.expect(pm.response.code).to.equal(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Start an import",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/beneficiaries/imports",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "beneficiaries",
+                    "imports"
+                  ],
+                  "query": []
+                },
+                "description": "Uploads a file and opens an import job. Parsing runs in the background.\n\nAccepts CSV, XLS, XLSX, TXT, JSON or PDF up to 20 MB. This request sends `samples/beneficiaries.csv`.\n\nSaves `import_id`.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/create-beneficiary-import\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": "samples/beneficiaries.csv"
+                    },
+                    {
+                      "key": "parse_mode",
+                      "value": "template",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 202) {",
+                      "  pm.collectionVariables.set(\"import_id\", pm.response.json().data.id);",
+                      "}",
+                      "pm.test(\"opens the import job\", function () {",
+                      "  pm.expect(pm.response.code).to.equal(202);",
+                      "  pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get the import status",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/beneficiaries/imports/{{import_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "beneficiaries",
+                    "imports",
+                    "{{import_id}}"
+                  ],
+                  "query": []
+                },
+                "description": "Returns the status and counters of an import job.\n\nPoll about every 2 seconds until `status` is `preview_ready`, `completed`, `failed` or `cancelled`.\n\nUses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/get-beneficiary-import\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"responds with 200\", function () {",
+                      "  pm.expect(pm.response.code).to.equal(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Preview the import rows",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/beneficiaries/imports/{{import_id}}/preview?page=1&per_page=25",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "beneficiaries",
+                    "imports",
+                    "{{import_id}}",
+                    "preview"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "25"
+                    },
+                    {
+                      "key": "buckets",
+                      "value": "valid,correctable",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Returns the rows extracted from the file, paginated and filterable by bucket.\n\nAccount numbers in the preview are not masked.\n\nQuery parameters:\n- `buckets` (optional): Which rows to include, based on how they came out of the file.\n- `page` (optional): Page number (1-based).\n- `per_page` (optional): Rows per page (1-100).\n\nUses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nSaves `import_row_id`.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/get-beneficiary-import-preview\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200 && pm.response.json().data.length > 0) {",
+                      "  pm.collectionVariables.set(\"import_row_id\", pm.response.json().data[0].id);",
+                      "}",
+                      "pm.test(\"responds with 200\", function () {",
+                      "  pm.expect(pm.response.code).to.equal(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Edit a preview row (destructive)",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/beneficiaries/imports/{{import_id}}/rows/{{import_row_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "beneficiaries",
+                    "imports",
+                    "{{import_id}}",
+                    "rows",
+                    "{{import_row_id}}"
+                  ],
+                  "query": []
+                },
+                "description": "Corrects a preview row before the import is confirmed.\n\nDestructive request. Overwrites the fields you send and reprocesses the row.\n\nUses `import_id`, `import_row_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/patch-beneficiary-import-row\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"parsed_label\": \"Example supplier\",\n  \"parsed_account_type\": \"clabe\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"responds with 200\", function () {",
+                      "  pm.expect(pm.response.code).to.equal(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Remove a preview row (destructive)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/beneficiaries/imports/{{import_id}}/rows/{{import_row_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "beneficiaries",
+                    "imports",
+                    "{{import_id}}",
+                    "rows",
+                    "{{import_row_id}}"
+                  ],
+                  "query": []
+                },
+                "description": "Removes a row from an import job before confirmation.\n\nDestructive request. Only jobs in `preview_ready` accept it; other states return `422 job_not_editable`.\n\nUses `import_id`, `import_row_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/delete-beneficiary-import-row\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"responds with 204\", function () {",
+                      "  pm.expect(pm.response.code).to.equal(204);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Confirm the import (destructive)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/beneficiaries/imports/{{import_id}}/commit",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "beneficiaries",
+                    "imports",
+                    "{{import_id}}",
+                    "commit"
+                  ],
+                  "query": []
+                },
+                "description": "Confirms the import job and saves its valid rows as beneficiaries.\n\nDestructive request. Creates beneficiaries. Archive them one by one with `DELETE /v1/beneficiaries/{id}` to undo it.\n\nThe commit is asynchronous: poll the import status until `completed` or `failed`.\n\nUses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/commit-beneficiary-import\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"responds with 202\", function () {",
+                      "  pm.expect(pm.response.code).to.equal(202);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Cancel an import (destructive)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/beneficiaries/imports/{{import_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "beneficiaries",
+                    "imports",
+                    "{{import_id}}"
+                  ],
+                  "query": []
+                },
+                "description": "Cancels an import job that was not confirmed yet.\n\nDestructive request. Applies to `pending`, `parsing` and `preview_ready` jobs. Jobs in a terminal state return `404`.\n\nUses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/cancel-beneficiary-import\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"responds with 204\", function () {",
+                      "  pm.expect(pm.response.code).to.equal(204);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "List beneficiaries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/beneficiaries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "beneficiaries"
+              ],
+              "query": [
+                {
+                  "key": "with_archived",
+                  "value": "0",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lists the saved beneficiary accounts: CLABE, card and phone (DiMo). The list is not paginated.\n\nQuery parameters:\n- `with_archived` (optional): Archived filter: empty or omitted = all; `0` = active only; `1` = archived only.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/list-beneficiaries\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create a beneficiary",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/beneficiaries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "beneficiaries"
+              ],
+              "query": []
+            },
+            "description": "Registers a beneficiary account. The type is detected from the length of the number.\n\nA phone number (10 digits) needs `bank_code`. Registering an archived account reactivates it and responds `200`.\n\nSaves `beneficiary_id`.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/create-beneficiary\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"account_number\": \"012180004412345678\",\n  \"label\": \"Example supplier\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if ([200, 201].includes(pm.response.code)) {",
+                  "  pm.collectionVariables.set(\"beneficiary_id\", pm.response.json().data.id);",
+                  "}",
+                  "pm.test(\"registers the beneficiary\", function () {",
+                  "  pm.expect([200, 201]).to.include(pm.response.code);",
+                  "  pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update a beneficiary (destructive)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/beneficiaries/{{beneficiary_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "beneficiaries",
+                "{{beneficiary_id}}"
+              ],
+              "query": []
+            },
+            "description": "Updates the label, the account number or the bank code of a beneficiary.\n\nDestructive request. A new `account_number` replaces the account and derives the bank again.\n\nUses `beneficiary_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/update-beneficiary\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Example supplier (updated)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validate an account structure",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/beneficiaries/validate-account?account=012180004412345678",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "beneficiaries",
+                "validate-account"
+              ],
+              "query": [
+                {
+                  "key": "account",
+                  "value": "012180004412345678"
+                },
+                {
+                  "key": "type",
+                  "value": "clabe",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Checks the structure of a CLABE, card or phone number, including the check digit, and resolves the bank.\n\nA malformed number is a result (`checksum_valid=false`), not a `422`. It does not consume quota.\n\nQuery parameters:\n- `account` (required): Account digits (complete or partial).\n- `type` (optional): Forces the input interpretation instead of auto-detecting by length.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/validate-account\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Look up an account in your beneficiaries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/beneficiaries/lookup?account=012180004412345678",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "beneficiaries",
+                "lookup"
+              ],
+              "query": [
+                {
+                  "key": "account",
+                  "value": "012180004412345678"
+                }
+              ]
+            },
+            "description": "Looks up an exact account number in the beneficiaries of the account.\n\nResponds `404` when the number is not in your list.\n\nQuery parameters:\n- `account` (required): Full account number: 10 digits (phone), 16 (card) or 18 (CLABE).\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/lookup-beneficiary-account\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Export beneficiaries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/beneficiaries/export?format=csv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "beneficiaries",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "csv"
+                },
+                {
+                  "key": "with_archived",
+                  "value": "0",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Downloads the beneficiaries as CSV or XLSX, up to 100,000 rows.\n\nAccount numbers are masked, except the CLABE.\n\nQuery parameters:\n- `with_archived` (optional): Archived filter: empty or omitted = all; `0` = active only; `1` = archived only.\n- `format` (optional): Output format.\n- `limit` (optional): Trims the number of rows in the file.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/export-beneficiaries\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Archive a beneficiary (destructive)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/beneficiaries/{{beneficiary_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "beneficiaries",
+                "{{beneficiary_id}}"
+              ],
+              "query": []
+            },
+            "description": "Archives a beneficiary account.\n\nDestructive request. The account leaves the active list; validation history stays. Registering the same number again reactivates it.\n\nUses `beneficiary_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/delete-beneficiary\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 204\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "List webhook endpoints",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks"
+              ],
+              "query": []
+            },
+            "description": "Lists the registered endpoints with their status and subscribed events. The secret is not included.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/list-webhooks\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create a webhook endpoint",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks"
+              ],
+              "query": []
+            },
+            "description": "Registers an HTTPS endpoint that receives the subscribed events.\n\n`url` must resolve to a public address. The signing `secret` appears only in this response and is saved as `webhook_secret`. Deliveries carry it as `X-Webhook-Signature`.\n\nSaves `webhook_id`, `webhook_secret`.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/create-webhook\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"{{webhook_receiver_url}}\",\n  \"events\": [\n    \"validation.completed\",\n    \"validation.failed\",\n    \"validation.error\",\n    \"validation.returned\",\n    \"validation.retry.scheduled\",\n    \"validation.retry.resolved\",\n    \"validation.retry.exhausted\"\n  ],\n  \"description\": \"veriko-api-collection example\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set(\"webhook_id\", pm.response.json().data.id);",
+                  "  pm.collectionVariables.set(\"webhook_secret\", pm.response.json().data.attributes.secret);",
+                  "}",
+                  "pm.test(\"creates the endpoint and returns the secret once\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(201);",
+                  "  pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
+                  "  pm.expect(pm.response.json().data.attributes.secret).to.be.a(\"string\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update a webhook endpoint (destructive)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks/{{webhook_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{webhook_id}}"
+              ],
+              "query": []
+            },
+            "description": "Updates the URL, the events or the status of an endpoint.\n\nDestructive request. Only the fields you send change. The signing secret stays the same.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/update-webhook\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"veriko-api-collection example (updated)\",\n  \"status\": \"active\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Send a test event",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks/{{webhook_id}}/test",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{webhook_id}}",
+                "test"
+              ],
+              "query": []
+            },
+            "description": "Sends a synthetic delivery to the endpoint and reports how the receiver answered.\n\nThe response is `200` even when the receiver fails. The test checks `delivered`.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/send-webhook-test\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"the receiver answered with a 2xx status\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json().data.attributes.delivered, pm.response.json().data.attributes.error || \"receiver did not answer 2xx\").to.equal(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List deliveries of an endpoint",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks/{{webhook_id}}/deliveries?page=1&per_page=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{webhook_id}}",
+                "deliveries"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Lists the delivery attempts of one endpoint, newest first.\n\nQuery parameters:\n- `page` (optional): Page requested, starting at 1.\n- `per_page` (optional): How many deliveries each page carries.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/list-webhook-deliveries\nGuide: https://docs.veriko.mx/en/concepts/webhooks-architecture"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Export deliveries of an endpoint",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks/{{webhook_id}}/deliveries/export?format=csv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{webhook_id}}",
+                "deliveries",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "csv"
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Downloads up to 100,000 delivery records of one endpoint as CSV or XLSX.\n\nQuery parameters:\n- `format` (optional): Output format.\n- `limit` (optional): Trims the number of rows in the file.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/export-webhook-deliveries\nGuide: https://docs.veriko.mx/en/concepts/webhooks-architecture"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List deliveries of all endpoints",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks/deliveries?page=1&per_page=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "deliveries"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "50"
+                },
+                {
+                  "key": "endpoint_id",
+                  "value": "{{webhook_id}}",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "success",
+                  "disabled": true
+                },
+                {
+                  "key": "event_type",
+                  "value": "validation.completed",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "validation.completed",
+                  "disabled": true
+                },
+                {
+                  "key": "validation_id",
+                  "value": "{{validation_id}}",
+                  "disabled": true
+                },
+                {
+                  "key": "response_status",
+                  "value": "2xx",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "2026-04-01",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-04-30",
+                  "disabled": true
+                },
+                {
+                  "key": "min_attempt",
+                  "value": "2",
+                  "disabled": true
+                },
+                {
+                  "key": "min_response_time_ms",
+                  "value": "1000",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lists the deliveries of every endpoint, with text search and filters.\n\nQuery parameters:\n- `page` (optional): Page requested, starting at 1.\n- `per_page` (optional): How many deliveries each page carries.\n- `endpoint_id` (optional): Filter, unique identifier of the webhook endpoint (UUID v4).\n- `status` (optional): Delivery state.\n- `event_type` (optional): Type of event that produced the delivery.\n- `q` (optional): Searches the delivery id, the endpoint's id, URL and description, the event type, the validation id and the response's HTTP code.\n- `validation_id` (optional): Only the deliveries of this validation (UUID v4).\n- `response_status` (optional): HTTP code the receiver answered with, comma-separated.\n- `from` (optional): Deliveries created from this moment on, inclusive.\n- `to` (optional): Deliveries created up to this moment, inclusive.\n- `min_attempt` (optional): Only deliveries whose attempt number is at least this.\n- `min_response_time_ms` (optional): Only deliveries whose receiver took at least this many milliseconds to answer.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/list-all-deliveries\nGuide: https://docs.veriko.mx/en/concepts/webhooks-architecture"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Export deliveries of all endpoints",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks/deliveries/export?format=csv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "deliveries",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "csv"
+                },
+                {
+                  "key": "endpoint_id",
+                  "value": "{{webhook_id}}",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "success",
+                  "disabled": true
+                },
+                {
+                  "key": "event_type",
+                  "value": "validation.completed",
+                  "disabled": true
+                },
+                {
+                  "key": "q",
+                  "value": "validation.completed",
+                  "disabled": true
+                },
+                {
+                  "key": "validation_id",
+                  "value": "{{validation_id}}",
+                  "disabled": true
+                },
+                {
+                  "key": "response_status",
+                  "value": "2xx",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "2026-04-01",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-04-30",
+                  "disabled": true
+                },
+                {
+                  "key": "min_attempt",
+                  "value": "2",
+                  "disabled": true
+                },
+                {
+                  "key": "min_response_time_ms",
+                  "value": "1000",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Downloads the delivery history of every endpoint as CSV or XLSX.\n\nQuery parameters:\n- `endpoint_id` (optional): Filter, unique identifier of the webhook endpoint (UUID v4).\n- `status` (optional): Delivery state.\n- `event_type` (optional): Type of event that produced the delivery.\n- `q` (optional): Searches the delivery id, the endpoint's id, URL and description, the event type, the validation id and the response's HTTP code.\n- `validation_id` (optional): Only the deliveries of this validation (UUID v4).\n- `response_status` (optional): HTTP code the receiver answered with, comma-separated.\n- `from` (optional): Deliveries created from this moment on, inclusive.\n- `to` (optional): Deliveries created up to this moment, inclusive.\n- `min_attempt` (optional): Only deliveries whose attempt number is at least this.\n- `min_response_time_ms` (optional): Only deliveries whose receiver took at least this many milliseconds to answer.\n- `format` (optional): Output format.\n- `limit` (optional): Trims the number of rows in the file.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/export-all-deliveries\nGuide: https://docs.veriko.mx/en/concepts/webhooks-architecture"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Regenerate the signing secret (destructive)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks/{{webhook_id}}/regenerate-secret",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{webhook_id}}",
+                "regenerate-secret"
+              ],
+              "query": []
+            },
+            "description": "Rotates the secret that signs the deliveries of an endpoint.\n\nDestructive request. The new secret appears only in this response and is saved as `webhook_secret`. For 24 hours deliveries also carry the previous signature in `X-Webhook-Signature-Old`; with `\"immediate\": true` the previous secret stops working at once.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nSaves `webhook_secret`.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/regenerate-webhook-secret\nGuide: https://docs.veriko.mx/en/concepts/webhooks-architecture",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"immediate\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set(\"webhook_secret\", pm.response.json().data.attributes.secret);",
+                  "}",
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete a webhook endpoint (destructive)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/webhooks/{{webhook_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{webhook_id}}"
+              ],
+              "query": []
+            },
+            "description": "Deletes an endpoint.\n\nDestructive request. Deletes the endpoint and its whole delivery history. It cannot be undone. To keep the history, set the status to `disabled` with the update request.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/delete-webhook\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 204\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Finance",
+      "item": [
+        {
+          "name": "CEP exports",
+          "description": "Background preparation of the CEP archive for large date ranges.",
+          "item": [
+            {
+              "name": "Request a CEP export",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Idempotency-Key",
+                    "value": "{{$randomUUID}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/finance/ceps/exports",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "finance",
+                    "ceps",
+                    "exports"
+                  ],
+                  "query": []
+                },
+                "description": "Queues the CEP archive of a date range and returns `202` at once.\n\nSends an `Idempotency-Key`. Poll the export with `cep_export_id`.\n\nSaves `cep_export_id`.\n\nReference: https://docs.veriko.mx/en/v1/finance/create-finance-cep-export\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"2026-04-01\",\n  \"to\": \"2026-04-30\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 202) {",
+                      "  pm.collectionVariables.set(\"cep_export_id\", pm.response.json().data.id);",
+                      "}",
+                      "pm.test(\"queues the export\", function () {",
+                      "  pm.expect(pm.response.code).to.equal(202);",
+                      "  pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "List CEP exports",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/finance/ceps/exports",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "finance",
+                    "ceps",
+                    "exports"
+                  ],
+                  "query": []
+                },
+                "description": "Lists the last 20 CEP exports of the caller, newest first.\n\nReference: https://docs.veriko.mx/en/v1/finance/list-finance-cep-exports\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"responds with 200\", function () {",
+                      "  pm.expect(pm.response.code).to.equal(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Poll a CEP export",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/finance/ceps/exports/{{cep_export_id}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "finance",
+                    "ceps",
+                    "exports",
+                    "{{cep_export_id}}"
+                  ],
+                  "query": []
+                },
+                "description": "Returns the state of a CEP export and repeats in the runner until it is terminal.\n\nThe terminal states are `ready`, `failed` and `expired`. While the state is `queued` or `building`, the script waits 3 seconds and repeats the request, up to 30 times.\n\nUses `cep_export_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-cep-export\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const TERMINAL_EXPORT = [\"ready\", \"failed\", \"expired\"];",
+                      "const polls = Number(pm.collectionVariables.get(\"cep_export_polls\") || 0) + 1;",
+                      "pm.collectionVariables.set(\"cep_export_polls\", String(polls));",
+                      "const state = pm.response.code === 200 ? pm.response.json().data.attributes.status : \"stop\";",
+                      "if (state !== \"stop\" && !TERMINAL_EXPORT.includes(state) && polls < 30) {",
+                      "  await new Promise((resolve) => setTimeout(resolve, 3000));",
+                      "  pm.execution.setNextRequest(\"Poll a CEP export\");",
+                      "} else {",
+                      "  pm.collectionVariables.set(\"cep_export_polls\", \"0\");",
+                      "}",
+                      "pm.test(\"returns the export\", function () {",
+                      "  pm.expect(pm.response.code).to.equal(200);",
+                      "  pm.expect(pm.response.json().data.attributes.status).to.be.a(\"string\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Download a CEP export",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/finance/ceps/exports/{{cep_export_id}}/download",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "finance",
+                    "ceps",
+                    "exports",
+                    "{{cep_export_id}}",
+                    "download"
+                  ],
+                  "query": []
+                },
+                "description": "Downloads the ZIP of a CEP export in the `ready` state.\n\nResponds `409 export_not_ready` while the export is in progress, and `410` after the archive expired.\n\nUses `cep_export_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/finance/download-finance-cep-export\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"responds with 200\", function () {",
+                      "  pm.expect(pm.response.code).to.equal(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Get the monthly summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/finance/summary?month=2026-04",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "finance",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-04"
+                },
+                {
+                  "key": "user_id",
+                  "value": "00000000-0000-4000-8000-000000000000",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Returns the KPIs of a month: verdict counts, amounts, success rate and breakdowns.\n\nQuery parameters:\n- `month` (required): Month to query in `YYYY-MM` format.\n- `user_id` (optional): Administrators only, UUID of the user to query.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-summary\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Export the accounting file",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/finance/accounting?month=2026-04&format=csv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "finance",
+                "accounting"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-04"
+                },
+                {
+                  "key": "format",
+                  "value": "csv"
+                },
+                {
+                  "key": "decimal",
+                  "value": "comma",
+                  "disabled": true
+                },
+                {
+                  "key": "user_id",
+                  "value": "00000000-0000-4000-8000-000000000000",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Exports the monthly report with `DD/MM/YYYY` dates and a configurable decimal separator.\n\nQuery parameters:\n- `month` (required): Month to export in `YYYY-MM` format.\n- `decimal` (optional): Decimal separator.\n- `format` (optional): Requested file format for the download.\n- `user_id` (optional): Administrators only, UUID of the user to query.\n- `limit` (optional): Trims the number of rows when the output is `csv` or `xlsx`.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-accounting\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Summarize by bank",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/finance/by-bank?month=2026-04&format=preview",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "finance",
+                "by-bank"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-04"
+                },
+                {
+                  "key": "format",
+                  "value": "preview"
+                },
+                {
+                  "key": "user_id",
+                  "value": "00000000-0000-4000-8000-000000000000",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Groups the verifications of a month by receiving bank.\n\nQuery parameters:\n- `month` (required): Month to report in `YYYY-MM` format.\n- `format` (optional): Requested file format for the download.\n- `user_id` (optional): Administrators only, UUID of the user to query.\n- `limit` (optional): Trims the number of rows when the output is `csv` or `xlsx`.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-by-bank\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Summarize by counterparty",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/finance/counterparties?month=2026-04&format=preview",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "finance",
+                "counterparties"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-04"
+                },
+                {
+                  "key": "format",
+                  "value": "preview"
+                },
+                {
+                  "key": "user_id",
+                  "value": "00000000-0000-4000-8000-000000000000",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Groups the verifications of a month by beneficiary account and bank.\n\nQuery parameters:\n- `month` (required): Month to report in `YYYY-MM` format.\n- `format` (optional): Requested file format for the download.\n- `user_id` (optional): Administrators only, UUID of the user to query.\n- `limit` (optional): Trims the number of rows when the output is `csv` or `xlsx`.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-counterparties\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get the monthly report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/finance/monthly?month=2026-04&format=preview",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "finance",
+                "monthly"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-04"
+                },
+                {
+                  "key": "format",
+                  "value": "preview"
+                },
+                {
+                  "key": "user_id",
+                  "value": "00000000-0000-4000-8000-000000000000",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Returns the monthly list of verifications in 15 columns.\n\nQuery parameters:\n- `month` (required): Month to report in `YYYY-MM` format.\n- `format` (optional): Requested file format for the download.\n- `user_id` (optional): Administrators only, UUID of the user to query.\n- `limit` (optional): Trims the number of rows when the output is `csv` or `xlsx`.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-monthly\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get the monthly statement",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/finance/statement?month=2026-04&format=pdf",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "finance",
+                "statement"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-04"
+                },
+                {
+                  "key": "format",
+                  "value": "pdf"
+                },
+                {
+                  "key": "user_id",
+                  "value": "00000000-0000-4000-8000-000000000000",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Generates the monthly statement as PDF, XLSX, CSV or HTML.\n\nQuery parameters:\n- `month` (required): Statement month in `YYYY-MM` format.\n- `format` (optional): Requested file format for the download.\n- `user_id` (optional): Administrators only, UUID of the user to query.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-statement\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Download CEPs as a ZIP",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/finance/ceps?from=2026-04-01&to=2026-04-30",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "finance",
+                "ceps"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-04-30"
+                },
+                {
+                  "key": "user_id",
+                  "value": "00000000-0000-4000-8000-000000000000",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Downloads every available CEP of a date range as one ZIP.\n\nUse the export requests for large ranges.\n\nQuery parameters:\n- `from` (required): Start date (inclusive, `YYYY-MM-DD`).\n- `to` (required): End date (inclusive, `YYYY-MM-DD`).\n- `user_id` (optional): Administrators only, UUID of the user to query.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-ceps\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Usage",
+      "item": [
+        {
+          "name": "Get API usage",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/usage",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "usage"
+              ],
+              "query": []
+            },
+            "description": "Returns the API usage of the account: requests today and this month, quota, recent requests and Banxico status.\n\nReference: https://docs.veriko.mx/en/v1/usage/get-api-usage\nGuide: https://docs.veriko.mx/en/how-to/monitor-usage"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get the quota summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usage/summary",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usage",
+                "summary"
+              ],
+              "query": []
+            },
+            "description": "Returns the plan limit, the validations consumed and remaining, and the percentage used.\n\nReference: https://docs.veriko.mx/en/v1/usage/get-usage-summary\nGuide: https://docs.veriko.mx/en/how-to/monitor-usage"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Break down usage by operation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usage/breakdown",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usage",
+                "breakdown"
+              ],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "current",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Breaks down the usage of a period by billable operation.\n\nQuery parameters:\n- `period` (optional): Period to break down.\n\nReference: https://docs.veriko.mx/en/v1/usage/get-usage-breakdown\nGuide: https://docs.veriko.mx/en/how-to/monitor-usage"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get the monthly usage history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usage/history",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usage",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "months",
+                  "value": "6",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Returns the monthly validation usage, most recent first.\n\nQuery parameters:\n- `months` (optional): Number of months to include in the history (counting back from the moment of the query).\n\nReference: https://docs.veriko.mx/en/v1/usage/get-usage-history\nGuide: https://docs.veriko.mx/en/how-to/monitor-usage"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get the rate limits",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usage/limits",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usage",
+                "limits"
+              ],
+              "query": []
+            },
+            "description": "Returns the rate limits that apply to the account, by context.\n\nReference: https://docs.veriko.mx/en/v1/usage/get-usage-limits\nGuide: https://docs.veriko.mx/en/concepts/rate-limits"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get the usage heatmap",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usage/heatmap",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usage",
+                "heatmap"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Returns the validations grouped by day of the week and hour of the day.\n\nQuery parameters:\n- `days` (optional): Number of days to include in the heatmap.\n\nReference: https://docs.veriko.mx/en/v1/usage/get-usage-heatmap\nGuide: https://docs.veriko.mx/en/how-to/monitor-usage"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Export API usage",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/usage/export?format=csv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "usage",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "csv"
+                },
+                {
+                  "key": "limit",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "2026-04-01",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-04-30",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Downloads the API activity log as CSV or XLSX, up to 100,000 rows.\n\nQuery parameters:\n- `format` (optional): Requested file format for the download.\n- `limit` (optional): Row cap for the download.\n- `from` (optional): Start date (inclusive) of the range to export, in ISO 8601 format (YYYY-MM-DD).\n- `to` (optional): End date (inclusive) of the range to export, in ISO 8601 format (YYYY-MM-DD).\n\nReference: https://docs.veriko.mx/en/v1/usage/export-api-usage\nGuide: https://docs.veriko.mx/en/how-to/monitor-usage"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Insights",
+      "item": [
+        {
+          "name": "Get the overview",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/insights/overview",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "insights",
+                "overview"
+              ],
+              "query": []
+            },
+            "description": "Returns the validation metrics of the account: totals, success rate, latency and verdict distribution.\n\nReference: https://docs.veriko.mx/en/v1/insights/get-user-insights-overview\nGuide: https://docs.veriko.mx/en/how-to/analyze-insights"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get the trends",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/insights/trends",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "insights",
+                "trends"
+              ],
+              "query": [
+                {
+                  "key": "range",
+                  "value": "7d",
+                  "disabled": true
+                },
+                {
+                  "key": "metric",
+                  "value": "volume",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Returns a time series of the validations of the account.\n\nQuery parameters:\n- `range` (optional): Filter, Time window covered by the series: `24h` (last 24 hours), `7d` (last 7 days), `30d` (last 30 days), or `90d` (last 90 days).\n- `metric` (optional): Filter, Series to return.\n\nReference: https://docs.veriko.mx/en/v1/insights/get-user-insights-trends\nGuide: https://docs.veriko.mx/en/how-to/analyze-insights"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List the top banks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/insights/top-banks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "insights",
+                "top-banks"
+              ],
+              "query": [
+                {
+                  "key": "metric",
+                  "value": "volume",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lists the banks of the last 30 days ranked by volume or error rate.\n\nQuery parameters:\n- `metric` (optional): Filter, Sorting criterion.\n- `limit` (optional): Filter, Maximum number of banks to return.\n\nReference: https://docs.veriko.mx/en/v1/insights/get-user-insights-top-banks\nGuide: https://docs.veriko.mx/en/how-to/analyze-insights"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List the top beneficiaries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/insights/top-beneficiaries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "insights",
+                "top-beneficiaries"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lists the beneficiaries detected most often in the last 90 days.\n\nQuery parameters:\n- `limit` (optional): Filter, Maximum number of beneficiaries to return.\n\nReference: https://docs.veriko.mx/en/v1/insights/get-user-insights-top-beneficiaries\nGuide: https://docs.veriko.mx/en/how-to/analyze-insights"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "description": "Public catalogs. These requests do not send the API key.",
+      "item": [
+        {
+          "name": "List SPEI banks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "If-None-Match",
+                "value": "{{banks_etag}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public/banks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "banks"
+              ],
+              "query": []
+            },
+            "description": "Returns the catalog of banks that participate in SPEI, updated weekly from Banxico.\n\nEnable `If-None-Match` to get `304` when the catalog did not change.\n\nSaves `banks_etag`.\n\nReference: https://docs.veriko.mx/en/v1/public/list-banks\nGuide: https://docs.veriko.mx/en/bank-directory",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const etag = pm.response.headers.get(\"etag\");",
+                  "if (etag) {",
+                  "  pm.collectionVariables.set(\"banks_etag\", etag);",
+                  "}",
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Look up the bank of a card",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/public/bin-lookup/45320151",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "bin-lookup",
+                "45320151"
+              ],
+              "query": []
+            },
+            "description": "Resolves the issuing bank of a card from its BIN: 6 to 16 digits, of which the first 6 to 8 are used.\n\nReference: https://docs.veriko.mx/en/v1/public/lookup-bin\nGuide: https://docs.veriko.mx/en/card-lookup",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get the SPEI calendar",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "If-None-Match",
+                "value": "{{calendar_etag}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/public/spei-calendar/2026",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "public",
+                "spei-calendar",
+                "2026"
+              ],
+              "query": []
+            },
+            "description": "Returns the SPEI non-business days of a year and the official provision they come from.\n\nSaves `calendar_etag`.\n\nReference: https://docs.veriko.mx/en/v1/public/get-spei-calendar\nGuide: https://docs.veriko.mx/en/concepts/timezone-handling",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const etag = pm.response.headers.get(\"etag\");",
+                  "if (etag) {",
+                  "  pm.collectionVariables.set(\"calendar_etag\", etag);",
+                  "}",
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Banxico status",
+      "item": [
+        {
+          "name": "Get the Banxico status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/status/banxico",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "status",
+                "banxico"
+              ],
+              "query": []
+            },
+            "description": "Returns the operational status of the Banxico validation service: `operational`, `degraded` or `down`.\n\nReference: https://docs.veriko.mx/en/v1/banxico-status/banxico-public-status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get the Banxico health time series",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/status/banxico/timeseries?metric=probe_latency&window=24h",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "status",
+                "banxico",
+                "timeseries"
+              ],
+              "query": [
+                {
+                  "key": "metric",
+                  "value": "probe_latency"
+                },
+                {
+                  "key": "window",
+                  "value": "24h"
+                }
+              ]
+            },
+            "description": "Returns the health history of the Banxico service, bucketed by minute or hour.\n\nQuery parameters:\n- `metric` (optional): Filter, Series to return.\n- `window` (optional): Filter, Window the series covers: `1h`, `8h`, `12h`, `24h` and `7d`.\n\nReference: https://docs.veriko.mx/en/v1/banxico-status/banxico-public-timeseries"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Plans",
+      "description": "Public plan catalog. These requests do not send the API key.",
+      "item": [
+        {
+          "name": "List public plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/plans/public",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "plans",
+                "public"
+              ],
+              "query": []
+            },
+            "description": "Returns the active public plans with their prices and features.\n\nReference: https://docs.veriko.mx/en/v1/plans/list-public-plans\nGuide: https://docs.veriko.mx/en/how-to/show-plans-and-prices",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get the plan comparison",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/plans/public/comparison",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "plans",
+                "public",
+                "comparison"
+              ],
+              "query": []
+            },
+            "description": "Returns the plan comparison table as structured data.\n\nReference: https://docs.veriko.mx/en/v1/plans/get-public-plan-comparison\nGuide: https://docs.veriko.mx/en/how-to/show-plans-and-prices",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Billing",
+      "item": [
+        {
+          "name": "Get my subscription",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/billing/subscription",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "billing",
+                "subscription"
+              ],
+              "query": []
+            },
+            "description": "Returns the active subscription of the account. Without one, it returns the default plan.\n\nReference: https://docs.veriko.mx/en/v1/billing/billing-get-subscription\nGuide: https://docs.veriko.mx/en/how-to/manage-my-subscription"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get the dashboard summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/summary?limit=5",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Returns the aggregate counters of the account and its most recent validations.\n\nQuery parameters:\n- `limit` (optional): Filter, Maximum number of recent validations to return.\n\nReference: https://docs.veriko.mx/en/v1/dashboard/get-dashboard-summary"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responds with 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.veriko.mx/v1"
+    },
+    {
+      "key": "api_key",
+      "value": ""
+    },
+    {
+      "key": "webhook_receiver_url",
+      "value": "https://webhook.site/replace-with-your-receiver-id"
+    },
+    {
+      "key": "receipt_image_url",
+      "value": "https://storage.example.com/receipts/spei-receipt-001.png"
+    },
+    {
+      "key": "receipt_image_base64",
+      "value": ""
+    },
+    {
+      "key": "validation_id",
+      "value": ""
+    },
+    {
+      "key": "queued_validation_id",
+      "value": ""
+    },
+    {
+      "key": "queued_validation_etag",
+      "value": ""
+    },
+    {
+      "key": "validation_etag",
+      "value": ""
+    },
+    {
+      "key": "idempotency_key",
+      "value": ""
+    },
+    {
+      "key": "webhook_id",
+      "value": ""
+    },
+    {
+      "key": "webhook_secret",
+      "value": ""
+    },
+    {
+      "key": "beneficiary_id",
+      "value": ""
+    },
+    {
+      "key": "import_id",
+      "value": ""
+    },
+    {
+      "key": "import_row_id",
+      "value": ""
+    },
+    {
+      "key": "cep_export_id",
+      "value": ""
+    },
+    {
+      "key": "purge_token",
+      "value": ""
+    },
+    {
+      "key": "poll_count",
+      "value": ""
+    },
+    {
+      "key": "validation_status",
+      "value": ""
+    },
+    {
+      "key": "idempotency_replay",
+      "value": ""
+    },
+    {
+      "key": "cep_export_polls",
+      "value": ""
+    },
+    {
+      "key": "banks_etag",
+      "value": ""
+    },
+    {
+      "key": "calendar_etag",
+      "value": ""
+    }
+  ]
+}

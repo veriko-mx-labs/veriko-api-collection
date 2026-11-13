@@ -1,0 +1,37 @@
+meta {
+  name: Get the Banxico health time series
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/status/banxico/timeseries?metric=probe_latency&window=24h
+  body: none
+  auth: inherit
+}
+
+params:query {
+  metric: probe_latency
+  window: 24h
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the health history of the Banxico service, bucketed by minute or hour.
+
+  Query parameters:
+  - `metric` (optional): Filter, Series to return.
+  - `window` (optional): Filter, Window the series covers: `1h`, `8h`, `12h`, `24h` and `7d`.
+
+  Reference: https://docs.veriko.mx/en/v1/banxico-status/banxico-public-timeseries
+}

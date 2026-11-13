@@ -1,0 +1,33 @@
+meta {
+  name: Send the CEP to Telegram
+  type: http
+  seq: 18
+}
+
+post {
+  url: {{base_url}}/validations/{{validation_id}}/cep/send-telegram
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 202", function () {
+    expect(res.getStatus()).to.equal(202);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Starts the delivery of the CEP as a PDF to the Telegram chat linked to the account.
+
+  Responds `409` with `cep_not_available` or `telegram_not_linked` when the CEP or the link is missing.
+
+  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/validations/send-cep-to-telegram
+  Guide: https://docs.veriko.mx/en/how-to/inspect-validations
+}

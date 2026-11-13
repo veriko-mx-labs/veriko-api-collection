@@ -1,0 +1,38 @@
+meta {
+  name: Get the monthly summary
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/finance/summary?month=2026-04
+  body: none
+  auth: inherit
+}
+
+params:query {
+  month: 2026-04
+  ~user_id: 00000000-0000-4000-8000-000000000000
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the KPIs of a month: verdict counts, amounts, success rate and breakdowns.
+
+  Query parameters:
+  - `month` (required): Month to query in `YYYY-MM` format.
+  - `user_id` (optional): Administrators only, UUID of the user to query.
+
+  Reference: https://docs.veriko.mx/en/v1/finance/get-finance-summary
+  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+}

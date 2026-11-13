@@ -1,0 +1,44 @@
+meta {
+  name: List SPEI banks
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/public/banks
+  body: none
+  auth: none
+}
+
+headers {
+  ~If-None-Match: {{banks_etag}}
+}
+
+script:post-response {
+  const etag = res.getHeader("etag");
+  if (etag) {
+    bru.setVar("banks_etag", etag);
+  }
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the catalog of banks that participate in SPEI, updated weekly from Banxico.
+
+  Enable `If-None-Match` to get `304` when the catalog did not change.
+
+  Saves `banks_etag`.
+
+  Reference: https://docs.veriko.mx/en/v1/public/list-banks
+  Guide: https://docs.veriko.mx/en/bank-directory
+}

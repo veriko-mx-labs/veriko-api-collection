@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "name": "Veriko API: SPEI transfer verification against the Banxico CEP",
+  "type": "collection",
+  "ignore": ["node_modules", ".git"]
+}

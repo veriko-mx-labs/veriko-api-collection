@@ -1,0 +1,38 @@
+meta {
+  name: Look up an account in your beneficiaries
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{base_url}}/beneficiaries/lookup?account=012180004412345678
+  body: none
+  auth: inherit
+}
+
+params:query {
+  account: 012180004412345678
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Looks up an exact account number in the beneficiaries of the account.
+
+  Responds `404` when the number is not in your list.
+
+  Query parameters:
+  - `account` (required): Full account number: 10 digits (phone), 16 (card) or 18 (CLABE).
+
+  Reference: https://docs.veriko.mx/en/v1/beneficiaries/lookup-beneficiary-account
+  Guide: https://docs.veriko.mx/en/how-to/manage-beneficiaries
+}

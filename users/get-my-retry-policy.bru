@@ -1,0 +1,29 @@
+meta {
+  name: Get my default retry policy
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/users/me/retry-policy
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the retry policy that applies to every validation without its own `retry_policy`.
+
+  Reference: https://docs.veriko.mx/en/v1/users/get-my-retry-policy
+  Guide: https://docs.veriko.mx/en/how-to/configure-retry-policy
+}

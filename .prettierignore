@@ -1,0 +1,4 @@
+node_modules/
+spec/openapi.yaml
+*.bru
+postman/*.json

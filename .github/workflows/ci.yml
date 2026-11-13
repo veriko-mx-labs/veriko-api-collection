@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  autoria:
+    if: github.event_name != 'workflow_dispatch'
+    uses: veriko-mx-labs/.github/.github/workflows/autoria.yml@39a6ff721b020af5a33fb370b62a829eaacbeab3
+    secrets:
+      config: ${{ secrets.VERIKO_LABS_AUTORIA_CONFIG }}
+
+  test:
+    name: Checks (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['18', '22']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: ${{ matrix.node }}
+
+      - run: npm ci
+
+      - name: Formatting
+        run: npm run format:check
+
+      - name: The vendored spec is the public contract
+        run: npm run check:spec-public
+
+      - name: Each request matches its operation and every field exists in the spec
+        run: npm run validate
+
+      - name: The collection covers every machine-to-machine operation
+        run: npm run check:coverage
+
+      - name: The text is English
+        run: npm run check:prose
+
+      - name: The Postman export is up to date with the .bru requests
+        run: npm run check:postman-fresh

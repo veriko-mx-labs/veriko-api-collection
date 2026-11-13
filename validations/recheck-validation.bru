@@ -1,0 +1,33 @@
+meta {
+  name: Recheck a validation
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{base_url}}/validations/{{validation_id}}/recheck
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Queries Banxico again for the payment status of a `valid` validation and moves it to `returned` if the payment was returned.
+
+  It queries Banxico and does not consume quota.
+
+  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/validations/recheck-validation
+  Guide: https://docs.veriko.mx/en/how-to/inspect-validations
+}

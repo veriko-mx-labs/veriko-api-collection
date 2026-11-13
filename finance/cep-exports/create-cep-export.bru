@@ -1,0 +1,51 @@
+meta {
+  name: Request a CEP export
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/finance/ceps/exports
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{$randomUUID}}
+}
+
+body:json {
+  {
+    "from": "2026-04-01",
+    "to": "2026-04-30"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 202) {
+    bru.setVar("cep_export_id", res.body.data.id);
+  }
+}
+
+tests {
+  test("queues the export", function () {
+    expect(res.getStatus()).to.equal(202);
+    expect(res.body.data.id).to.be.a("string");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Queues the CEP archive of a date range and returns `202` at once.
+
+  Sends an `Idempotency-Key`. Poll the export with `cep_export_id`.
+
+  Saves `cep_export_id`.
+
+  Reference: https://docs.veriko.mx/en/v1/finance/create-finance-cep-export
+  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+}

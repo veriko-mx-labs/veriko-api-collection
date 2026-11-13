@@ -1,0 +1,29 @@
+meta {
+  name: Get the quota summary
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/usage/summary
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the plan limit, the validations consumed and remaining, and the percentage used.
+
+  Reference: https://docs.veriko.mx/en/v1/usage/get-usage-summary
+  Guide: https://docs.veriko.mx/en/how-to/monitor-usage
+}

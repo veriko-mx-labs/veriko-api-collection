@@ -1,0 +1,44 @@
+meta {
+  name: Prepare the permanent deletion (destructive)
+  type: http
+  seq: 20
+  tags: [
+    destructive
+  ]
+}
+
+post {
+  url: {{base_url}}/validations/{{validation_id}}/purge/prepare
+  body: none
+  auth: inherit
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    bru.setVar("purge_token", res.body.data.attributes.confirmation_token);
+  }
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Describes what the permanent deletion would remove and issues the `confirmation_token`.
+
+  Destructive request. This step changes nothing, but it opens the irreversible purge. The token expires in 120 seconds and is saved as `purge_token`.
+
+  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Saves `purge_token`.
+
+  Reference: https://docs.veriko.mx/en/v1/validations/prepare-validation-purge
+  Guide: https://docs.veriko.mx/en/how-to/purge-a-validation
+}

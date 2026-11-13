@@ -1,0 +1,45 @@
+meta {
+  name: Start an import
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/beneficiaries/imports
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  file: @file(samples/beneficiaries.csv) @contentType(text/csv)
+  parse_mode: template
+}
+
+script:post-response {
+  if (res.getStatus() === 202) {
+    bru.setVar("import_id", res.body.data.id);
+  }
+}
+
+tests {
+  test("opens the import job", function () {
+    expect(res.getStatus()).to.equal(202);
+    expect(res.body.data.id).to.be.a("string");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Uploads a file and opens an import job. Parsing runs in the background.
+
+  Accepts CSV, XLS, XLSX, TXT, JSON or PDF up to 20 MB. This request sends `samples/beneficiaries.csv`.
+
+  Saves `import_id`.
+
+  Reference: https://docs.veriko.mx/en/v1/beneficiaries/create-beneficiary-import
+  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+}

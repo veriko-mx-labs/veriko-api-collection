@@ -1,0 +1,38 @@
+meta {
+  name: Get the trends
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/insights/trends
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~range: 7d
+  ~metric: volume
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns a time series of the validations of the account.
+
+  Query parameters:
+  - `range` (optional): Filter, Time window covered by the series: `24h` (last 24 hours), `7d` (last 7 days), `30d` (last 30 days), or `90d` (last 90 days).
+  - `metric` (optional): Filter, Series to return.
+
+  Reference: https://docs.veriko.mx/en/v1/insights/get-user-insights-trends
+  Guide: https://docs.veriko.mx/en/how-to/analyze-insights
+}

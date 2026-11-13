@@ -1,0 +1,36 @@
+meta {
+  name: List the top beneficiaries
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/insights/top-beneficiaries
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~limit: 10
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Lists the beneficiaries detected most often in the last 90 days.
+
+  Query parameters:
+  - `limit` (optional): Filter, Maximum number of beneficiaries to return.
+
+  Reference: https://docs.veriko.mx/en/v1/insights/get-user-insights-top-beneficiaries
+  Guide: https://docs.veriko.mx/en/how-to/analyze-insights
+}

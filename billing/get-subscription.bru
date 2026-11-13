@@ -1,0 +1,29 @@
+meta {
+  name: Get my subscription
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/billing/subscription
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the active subscription of the account. Without one, it returns the default plan.
+
+  Reference: https://docs.veriko.mx/en/v1/billing/billing-get-subscription
+  Guide: https://docs.veriko.mx/en/how-to/manage-my-subscription
+}

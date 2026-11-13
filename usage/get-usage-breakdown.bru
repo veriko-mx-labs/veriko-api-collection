@@ -1,0 +1,36 @@
+meta {
+  name: Break down usage by operation
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/usage/breakdown
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~period: current
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Breaks down the usage of a period by billable operation.
+
+  Query parameters:
+  - `period` (optional): Period to break down.
+
+  Reference: https://docs.veriko.mx/en/v1/usage/get-usage-breakdown
+  Guide: https://docs.veriko.mx/en/how-to/monitor-usage
+}

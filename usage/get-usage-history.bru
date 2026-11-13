@@ -1,0 +1,36 @@
+meta {
+  name: Get the monthly usage history
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/usage/history
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~months: 6
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the monthly validation usage, most recent first.
+
+  Query parameters:
+  - `months` (optional): Number of months to include in the history (counting back from the moment of the query).
+
+  Reference: https://docs.veriko.mx/en/v1/usage/get-usage-history
+  Guide: https://docs.veriko.mx/en/how-to/monitor-usage
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Get the Banxico status
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/status/banxico
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the operational status of the Banxico validation service: `operational`, `degraded` or `down`.
+
+  Reference: https://docs.veriko.mx/en/v1/banxico-status/banxico-public-status
+}

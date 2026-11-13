@@ -1,0 +1,29 @@
+meta {
+  name: Get my profile
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/users/me
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the profile, API key prefix, subscription, 2FA state and effective permissions of the authenticated user.
+
+  Reference: https://docs.veriko.mx/en/v1/users/my-profile
+  Guide: https://docs.veriko.mx/en/how-to/inspect-my-account
+}

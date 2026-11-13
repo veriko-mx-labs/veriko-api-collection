@@ -1,0 +1,36 @@
+meta {
+  name: Remove a preview row (destructive)
+  type: http
+  seq: 6
+  tags: [
+    destructive
+  ]
+}
+
+delete {
+  url: {{base_url}}/beneficiaries/imports/{{import_id}}/rows/{{import_row_id}}
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 204", function () {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Removes a row from an import job before confirmation.
+
+  Destructive request. Only jobs in `preview_ready` accept it; other states return `422 job_not_editable`.
+
+  Uses `import_id`, `import_row_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/beneficiaries/delete-beneficiary-import-row
+  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+}

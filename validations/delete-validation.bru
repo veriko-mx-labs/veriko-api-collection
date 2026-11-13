@@ -1,0 +1,36 @@
+meta {
+  name: Withdraw a validation (destructive)
+  type: http
+  seq: 19
+  tags: [
+    destructive
+  ]
+}
+
+delete {
+  url: {{base_url}}/validations/{{validation_id}}
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 204", function () {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Withdraws a validation from the history with a soft delete.
+
+  Destructive request. The record keeps its result and reappears with `with_deleted=1`. For a permanent deletion use the purge requests.
+
+  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/validations/delete-validation
+  Guide: https://docs.veriko.mx/en/how-to/inspect-validations
+}

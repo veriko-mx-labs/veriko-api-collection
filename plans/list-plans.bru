@@ -1,0 +1,29 @@
+meta {
+  name: List public plans
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/plans/public
+  body: none
+  auth: none
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the active public plans with their prices and features.
+
+  Reference: https://docs.veriko.mx/en/v1/plans/list-public-plans
+  Guide: https://docs.veriko.mx/en/how-to/show-plans-and-prices
+}

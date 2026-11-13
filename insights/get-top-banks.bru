@@ -1,0 +1,38 @@
+meta {
+  name: List the top banks
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/insights/top-banks
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~metric: volume
+  ~limit: 10
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Lists the banks of the last 30 days ranked by volume or error rate.
+
+  Query parameters:
+  - `metric` (optional): Filter, Sorting criterion.
+  - `limit` (optional): Filter, Maximum number of banks to return.
+
+  Reference: https://docs.veriko.mx/en/v1/insights/get-user-insights-top-banks
+  Guide: https://docs.veriko.mx/en/how-to/analyze-insights
+}

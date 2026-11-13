@@ -1,0 +1,36 @@
+meta {
+  name: Cancel an import (destructive)
+  type: http
+  seq: 8
+  tags: [
+    destructive
+  ]
+}
+
+delete {
+  url: {{base_url}}/beneficiaries/imports/{{import_id}}
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 204", function () {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Cancels an import job that was not confirmed yet.
+
+  Destructive request. Applies to `pending`, `parsing` and `preview_ready` jobs. Jobs in a terminal state return `404`.
+
+  Uses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/beneficiaries/cancel-beneficiary-import
+  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+}

@@ -1,0 +1,29 @@
+meta {
+  name: Get the rate limits
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{base_url}}/usage/limits
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the rate limits that apply to the account, by context.
+
+  Reference: https://docs.veriko.mx/en/v1/usage/get-usage-limits
+  Guide: https://docs.veriko.mx/en/concepts/rate-limits
+}

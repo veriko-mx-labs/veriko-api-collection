@@ -1,0 +1,42 @@
+meta {
+  name: Summarize by counterparty
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/finance/counterparties?month=2026-04&format=preview
+  body: none
+  auth: inherit
+}
+
+params:query {
+  month: 2026-04
+  format: preview
+  ~user_id: 00000000-0000-4000-8000-000000000000
+  ~limit: 1
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Groups the verifications of a month by beneficiary account and bank.
+
+  Query parameters:
+  - `month` (required): Month to report in `YYYY-MM` format.
+  - `format` (optional): Requested file format for the download.
+  - `user_id` (optional): Administrators only, UUID of the user to query.
+  - `limit` (optional): Trims the number of rows when the output is `csv` or `xlsx`.
+
+  Reference: https://docs.veriko.mx/en/v1/finance/get-finance-counterparties
+  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+}

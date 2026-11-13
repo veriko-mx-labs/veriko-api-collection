@@ -1,0 +1,69 @@
+meta {
+  name: List validations
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{base_url}}/validations?page=1&per_page=50
+  body: none
+  auth: inherit
+}
+
+params:query {
+  page: 1
+  per_page: 50
+  ~status: example
+  ~type: direct
+  ~from: 2026-04-01
+  ~to: 2026-04-30
+  ~search: MXBA
+  ~client_ref: collection-example
+  ~playground: 1
+  ~with_deleted: 0
+  ~batch_id: 1
+  ~bank: 40012
+  ~banks: 40012,40002
+  ~amount_min: 1000
+  ~amount_max: 50000
+  ~retry_state: pending
+}
+
+tests {
+  test("returns a page of validations", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body.data).to.be.an("array");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Lists the validation history, newest first, with combinable filters.
+
+  `per_page` accepts 1 to 50.
+
+  Query parameters:
+  - `page` (optional): Requested page; values below `1` are adjusted to `1`.
+  - `per_page` (optional): Items per page; adjusted to the `1` to `50` range.
+  - `status` (optional): Lifecycle state.
+  - `type` (optional): Mode: `direct` for manual validation or `ocr` for image-based validation.
+  - `from` (optional): Inclusive start date, applied to the validation creation date.
+  - `to` (optional): Inclusive end date, applied to the validation creation date.
+  - `search` (optional): Case-insensitive text search over the submitted, normalized, and Banxico response data.
+  - `client_ref` (optional): Exact match with the `client_ref` sent when validating.
+  - `playground` (optional): Keeps only playground validations.
+  - `with_deleted` (optional): Scope for withdrawn records: omitted includes active and withdrawn records; `0` keeps active records only and `1`, withdrawn records only.
+  - `batch_id` (optional): Identifier of the import job that generated the validations.
+  - `bank` (optional): SPEI code of the sending or receiving bank in the original request.
+  - `banks` (optional): Comma-separated SPEI codes (up to 50); returns the validations whose sending or receiving bank is any of them.
+  - `amount_min` (optional): Inclusive minimum amount, as a number.
+  - `amount_max` (optional): Inclusive maximum amount, as a number.
+  - `retry_state` (optional): Retry cycle state: `pending`, `resolved`, `exhausted`, or `cancelled`.
+
+  Reference: https://docs.veriko.mx/en/v1/validations/list-validations
+  Guide: https://docs.veriko.mx/en/concepts/pagination
+}

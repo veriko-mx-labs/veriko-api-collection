@@ -1,0 +1,43 @@
+meta {
+  name: Edit a preview row (destructive)
+  type: http
+  seq: 5
+  tags: [
+    destructive
+  ]
+}
+
+patch {
+  url: {{base_url}}/beneficiaries/imports/{{import_id}}/rows/{{import_row_id}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "parsed_label": "Example supplier",
+    "parsed_account_type": "clabe"
+  }
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Corrects a preview row before the import is confirmed.
+
+  Destructive request. Overwrites the fields you send and reprocesses the row.
+
+  Uses `import_id`, `import_row_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/beneficiaries/patch-beneficiary-import-row
+  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+}

@@ -1,0 +1,29 @@
+meta {
+  name: List CEP exports
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/finance/ceps/exports
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Lists the last 20 CEP exports of the caller, newest first.
+
+  Reference: https://docs.veriko.mx/en/v1/finance/list-finance-cep-exports
+  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+}

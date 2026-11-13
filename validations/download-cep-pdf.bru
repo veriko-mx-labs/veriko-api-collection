@@ -1,0 +1,39 @@
+meta {
+  name: Download the CEP (PDF)
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{base_url}}/validations/{{validation_id}}/cep?format=pdf
+  body: none
+  auth: inherit
+}
+
+params:query {
+  format: pdf
+}
+
+tests {
+  test("returns the CEP as PDF", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getHeader("content-type")).to.include("pdf");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Downloads the official Banxico CEP of a `valid` or `returned` validation as PDF.
+
+  Query parameters:
+  - `format` (optional): Certificate format: `xml` (default) or `pdf`.
+
+  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/validations/download-cep
+  Guide: https://docs.veriko.mx/en/how-to/inspect-validations
+}

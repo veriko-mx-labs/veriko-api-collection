@@ -1,0 +1,40 @@
+meta {
+  name: Export deliveries of an endpoint
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base_url}}/webhooks/{{webhook_id}}/deliveries/export?format=csv
+  body: none
+  auth: inherit
+}
+
+params:query {
+  format: csv
+  ~limit: 1
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Downloads up to 100,000 delivery records of one endpoint as CSV or XLSX.
+
+  Query parameters:
+  - `format` (optional): Output format.
+  - `limit` (optional): Trims the number of rows in the file.
+
+  Uses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/webhooks/export-webhook-deliveries
+  Guide: https://docs.veriko.mx/en/concepts/webhooks-architecture
+}

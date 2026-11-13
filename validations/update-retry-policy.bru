@@ -1,0 +1,54 @@
+meta {
+  name: Update the retry policy of a validation (destructive)
+  type: http
+  seq: 15
+  tags: [
+    destructive
+  ]
+}
+
+put {
+  url: {{base_url}}/validations/{{validation_id}}/retry-policy
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{$randomUUID}}
+}
+
+body:json {
+  {
+    "retry_policy": {
+      "enabled": true,
+      "max_retries": 3,
+      "interval_seconds": 600,
+      "outcomes": [
+        "not_found",
+        "cep_unavailable"
+      ]
+    }
+  }
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Activates an automatic retry policy for a validation with a `not_found`, `cep_unavailable` or `error` verdict.
+
+  Destructive request. Changes the retry cycle of the validation. It is not accepted for validations from a bulk import, already resolved, or older than seven days.
+
+  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/validations/update-validation-retry-policy
+  Guide: https://docs.veriko.mx/en/how-to/configure-retry-policy
+}

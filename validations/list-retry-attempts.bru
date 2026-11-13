@@ -1,0 +1,31 @@
+meta {
+  name: List retry attempts
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{base_url}}/validations/{{validation_id}}/retry-attempts
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the chronological history of the automatic retries of a validation.
+
+  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/validations/list-validation-retry-attempts
+  Guide: https://docs.veriko.mx/en/concepts/retry-policy
+}

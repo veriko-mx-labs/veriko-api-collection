@@ -1,0 +1,36 @@
+meta {
+  name: Get the usage heatmap
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base_url}}/usage/heatmap
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~days: 30
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the validations grouped by day of the week and hour of the day.
+
+  Query parameters:
+  - `days` (optional): Number of days to include in the heatmap.
+
+  Reference: https://docs.veriko.mx/en/v1/usage/get-usage-heatmap
+  Guide: https://docs.veriko.mx/en/how-to/monitor-usage
+}

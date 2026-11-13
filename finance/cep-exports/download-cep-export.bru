@@ -1,0 +1,33 @@
+meta {
+  name: Download a CEP export
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/finance/ceps/exports/{{cep_export_id}}/download
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Downloads the ZIP of a CEP export in the `ready` state.
+
+  Responds `409 export_not_ready` while the export is in progress, and `410` after the archive expired.
+
+  Uses `cep_export_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/finance/download-finance-cep-export
+  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+}

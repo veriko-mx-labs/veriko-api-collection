@@ -1,0 +1,42 @@
+meta {
+  name: Get the SPEI calendar
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/public/spei-calendar/2026
+  body: none
+  auth: none
+}
+
+headers {
+  ~If-None-Match: {{calendar_etag}}
+}
+
+script:post-response {
+  const etag = res.getHeader("etag");
+  if (etag) {
+    bru.setVar("calendar_etag", etag);
+  }
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the SPEI non-business days of a year and the official provision they come from.
+
+  Saves `calendar_etag`.
+
+  Reference: https://docs.veriko.mx/en/v1/public/get-spei-calendar
+  Guide: https://docs.veriko.mx/en/concepts/timezone-handling
+}

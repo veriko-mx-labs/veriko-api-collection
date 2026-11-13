@@ -1,0 +1,58 @@
+meta {
+  name: Create a webhook endpoint
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/webhooks
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "url": "{{webhook_receiver_url}}",
+    "events": [
+      "validation.completed",
+      "validation.failed",
+      "validation.error",
+      "validation.returned",
+      "validation.retry.scheduled",
+      "validation.retry.resolved",
+      "validation.retry.exhausted"
+    ],
+    "description": "veriko-api-collection example"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 201) {
+    bru.setVar("webhook_id", res.body.data.id);
+    bru.setVar("webhook_secret", res.body.data.attributes.secret);
+  }
+}
+
+tests {
+  test("creates the endpoint and returns the secret once", function () {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.body.data.id).to.be.a("string");
+    expect(res.body.data.attributes.secret).to.be.a("string");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Registers an HTTPS endpoint that receives the subscribed events.
+
+  `url` must resolve to a public address. The signing `secret` appears only in this response and is saved as `webhook_secret`. Deliveries carry it as `X-Webhook-Signature`.
+
+  Saves `webhook_id`, `webhook_secret`.
+
+  Reference: https://docs.veriko.mx/en/v1/webhooks/create-webhook
+  Guide: https://docs.veriko.mx/en/how-to/set-up-webhooks
+}

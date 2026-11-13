@@ -1,0 +1,35 @@
+meta {
+  name: Get the dashboard summary
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/summary?limit=5
+  body: none
+  auth: inherit
+}
+
+params:query {
+  limit: 5
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the aggregate counters of the account and its most recent validations.
+
+  Query parameters:
+  - `limit` (optional): Filter, Maximum number of recent validations to return.
+
+  Reference: https://docs.veriko.mx/en/v1/dashboard/get-dashboard-summary
+}

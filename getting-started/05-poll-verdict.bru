@@ -1,0 +1,77 @@
+meta {
+  name: 05 Poll the verdict
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{base_url}}/validations/{{queued_validation_id}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  If-None-Match: {{queued_validation_etag}}
+}
+
+script:post-response {
+  const TERMINAL = ["valid", "not_found", "cep_unavailable", "invalid", "returned", "failed", "error"];
+  const MAX_POLLS = 30;
+  const etag = res.getHeader("etag");
+  if (etag) {
+    bru.setVar("queued_validation_etag", etag);
+  }
+  let done = false;
+  let waitSeconds = Number(res.getHeader("retry-after")) || 2;
+  if (res.getStatus() === 200) {
+    const attributes = res.body.data.attributes;
+    bru.setVar("validation_status", attributes.status);
+    waitSeconds = Number(res.getHeader("retry-after")) || Number((res.body.meta || {}).next_poll_after_seconds) || 2;
+    if (TERMINAL.includes(attributes.status)) {
+      done = true;
+    } else if (attributes.expires_at && Date.now() > Date.parse(attributes.expires_at)) {
+      done = true; // the validation expired (ttl_expired); stop polling
+    }
+  } else if (res.getStatus() !== 304) {
+    done = true; // 404, 422 and the rest do not change by polling
+  }
+  const polls = Number(bru.getVar("poll_count") || 0) + 1;
+  bru.setVar("poll_count", String(polls));
+  if (!done && polls < MAX_POLLS) {
+    await bru.sleep(waitSeconds * 1000);
+    bru.runner.setNextRequest("05 Poll the verdict");
+  } else {
+    bru.setVar("poll_count", "0");
+  }
+}
+
+tests {
+  test("returns the current state, or 304 when nothing changed", function () {
+    expect([200, 304]).to.include(res.getStatus());
+    if (res.getStatus() === 200) {
+      expect(res.body.data.attributes.status).to.be.a("string");
+    }
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Polls `queued_validation_id` until the validation reaches a terminal state.
+
+  The terminal states are `valid`, `not_found`, `cep_unavailable`, `invalid`, `returned`, `failed` and `error`. `queued` and `processing` are not terminal.
+
+  Honors `Retry-After` and `meta.next_poll_after_seconds`. The script waits that long, sends the last `ETag` in `If-None-Match`, and repeats the request in the runner up to 30 times or until `expires_at`.
+
+  A single send without the runner returns one reading.
+
+  Uses `queued_validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Saves `queued_validation_etag`, `validation_status`.
+
+  Reference: https://docs.veriko.mx/en/v1/validations/get-validation
+  Guide: https://docs.veriko.mx/en/concepts/async-validations
+}

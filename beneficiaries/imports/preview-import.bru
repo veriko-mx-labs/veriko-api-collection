@@ -1,0 +1,52 @@
+meta {
+  name: Preview the import rows
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/beneficiaries/imports/{{import_id}}/preview?page=1&per_page=25
+  body: none
+  auth: inherit
+}
+
+params:query {
+  page: 1
+  per_page: 25
+  ~buckets: valid,correctable
+}
+
+script:post-response {
+  if (res.getStatus() === 200 && res.body.data.length > 0) {
+    bru.setVar("import_row_id", res.body.data[0].id);
+  }
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the rows extracted from the file, paginated and filterable by bucket.
+
+  Account numbers in the preview are not masked.
+
+  Query parameters:
+  - `buckets` (optional): Which rows to include, based on how they came out of the file.
+  - `page` (optional): Page number (1-based).
+  - `per_page` (optional): Rows per page (1-100).
+
+  Uses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Saves `import_row_id`.
+
+  Reference: https://docs.veriko.mx/en/v1/beneficiaries/get-beneficiary-import-preview
+  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+}

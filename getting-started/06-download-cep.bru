@@ -1,0 +1,43 @@
+meta {
+  name: 06 Download the CEP
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base_url}}/validations/{{queued_validation_id}}/cep?format=xml
+  body: none
+  auth: inherit
+}
+
+params:query {
+  format: xml
+}
+
+tests {
+  test("returns the CEP, or 404 cep_not_available when the verdict has none", function () {
+    expect([200, 404]).to.include(res.getStatus());
+    if (res.getStatus() === 200) {
+      expect(res.getHeader("content-type")).to.include("xml");
+    }
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Downloads the official Banxico CEP of the polled validation as XML.
+
+  Responds `404` with `cep_not_available` when the verdict has no CEP, which is the case for example data. Use `format=pdf` for the PDF.
+
+  Query parameters:
+  - `format` (optional): Certificate format: `xml` (default) or `pdf`.
+
+  Uses `queued_validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/validations/download-cep
+  Guide: https://docs.veriko.mx/en/how-to/inspect-validations
+}

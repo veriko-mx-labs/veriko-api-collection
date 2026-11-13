@@ -1,0 +1,36 @@
+meta {
+  name: Archive a beneficiary (destructive)
+  type: http
+  seq: 7
+  tags: [
+    destructive
+  ]
+}
+
+delete {
+  url: {{base_url}}/beneficiaries/{{beneficiary_id}}
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 204", function () {
+    expect(res.getStatus()).to.equal(204);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Archives a beneficiary account.
+
+  Destructive request. The account leaves the active list; validation history stays. Registering the same number again reactivates it.
+
+  Uses `beneficiary_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/beneficiaries/delete-beneficiary
+  Guide: https://docs.veriko.mx/en/how-to/manage-beneficiaries
+}

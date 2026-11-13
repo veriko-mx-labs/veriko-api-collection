@@ -1,0 +1,15 @@
+auth {
+  mode: bearer
+}
+
+auth:bearer {
+  token: {{api_key}}
+}
+
+docs {
+  Requests for every public machine-to-machine operation of the Veriko API.
+
+  Set `VERIKO_API_KEY` in your shell or in a `.env` file at the collection root, then select the `production` environment. Start with the `getting-started` folder.
+
+  Requests that validate a transfer consume quota. Requests marked destructive change or delete data.
+}

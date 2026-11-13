@@ -1,0 +1,47 @@
+meta {
+  name: Get a validation
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{base_url}}/validations/{{validation_id}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  ~If-None-Match: {{validation_etag}}
+}
+
+script:post-response {
+  const etag = res.getHeader("etag");
+  if (etag) {
+    bru.setVar("validation_etag", etag);
+  }
+}
+
+tests {
+  test("returns the validation", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.body.data.attributes.status).to.be.a("string");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the full record of a validation: verdict, normalized data and retry state.
+
+  While the state is `queued` or `processing`, `Retry-After` and `meta.next_poll_after_seconds` say when to poll again. Enable `If-None-Match` to get `304` when nothing changed.
+
+  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Saves `validation_etag`.
+
+  Reference: https://docs.veriko.mx/en/v1/validations/get-validation
+  Guide: https://docs.veriko.mx/en/concepts/async-validations
+}

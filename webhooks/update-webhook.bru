@@ -1,0 +1,43 @@
+meta {
+  name: Update a webhook endpoint (destructive)
+  type: http
+  seq: 3
+  tags: [
+    destructive
+  ]
+}
+
+put {
+  url: {{base_url}}/webhooks/{{webhook_id}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "description": "veriko-api-collection example (updated)",
+    "status": "active"
+  }
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Updates the URL, the events or the status of an endpoint.
+
+  Destructive request. Only the fields you send change. The signing secret stays the same.
+
+  Uses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/webhooks/update-webhook
+  Guide: https://docs.veriko.mx/en/how-to/set-up-webhooks
+}

@@ -1,0 +1,38 @@
+meta {
+  name: Confirm the import (destructive)
+  type: http
+  seq: 7
+  tags: [
+    destructive
+  ]
+}
+
+post {
+  url: {{base_url}}/beneficiaries/imports/{{import_id}}/commit
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 202", function () {
+    expect(res.getStatus()).to.equal(202);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Confirms the import job and saves its valid rows as beneficiaries.
+
+  Destructive request. Creates beneficiaries. Archive them one by one with `DELETE /v1/beneficiaries/{id}` to undo it.
+
+  The commit is asynchronous: poll the import status until `completed` or `failed`.
+
+  Uses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+
+  Reference: https://docs.veriko.mx/en/v1/beneficiaries/commit-beneficiary-import
+  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+}

@@ -1,0 +1,29 @@
+meta {
+  name: Get the overview
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/insights/overview
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Returns the validation metrics of the account: totals, success rate, latency and verdict distribution.
+
+  Reference: https://docs.veriko.mx/en/v1/insights/get-user-insights-overview
+  Guide: https://docs.veriko.mx/en/how-to/analyze-insights
+}

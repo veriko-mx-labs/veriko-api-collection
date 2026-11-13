@@ -1,0 +1,58 @@
+meta {
+  name: Export deliveries of all endpoints
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{base_url}}/webhooks/deliveries/export?format=csv
+  body: none
+  auth: inherit
+}
+
+params:query {
+  format: csv
+  ~endpoint_id: {{webhook_id}}
+  ~status: success
+  ~event_type: validation.completed
+  ~q: validation.completed
+  ~validation_id: {{validation_id}}
+  ~response_status: 2xx
+  ~from: 2026-04-01
+  ~to: 2026-04-30
+  ~min_attempt: 2
+  ~min_response_time_ms: 1000
+  ~limit: 1
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Downloads the delivery history of every endpoint as CSV or XLSX.
+
+  Query parameters:
+  - `endpoint_id` (optional): Filter, unique identifier of the webhook endpoint (UUID v4).
+  - `status` (optional): Delivery state.
+  - `event_type` (optional): Type of event that produced the delivery.
+  - `q` (optional): Searches the delivery id, the endpoint's id, URL and description, the event type, the validation id and the response's HTTP code.
+  - `validation_id` (optional): Only the deliveries of this validation (UUID v4).
+  - `response_status` (optional): HTTP code the receiver answered with, comma-separated.
+  - `from` (optional): Deliveries created from this moment on, inclusive.
+  - `to` (optional): Deliveries created up to this moment, inclusive.
+  - `min_attempt` (optional): Only deliveries whose attempt number is at least this.
+  - `min_response_time_ms` (optional): Only deliveries whose receiver took at least this many milliseconds to answer.
+  - `format` (optional): Output format.
+  - `limit` (optional): Trims the number of rows in the file.
+
+  Reference: https://docs.veriko.mx/en/v1/webhooks/export-all-deliveries
+  Guide: https://docs.veriko.mx/en/concepts/webhooks-architecture
+}

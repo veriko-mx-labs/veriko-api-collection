@@ -1,0 +1,81 @@
+meta {
+  name: 01 Validate by fields
+  type: http
+  seq: 1
+  tags: [
+    consumes-quota
+  ]
+}
+
+post {
+  url: {{base_url}}/validate
+  body: json
+  auth: inherit
+}
+
+params:query {
+  ~async: 1
+}
+
+headers {
+  Idempotency-Key: {{$randomUUID}}
+}
+
+body:json {
+  {
+    "send_date": "2025-03-15",
+    "amount": 15000.5,
+    "tracking_key": "MXBA20250315001234",
+    "numeric_reference": "1234567",
+    "sender_bank": "BANCO NACIONAL DE MEXICO",
+    "receiver_bank": "BBVA MEXICO",
+    "beneficiary_account": "012180004412345678",
+    "client_ref": "collection-example"
+  }
+}
+
+script:post-response {
+  if (res.getStatus() === 200) {
+    bru.setVar("validation_id", res.body.data.id);
+  } else if (res.getStatus() === 202) {
+    // sync_deadline: Banxico took longer than 45 seconds. Poll the validation.
+    bru.setVar("validation_id", res.body.data.id);
+    bru.setVar("queued_validation_id", res.body.data.id);
+    bru.setVar("queued_validation_etag", res.getHeader("etag") || "");
+    bru.setVar("poll_count", "0");
+  }
+}
+
+tests {
+  test("returns a verdict, or hands the validation off with 202 sync_deadline", function () {
+    expect([200, 202]).to.include(res.getStatus());
+    if (res.getStatus() === 200) {
+      expect(res.body.data.attributes.status).to.be.a("string");
+    } else if (res.getStatus() === 202) {
+      expect(res.body.meta.async_reason).to.equal("sync_deadline");
+    }
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Validates a SPEI transfer from its fields and returns the verdict in the same response.
+
+  Consumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.
+
+  A `202` response with `meta.async_reason: sync_deadline` means Banxico took longer than 45 seconds. The validation continues in the background; continue with step 05.
+
+  The body holds example data. A transfer that does not exist returns `not_found`.
+
+  Query parameters:
+  - `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.
+
+  Saves `validation_id`, `queued_validation_id` (on 202).
+
+  Reference: https://docs.veriko.mx/en/v1/validations/validate-direct
+  Guide: https://docs.veriko.mx/en/how-to/validate-spei
+}

@@ -1,0 +1,40 @@
+meta {
+  name: Get the monthly statement
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base_url}}/finance/statement?month=2026-04&format=pdf
+  body: none
+  auth: inherit
+}
+
+params:query {
+  month: 2026-04
+  format: pdf
+  ~user_id: 00000000-0000-4000-8000-000000000000
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Generates the monthly statement as PDF, XLSX, CSV or HTML.
+
+  Query parameters:
+  - `month` (required): Statement month in `YYYY-MM` format.
+  - `format` (optional): Requested file format for the download.
+  - `user_id` (optional): Administrators only, UUID of the user to query.
+
+  Reference: https://docs.veriko.mx/en/v1/finance/get-finance-statement
+  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+}

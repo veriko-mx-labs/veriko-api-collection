@@ -1,0 +1,47 @@
+meta {
+  name: Create a beneficiary
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/beneficiaries
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "account_number": "012180004412345678",
+    "label": "Example supplier"
+  }
+}
+
+script:post-response {
+  if ([200, 201].includes(res.getStatus())) {
+    bru.setVar("beneficiary_id", res.body.data.id);
+  }
+}
+
+tests {
+  test("registers the beneficiary", function () {
+    expect([200, 201]).to.include(res.getStatus());
+    expect(res.body.data.id).to.be.a("string");
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Registers a beneficiary account. The type is detected from the length of the number.
+
+  A phone number (10 digits) needs `bank_code`. Registering an archived account reactivates it and responds `200`.
+
+  Saves `beneficiary_id`.
+
+  Reference: https://docs.veriko.mx/en/v1/beneficiaries/create-beneficiary
+  Guide: https://docs.veriko.mx/en/how-to/manage-beneficiaries
+}

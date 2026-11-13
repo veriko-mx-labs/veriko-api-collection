@@ -1,0 +1,40 @@
+meta {
+  name: Validate an account structure
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/beneficiaries/validate-account?account=012180004412345678
+  body: none
+  auth: inherit
+}
+
+params:query {
+  account: 012180004412345678
+  ~type: clabe
+}
+
+tests {
+  test("responds with 200", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  Checks the structure of a CLABE, card or phone number, including the check digit, and resolves the bank.
+
+  A malformed number is a result (`checksum_valid=false`), not a `422`. It does not consume quota.
+
+  Query parameters:
+  - `account` (required): Account digits (complete or partial).
+  - `type` (optional): Forces the input interpretation instead of auto-detecting by length.
+
+  Reference: https://docs.veriko.mx/en/v1/beneficiaries/validate-account
+  Guide: https://docs.veriko.mx/en/how-to/manage-beneficiaries
+}
