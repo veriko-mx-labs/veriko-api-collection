@@ -1,5 +1,5 @@
 meta {
-  name: Get my subscription
+  name: Consultar mi suscripción
   type: http
   seq: 1
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,8 +22,8 @@ settings {
 }
 
 docs {
-  Returns the active subscription of the account. Without one, it returns the default plan.
+  Devuelve la suscripción activa de la cuenta. Si no tiene una, devuelve el plan predeterminado.
 
-  Reference: https://docs.veriko.mx/en/v1/billing/billing-get-subscription
-  Guide: https://docs.veriko.mx/en/how-to/manage-my-subscription
+  Referencia: https://docs.veriko.mx/es/v1/billing/billing-get-subscription
+  Guía: https://docs.veriko.mx/es/how-to/manage-my-subscription
 }

@@ -1,5 +1,5 @@
 meta {
-  name: List deliveries of an endpoint
+  name: Listar las entregas de un endpoint
   type: http
   seq: 5
 }
@@ -16,7 +16,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -27,14 +27,14 @@ settings {
 }
 
 docs {
-  Lists the delivery attempts of one endpoint, newest first.
+  Lista los intentos de entrega de un endpoint, del más reciente al más antiguo.
 
-  Query parameters:
-  - `page` (optional): Page requested, starting at 1.
-  - `per_page` (optional): How many deliveries each page carries.
+  Parámetros de consulta:
+  - `page` (opcional): Página que se pide, empezando en 1.
+  - `per_page` (opcional): Cuántas entregas trae cada página.
 
-  Uses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `webhook_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/webhooks/list-webhook-deliveries
-  Guide: https://docs.veriko.mx/en/concepts/webhooks-architecture
+  Referencia: https://docs.veriko.mx/es/v1/webhooks/list-webhook-deliveries
+  Guía: https://docs.veriko.mx/es/concepts/webhooks-architecture
 }

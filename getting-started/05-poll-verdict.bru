@@ -1,5 +1,5 @@
 meta {
-  name: 05 Poll the verdict
+  name: 05 Sondear el veredicto
   type: http
   seq: 5
 }
@@ -30,23 +30,23 @@ script:post-response {
     if (TERMINAL.includes(attributes.status)) {
       done = true;
     } else if (attributes.expires_at && Date.now() > Date.parse(attributes.expires_at)) {
-      done = true; // the validation expired (ttl_expired); stop polling
+      done = true; // la validación venció (ttl_expired); deja de sondear
     }
   } else if (res.getStatus() !== 304) {
-    done = true; // 404, 422 and the rest do not change by polling
+    done = true; // 404, 422 y el resto no cambian al sondear
   }
   const polls = Number(bru.getVar("poll_count") || 0) + 1;
   bru.setVar("poll_count", String(polls));
   if (!done && polls < MAX_POLLS) {
     await bru.sleep(waitSeconds * 1000);
-    bru.runner.setNextRequest("05 Poll the verdict");
+    bru.runner.setNextRequest("05 Sondear el veredicto");
   } else {
     bru.setVar("poll_count", "0");
   }
 }
 
 tests {
-  test("returns the current state, or 304 when nothing changed", function () {
+  test("devuelve el estado actual, o 304 si nada cambió", function () {
     expect([200, 304]).to.include(res.getStatus());
     if (res.getStatus() === 200) {
       expect(res.body.data.attributes.status).to.be.a("string");
@@ -60,18 +60,18 @@ settings {
 }
 
 docs {
-  Polls `queued_validation_id` until the validation reaches a terminal state.
+  Sondea `queued_validation_id` hasta que la validación llegue a un estado terminal.
 
-  The terminal states are `valid`, `not_found`, `cep_unavailable`, `invalid`, `returned`, `failed` and `error`. `queued` and `processing` are not terminal.
+  Los estados terminales son `valid`, `not_found`, `cep_unavailable`, `invalid`, `returned`, `failed` y `error`. `queued` y `processing` no son terminales.
 
-  Honors `Retry-After` and `meta.next_poll_after_seconds`. The script waits that long, sends the last `ETag` in `If-None-Match`, and repeats the request in the runner up to 30 times or until `expires_at`.
+  Respeta `Retry-After` y `meta.next_poll_after_seconds`. El script espera ese tiempo, envía el último `ETag` en `If-None-Match` y repite la petición en el ejecutor hasta 30 veces o hasta `expires_at`.
 
-  A single send without the runner returns one reading.
+  Un envío suelto, sin el ejecutor, devuelve una sola lectura.
 
-  Uses `queued_validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `queued_validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Saves `queued_validation_etag`, `validation_status`.
+  Guarda `queued_validation_etag` y `validation_status`.
 
-  Reference: https://docs.veriko.mx/en/v1/validations/get-validation
-  Guide: https://docs.veriko.mx/en/concepts/async-validations
+  Referencia: https://docs.veriko.mx/es/v1/validations/get-validation
+  Guía: https://docs.veriko.mx/es/concepts/async-validations
 }

@@ -1,5 +1,5 @@
 meta {
-  name: Execute the permanent deletion (destructive)
+  name: Ejecutar la eliminación permanente (destructiva)
   type: http
   seq: 21
   tags: [
@@ -20,7 +20,7 @@ body:json {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -31,12 +31,12 @@ settings {
 }
 
 docs {
-  Permanently deletes the content of a validation with the token from the prepare step.
+  Borra de forma permanente el contenido de una validación con el token del paso de preparación.
 
-  Destructive request. Deletes the receipt, the CEP and the stored data of the validation. It cannot be undone.
+  Petición destructiva. Borra el comprobante, el CEP y los datos guardados de la validación. No se puede deshacer.
 
-  Uses `validation_id`, `purge_token`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `validation_id` y `purge_token`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define las variables en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/validations/execute-validation-purge
-  Guide: https://docs.veriko.mx/en/how-to/purge-a-validation
+  Referencia: https://docs.veriko.mx/es/v1/validations/execute-validation-purge
+  Guía: https://docs.veriko.mx/es/how-to/purge-a-validation
 }

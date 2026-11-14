@@ -1,5 +1,5 @@
 meta {
-  name: Look up the bank of a card
+  name: Buscar el banco de una tarjeta
   type: http
   seq: 2
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,8 +22,8 @@ settings {
 }
 
 docs {
-  Resolves the issuing bank of a card from its BIN: 6 to 16 digits, of which the first 6 to 8 are used.
+  Resuelve el banco emisor de una tarjeta a partir de su BIN: de 6 a 16 dígitos, de los que se usan los primeros 6 a 8.
 
-  Reference: https://docs.veriko.mx/en/v1/public/lookup-bin
-  Guide: https://docs.veriko.mx/en/card-lookup
+  Referencia: https://docs.veriko.mx/es/v1/public/lookup-bin
+  Guía: https://docs.veriko.mx/es/card-lookup
 }

@@ -1,5 +1,5 @@
 meta {
-  name: Get the usage heatmap
+  name: Consultar el mapa de calor del uso
   type: http
   seq: 6
 }
@@ -15,7 +15,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -26,11 +26,11 @@ settings {
 }
 
 docs {
-  Returns the validations grouped by day of the week and hour of the day.
+  Devuelve las validaciones agrupadas por día de la semana y hora del día.
 
-  Query parameters:
-  - `days` (optional): Number of days to include in the heatmap.
+  Parámetros de consulta:
+  - `days` (opcional): Número de días que incluye el mapa de calor.
 
-  Reference: https://docs.veriko.mx/en/v1/usage/get-usage-heatmap
-  Guide: https://docs.veriko.mx/en/how-to/monitor-usage
+  Referencia: https://docs.veriko.mx/es/v1/usage/get-usage-heatmap
+  Guía: https://docs.veriko.mx/es/how-to/monitor-usage
 }

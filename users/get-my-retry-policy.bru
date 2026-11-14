@@ -1,5 +1,5 @@
 meta {
-  name: Get my default retry policy
+  name: Consultar mi política de reintentos
   type: http
   seq: 2
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,8 +22,8 @@ settings {
 }
 
 docs {
-  Returns the retry policy that applies to every validation without its own `retry_policy`.
+  Devuelve la política de reintentos que aplica a cada validación que no trae su propio `retry_policy`.
 
-  Reference: https://docs.veriko.mx/en/v1/users/get-my-retry-policy
-  Guide: https://docs.veriko.mx/en/how-to/configure-retry-policy
+  Referencia: https://docs.veriko.mx/es/v1/users/get-my-retry-policy
+  Guía: https://docs.veriko.mx/es/how-to/configure-retry-policy
 }

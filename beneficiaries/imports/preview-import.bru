@@ -1,5 +1,5 @@
 meta {
-  name: Preview the import rows
+  name: Ver las filas de la importación
   type: http
   seq: 4
 }
@@ -23,7 +23,7 @@ script:post-response {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -34,19 +34,19 @@ settings {
 }
 
 docs {
-  Returns the rows extracted from the file, paginated and filterable by bucket.
+  Devuelve las filas que se extrajeron del archivo, paginadas y filtrables por grupo.
 
-  Account numbers in the preview are not masked.
+  Los números de cuenta de la vista previa no van enmascarados.
 
-  Query parameters:
-  - `buckets` (optional): Which rows to include, based on how they came out of the file.
-  - `page` (optional): Page number (1-based).
-  - `per_page` (optional): Rows per page (1-100).
+  Parámetros de consulta:
+  - `buckets` (opcional): Qué filas incluir, según cómo salieron al leer el archivo.
+  - `page` (opcional): Número de página, empezando en 1.
+  - `per_page` (opcional): Filas por página, de 1 a 100.
 
-  Uses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `import_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Saves `import_row_id`.
+  Guarda `import_row_id`.
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/get-beneficiary-import-preview
-  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/get-beneficiary-import-preview
+  Guía: https://docs.veriko.mx/es/how-to/beneficiary-import
 }

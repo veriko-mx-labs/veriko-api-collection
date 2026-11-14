@@ -199,8 +199,8 @@ for (const request of requests) {
 
   // Docs.
   if (!request.docs.trim()) fail(request, 'no docs block');
-  else if (!/https:\/\/docs\.veriko\.mx\/en\/\S+/.test(request.docs))
-    fail(request, 'docs do not link to docs.veriko.mx/en');
+  else if (!/https:\/\/docs\.veriko\.mx\/es\/\S+/.test(request.docs))
+    fail(request, 'docs do not link to docs.veriko.mx/es');
 
   // Destructive and quota markers.
   const destructive =
@@ -209,17 +209,17 @@ for (const request of requests) {
   if (destructive) {
     if (!request.tags.includes('destructive'))
       fail(request, 'destructive request without the `destructive` tag');
-    if (!/\(destructive\)/.test(request.name))
-      fail(request, 'destructive request without "(destructive)" in its name');
-    if (!/Destructive request\./.test(request.docs))
-      fail(request, 'destructive request without a "Destructive request." warning in docs');
+    if (!/\(destructiva\)/.test(request.name))
+      fail(request, 'destructive request without "(destructiva)" in its name');
+    if (!/Petición destructiva\./.test(request.docs))
+      fail(request, 'destructive request without a "Petición destructiva." warning in docs');
   } else if (request.tags.includes('destructive'))
     fail(request, 'tagged destructive but the operation only reads or creates');
   if (QUOTA_OPERATIONS.has(operation.operationId)) {
     if (!request.tags.includes('consumes-quota'))
       fail(request, 'quota-consuming request without the `consumes-quota` tag');
-    if (!/Consumes quota\./.test(request.docs))
-      fail(request, 'quota-consuming request without a "Consumes quota." note in docs');
+    if (!/Consume cuota\./.test(request.docs))
+      fail(request, 'quota-consuming request without a "Consume cuota." note in docs');
   }
 
   // Variables.

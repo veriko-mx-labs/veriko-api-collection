@@ -1,5 +1,5 @@
 meta {
-  name: Export beneficiaries
+  name: Exportar beneficiarios
   type: http
   seq: 6
 }
@@ -17,7 +17,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -28,15 +28,15 @@ settings {
 }
 
 docs {
-  Downloads the beneficiaries as CSV or XLSX, up to 100,000 rows.
+  Descarga los beneficiarios en CSV o XLSX, hasta 100,000 filas.
 
-  Account numbers are masked, except the CLABE.
+  Los números de cuenta salen enmascarados, salvo la CLABE.
 
-  Query parameters:
-  - `with_archived` (optional): Archived filter: empty or omitted = all; `0` = active only; `1` = archived only.
-  - `format` (optional): Output format.
-  - `limit` (optional): Trims the number of rows in the file.
+  Parámetros de consulta:
+  - `with_archived` (opcional): Filtro de archivados: vacío u omitido = todas; `0` = sólo activas; `1` = sólo archivadas.
+  - `format` (opcional): Formato del archivo.
+  - `limit` (opcional): Recorta el número de filas del archivo.
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/export-beneficiaries
-  Guide: https://docs.veriko.mx/en/how-to/manage-beneficiaries
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/export-beneficiaries
+  Guía: https://docs.veriko.mx/es/how-to/manage-beneficiaries
 }

@@ -1,5 +1,5 @@
 meta {
-  name: Get the overview
+  name: Consultar el panorama general
   type: http
   seq: 1
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,8 +22,8 @@ settings {
 }
 
 docs {
-  Returns the validation metrics of the account: totals, success rate, latency and verdict distribution.
+  Devuelve las métricas de validación de la cuenta: totales, tasa de éxito, latencia y distribución de veredictos.
 
-  Reference: https://docs.veriko.mx/en/v1/insights/get-user-insights-overview
-  Guide: https://docs.veriko.mx/en/how-to/analyze-insights
+  Referencia: https://docs.veriko.mx/es/v1/insights/get-user-insights-overview
+  Guía: https://docs.veriko.mx/es/how-to/analyze-insights
 }

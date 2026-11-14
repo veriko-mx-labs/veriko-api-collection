@@ -1,5 +1,5 @@
 meta {
-  name: List webhook endpoints
+  name: Listar los endpoints de webhook
   type: http
   seq: 1
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,8 +22,8 @@ settings {
 }
 
 docs {
-  Lists the registered endpoints with their status and subscribed events. The secret is not included.
+  Lista los endpoints registrados con su estado y los eventos a los que se suscriben. No incluye el secreto.
 
-  Reference: https://docs.veriko.mx/en/v1/webhooks/list-webhooks
-  Guide: https://docs.veriko.mx/en/how-to/set-up-webhooks
+  Referencia: https://docs.veriko.mx/es/v1/webhooks/list-webhooks
+  Guía: https://docs.veriko.mx/es/how-to/set-up-webhooks
 }

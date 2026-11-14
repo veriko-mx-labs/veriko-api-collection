@@ -1,5 +1,5 @@
 meta {
-  name: Get the receipt image
+  name: Consultar la imagen del comprobante
   type: http
   seq: 13
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,12 +22,12 @@ settings {
 }
 
 docs {
-  Returns the receipt kept for an OCR validation.
+  Devuelve el comprobante que se guardó de una validación por OCR.
 
-  Responds `404 image_not_available` without an image, and `410` when the validation was created with `retain_image=false`.
+  Responde `404 image_not_available` si no hay imagen y `410` cuando la validación se creó con `retain_image=false`.
 
-  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/validations/get-validation-image
-  Guide: https://docs.veriko.mx/en/how-to/inspect-validations
+  Referencia: https://docs.veriko.mx/es/v1/validations/get-validation-image
+  Guía: https://docs.veriko.mx/es/how-to/inspect-validations
 }

@@ -1,21 +1,21 @@
-# Contributing
+# Cómo contribuir
 
-Issues and pull requests are welcome.
+Los issues y los pull requests son bienvenidos.
 
-## Report a bug or request a change
+## Reportar un error o pedir un cambio
 
-Open an issue with the [bug report](https://github.com/veriko-mx-labs/veriko-api-collection/issues/new?template=bug_report.yml) or [feature request](https://github.com/veriko-mx-labs/veriko-api-collection/issues/new?template=feature_request.yml) form. Search the open issues first.
+Abre un issue con el formulario de [reporte de error](https://github.com/veriko-mx-labs/veriko-api-collection/issues/new?template=bug_report.yml) o de [solicitud de mejora](https://github.com/veriko-mx-labs/veriko-api-collection/issues/new?template=feature_request.yml). Antes, busca entre los issues abiertos.
 
-A bug report needs the versions you use, the steps that reproduce it and, when the API answered with an error, its `request_id`. Remove API keys, receipts, account numbers and customer data from anything you paste.
+Un reporte de error necesita las versiones que usas, los pasos para reproducirlo y, cuando la API respondió con un error, su `request_id`. Quita las claves de API, los comprobantes, los números de cuenta y los datos de clientes de todo lo que pegues.
 
-Do not open a public issue for a security vulnerability. Follow [SECURITY.md](SECURITY.md).
+No abras un issue público para una vulnerabilidad de seguridad. Sigue [SECURITY.md](SECURITY.md).
 
-## Propose a change
+## Proponer un cambio
 
-1. For anything larger than a fix, open an issue first so the change can be agreed before you write it.
-2. Fork the repository and create a branch from `main`.
-3. Make the change. Add or update the request, and keep `npm test` passing.
-4. Run the checks of this repository:
+1. Si el cambio es más grande que una corrección, abre antes un issue para acordarlo antes de escribirlo.
+2. Haz un fork del repositorio y crea una rama desde `main`.
+3. Haz el cambio. Agrega o actualiza la petición y mantén `npm test` en verde.
+4. Corre las comprobaciones de este repositorio:
 
    ```bash
    npm ci
@@ -23,17 +23,17 @@ Do not open a public issue for a security vulnerability. Follow [SECURITY.md](SE
    npm test
    ```
 
-   `npm run format` fixes the formatting. `npm test` sends no request and does not need an API key. Use Node.js 18 or later.
+   `npm run format` corrige el formato. `npm test` no envía ninguna petición ni necesita una clave de API. Usa Node.js 18 o posterior.
 
-5. Update README.md and CHANGELOG.md when the behavior that users see changes.
-6. Open a pull request against `main` and fill in the template.
+5. Actualiza README.md y CHANGELOG.md cuando cambie lo que ven quienes usan la colección.
+6. Abre un pull request contra `main` y llena la plantilla.
 
-Write commit messages in English, in the imperative, and keep one change in each commit.
+Escribe los mensajes de commit en español, en imperativo, y deja un solo cambio por commit.
 
-After you change a `.bru` file, run `npm run gen:postman` and commit the regenerated files in `postman/`. `npm run check:postman-fresh` fails when they differ from the `.bru` requests.
+Después de cambiar un archivo `.bru`, corre `npm run gen:postman` y confirma los archivos regenerados de `postman/`. `npm run check:postman-fresh` falla cuando difieren de las peticiones `.bru`.
 
-Keep the text of every request in English, and mark a request that consumes quota with the `consumes-quota` tag and one that changes data with the `destructive` tag.
+Escribe en español el texto de cada petición. Marca con la etiqueta `consumes-quota` la petición que consume cuota y con `destructive` la que modifica datos.
 
-## The API contract
+## El contrato de la API
 
-The API contract is the public spec at <https://docs.veriko.mx/openapi.yaml>. `spec/openapi.yaml` is a copy that a scheduled workflow syncs. Do not edit it by hand. When the API behaves differently from the spec, open an issue.
+El contrato de la API es el spec público en <https://docs.veriko.mx/openapi.yaml>. `spec/openapi.yaml` es una copia que sincroniza un workflow programado. No la edites a mano. Cuando la API se comporte distinto del spec, abre un issue.

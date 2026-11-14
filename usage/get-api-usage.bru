@@ -1,5 +1,5 @@
 meta {
-  name: Get API usage
+  name: Consultar el uso de la API
   type: http
   seq: 1
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,8 +22,8 @@ settings {
 }
 
 docs {
-  Returns the API usage of the account: requests today and this month, quota, recent requests and Banxico status.
+  Devuelve el uso de la API de la cuenta: peticiones de hoy y del mes, cuota, peticiones recientes y estado de Banxico.
 
-  Reference: https://docs.veriko.mx/en/v1/usage/get-api-usage
-  Guide: https://docs.veriko.mx/en/how-to/monitor-usage
+  Referencia: https://docs.veriko.mx/es/v1/usage/get-api-usage
+  Guía: https://docs.veriko.mx/es/how-to/monitor-usage
 }

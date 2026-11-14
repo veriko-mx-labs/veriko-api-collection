@@ -1,5 +1,5 @@
 meta {
-  name: Withdraw a validation (destructive)
+  name: Retirar una validación (destructiva)
   type: http
   seq: 19
   tags: [
@@ -14,7 +14,7 @@ delete {
 }
 
 tests {
-  test("responds with 204", function () {
+  test("responde 204", function () {
     expect(res.getStatus()).to.equal(204);
   });
 }
@@ -25,12 +25,12 @@ settings {
 }
 
 docs {
-  Withdraws a validation from the history with a soft delete.
+  Retira una validación del historial con un borrado lógico.
 
-  Destructive request. The record keeps its result and reappears with `with_deleted=1`. For a permanent deletion use the purge requests.
+  Petición destructiva. El registro conserva su resultado y reaparece con `with_deleted=1`. Para borrarlo de forma permanente usa las peticiones de purga.
 
-  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/validations/delete-validation
-  Guide: https://docs.veriko.mx/en/how-to/inspect-validations
+  Referencia: https://docs.veriko.mx/es/v1/validations/delete-validation
+  Guía: https://docs.veriko.mx/es/how-to/inspect-validations
 }

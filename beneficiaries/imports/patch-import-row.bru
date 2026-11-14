@@ -1,5 +1,5 @@
 meta {
-  name: Edit a preview row (destructive)
+  name: Editar una fila de la vista previa (destructiva)
   type: http
   seq: 5
   tags: [
@@ -15,13 +15,13 @@ patch {
 
 body:json {
   {
-    "parsed_label": "Example supplier",
+    "parsed_label": "Proveedor de ejemplo",
     "parsed_account_type": "clabe"
   }
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -32,12 +32,12 @@ settings {
 }
 
 docs {
-  Corrects a preview row before the import is confirmed.
+  Corrige una fila de la vista previa antes de confirmar la importación.
 
-  Destructive request. Overwrites the fields you send and reprocesses the row.
+  Petición destructiva. Sobrescribe los campos que envíes y vuelve a procesar la fila.
 
-  Uses `import_id`, `import_row_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `import_id` e `import_row_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define las variables en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/patch-beneficiary-import-row
-  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/patch-beneficiary-import-row
+  Guía: https://docs.veriko.mx/es/how-to/beneficiary-import
 }

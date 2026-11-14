@@ -1,5 +1,5 @@
 meta {
-  name: Update a beneficiary (destructive)
+  name: Actualizar un beneficiario (destructiva)
   type: http
   seq: 3
   tags: [
@@ -15,12 +15,12 @@ put {
 
 body:json {
   {
-    "label": "Example supplier (updated)"
+    "label": "Proveedor de ejemplo (actualizado)"
   }
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -31,12 +31,12 @@ settings {
 }
 
 docs {
-  Updates the label, the account number or the bank code of a beneficiary.
+  Actualiza la etiqueta, el número de cuenta o la clave de banco de un beneficiario.
 
-  Destructive request. A new `account_number` replaces the account and derives the bank again.
+  Petición destructiva. Un `account_number` nuevo reemplaza la cuenta y vuelve a derivar el banco.
 
-  Uses `beneficiary_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `beneficiary_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/update-beneficiary
-  Guide: https://docs.veriko.mx/en/how-to/manage-beneficiaries
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/update-beneficiary
+  Guía: https://docs.veriko.mx/es/how-to/manage-beneficiaries
 }

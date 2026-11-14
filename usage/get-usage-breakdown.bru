@@ -1,5 +1,5 @@
 meta {
-  name: Break down usage by operation
+  name: Desglosar el uso por operación
   type: http
   seq: 3
 }
@@ -15,7 +15,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -26,11 +26,11 @@ settings {
 }
 
 docs {
-  Breaks down the usage of a period by billable operation.
+  Desglosa el uso de un periodo por operación facturable.
 
-  Query parameters:
-  - `period` (optional): Period to break down.
+  Parámetros de consulta:
+  - `period` (opcional): Periodo a desglosar.
 
-  Reference: https://docs.veriko.mx/en/v1/usage/get-usage-breakdown
-  Guide: https://docs.veriko.mx/en/how-to/monitor-usage
+  Referencia: https://docs.veriko.mx/es/v1/usage/get-usage-breakdown
+  Guía: https://docs.veriko.mx/es/how-to/monitor-usage
 }

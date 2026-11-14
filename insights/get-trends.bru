@@ -1,5 +1,5 @@
 meta {
-  name: Get the trends
+  name: Consultar las tendencias
   type: http
   seq: 2
 }
@@ -16,7 +16,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -27,12 +27,12 @@ settings {
 }
 
 docs {
-  Returns a time series of the validations of the account.
+  Devuelve una serie de tiempo de las validaciones de la cuenta.
 
-  Query parameters:
-  - `range` (optional): Filter, Time window covered by the series: `24h` (last 24 hours), `7d` (last 7 days), `30d` (last 30 days), or `90d` (last 90 days).
-  - `metric` (optional): Filter, Series to return.
+  Parámetros de consulta:
+  - `range` (opcional): Filtro: ventana de tiempo que cubre la serie: `24h` (últimas 24 horas), `7d` (últimos 7 días), `30d` (últimos 30 días) o `90d` (últimos 90 días).
+  - `metric` (opcional): Filtro: serie que se devuelve.
 
-  Reference: https://docs.veriko.mx/en/v1/insights/get-user-insights-trends
-  Guide: https://docs.veriko.mx/en/how-to/analyze-insights
+  Referencia: https://docs.veriko.mx/es/v1/insights/get-user-insights-trends
+  Guía: https://docs.veriko.mx/es/how-to/analyze-insights
 }

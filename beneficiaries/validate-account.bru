@@ -1,5 +1,5 @@
 meta {
-  name: Validate an account structure
+  name: Validar la estructura de una cuenta
   type: http
   seq: 4
 }
@@ -16,7 +16,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -27,14 +27,14 @@ settings {
 }
 
 docs {
-  Checks the structure of a CLABE, card or phone number, including the check digit, and resolves the bank.
+  Revisa la estructura de una CLABE, una tarjeta o un celular, con su dígito verificador, y resuelve el banco.
 
-  A malformed number is a result (`checksum_valid=false`), not a `422`. It does not consume quota.
+  Un número mal formado es un resultado (`checksum_valid=false`), no un `422`. No consume cuota.
 
-  Query parameters:
-  - `account` (required): Account digits (complete or partial).
-  - `type` (optional): Forces the input interpretation instead of auto-detecting by length.
+  Parámetros de consulta:
+  - `account` (obligatorio): Dígitos de la cuenta (completos o parciales).
+  - `type` (opcional): Fuerza la interpretación del dato en lugar de detectarla por la longitud.
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/validate-account
-  Guide: https://docs.veriko.mx/en/how-to/manage-beneficiaries
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/validate-account
+  Guía: https://docs.veriko.mx/es/how-to/manage-beneficiaries
 }

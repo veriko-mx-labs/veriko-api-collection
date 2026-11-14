@@ -1,5 +1,5 @@
 meta {
-  name: Get the Banxico health time series
+  name: Consultar la serie de salud de Banxico
   type: http
   seq: 2
 }
@@ -16,7 +16,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -27,11 +27,11 @@ settings {
 }
 
 docs {
-  Returns the health history of the Banxico service, bucketed by minute or hour.
+  Devuelve el historial de salud del servicio de Banxico, agrupado por minuto o por hora.
 
-  Query parameters:
-  - `metric` (optional): Filter, Series to return.
-  - `window` (optional): Filter, Window the series covers: `1h`, `8h`, `12h`, `24h` and `7d`.
+  Parámetros de consulta:
+  - `metric` (opcional): Filtro: serie que se devuelve.
+  - `window` (opcional): Filtro: ventana que cubre la serie: `1h`, `8h`, `12h`, `24h` y `7d`.
 
-  Reference: https://docs.veriko.mx/en/v1/banxico-status/banxico-public-timeseries
+  Referencia: https://docs.veriko.mx/es/v1/banxico-status/banxico-public-timeseries
 }

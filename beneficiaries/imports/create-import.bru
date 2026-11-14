@@ -1,5 +1,5 @@
 meta {
-  name: Start an import
+  name: Iniciar una importación
   type: http
   seq: 2
 }
@@ -22,7 +22,7 @@ script:post-response {
 }
 
 tests {
-  test("opens the import job", function () {
+  test("abre el trabajo de importación", function () {
     expect(res.getStatus()).to.equal(202);
     expect(res.body.data.id).to.be.a("string");
   });
@@ -34,12 +34,12 @@ settings {
 }
 
 docs {
-  Uploads a file and opens an import job. Parsing runs in the background.
+  Sube un archivo y abre un trabajo de importación. La lectura del archivo corre en segundo plano.
 
-  Accepts CSV, XLS, XLSX, TXT, JSON or PDF up to 20 MB. This request sends `samples/beneficiaries.csv`.
+  Acepta CSV, XLS, XLSX, TXT, JSON o PDF de hasta 20 MB. Esta petición envía `samples/beneficiaries.csv`.
 
-  Saves `import_id`.
+  Guarda `import_id`.
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/create-beneficiary-import
-  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/create-beneficiary-import
+  Guía: https://docs.veriko.mx/es/how-to/beneficiary-import
 }

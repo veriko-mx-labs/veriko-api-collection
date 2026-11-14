@@ -1,5 +1,5 @@
 meta {
-  name: 13 Delete the webhook endpoint (destructive)
+  name: 13 Eliminar el endpoint de webhook (destructiva)
   type: http
   seq: 13
   tags: [
@@ -14,7 +14,7 @@ delete {
 }
 
 tests {
-  test("responds with 204", function () {
+  test("responde 204", function () {
     expect(res.getStatus()).to.equal(204);
   });
 }
@@ -25,12 +25,12 @@ settings {
 }
 
 docs {
-  Deletes the endpoint registered in step 08.
+  Elimina el endpoint que registraste en el paso 08.
 
-  Destructive request. Deletes the endpoint and its whole delivery history. It cannot be undone.
+  Petición destructiva. Elimina el endpoint y todo su historial de entregas. No se puede deshacer.
 
-  Uses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `webhook_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/webhooks/delete-webhook
-  Guide: https://docs.veriko.mx/en/how-to/set-up-webhooks
+  Referencia: https://docs.veriko.mx/es/v1/webhooks/delete-webhook
+  Guía: https://docs.veriko.mx/es/how-to/set-up-webhooks
 }

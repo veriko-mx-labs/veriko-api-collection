@@ -1,5 +1,5 @@
 meta {
-  name: Validate by fields, queued
+  name: Validar por campos, en cola
   type: http
   seq: 2
   tags: [
@@ -29,7 +29,7 @@ body:json {
     "sender_bank": "BANCO NACIONAL DE MEXICO",
     "receiver_bank": "SCOTIABANK",
     "beneficiary_account": "044180001122334455",
-    "client_ref": "collection-example-async"
+    "client_ref": "coleccion-ejemplo-async"
   }
 }
 
@@ -43,7 +43,7 @@ script:post-response {
 }
 
 tests {
-  test("accepts the validation and returns its identifier", function () {
+  test("acepta la validación y devuelve su identificador", function () {
     expect([202]).to.include(res.getStatus());
     if (res.getStatus() === 202) {
       expect(res.body.data.id).to.be.a("string");
@@ -58,17 +58,17 @@ settings {
 }
 
 docs {
-  Queues the validation of a SPEI transfer and returns `202` at once, without a verdict.
+  Pone en cola la validación de una transferencia SPEI y responde `202` de inmediato, sin veredicto.
 
-  Consumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.
+  Consume cuota. Cada validación aceptada cuenta contra el plan, y un `not_found` se cobra igual que un `valid`.
 
-  Poll `GET /v1/validations/{id}` with `queued_validation_id`, or subscribe to the `validation.*` webhook events.
+  Sondea `GET /v1/validations/{id}` con `queued_validation_id` o suscríbete a los eventos de webhook `validation.*`.
 
-  Query parameters:
-  - `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.
+  Parámetros de consulta:
+  - `async` (opcional): Ponlo en `1` para poner en cola la validación. La respuesta es `202` con el identificador de la validación.
 
-  Saves `validation_id`, `queued_validation_id`, `queued_validation_etag`.
+  Guarda `validation_id`, `queued_validation_id` y `queued_validation_etag`.
 
-  Reference: https://docs.veriko.mx/en/v1/validations/validate-direct
-  Guide: https://docs.veriko.mx/en/how-to/validate-spei
+  Referencia: https://docs.veriko.mx/es/v1/validations/validate-direct
+  Guía: https://docs.veriko.mx/es/how-to/validate-spei
 }

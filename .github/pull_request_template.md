@@ -1,11 +1,11 @@
-## Change
+## Cambio
 
-Describe what changes for the people who use this repository.
+Describe qué cambia para quienes usan este repositorio.
 
-## Checklist
+## Lista de revisión
 
-- [ ] The checks pass: `npm ci`, `npm run format:check`, `npm test`.
-- [ ] The requests and checks cover the change.
-- [ ] README.md and CHANGELOG.md are updated when the behavior changes.
-- [ ] `spec/openapi.yaml` is not edited by hand.
-- [ ] The change contains no API keys and no personal data.
+- [ ] Las comprobaciones pasan: `npm ci`, `npm run format:check`, `npm test`.
+- [ ] Las peticiones y las comprobaciones cubren el cambio.
+- [ ] README.md y CHANGELOG.md están al día cuando cambia el comportamiento.
+- [ ] `spec/openapi.yaml` no se editó a mano.
+- [ ] El cambio no contiene claves de API ni datos personales.

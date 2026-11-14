@@ -1,5 +1,5 @@
 meta {
-  name: Export API usage
+  name: Exportar el uso de la API
   type: http
   seq: 7
 }
@@ -18,7 +18,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -29,14 +29,14 @@ settings {
 }
 
 docs {
-  Downloads the API activity log as CSV or XLSX, up to 100,000 rows.
+  Descarga el registro de actividad de la API en CSV o XLSX, hasta 100,000 filas.
 
-  Query parameters:
-  - `format` (optional): Requested file format for the download.
-  - `limit` (optional): Row cap for the download.
-  - `from` (optional): Start date (inclusive) of the range to export, in ISO 8601 format (YYYY-MM-DD).
-  - `to` (optional): End date (inclusive) of the range to export, in ISO 8601 format (YYYY-MM-DD).
+  Parámetros de consulta:
+  - `format` (opcional): Formato del archivo que se descarga.
+  - `limit` (opcional): Tope de filas de la descarga.
+  - `from` (opcional): Fecha de inicio (inclusive) del rango a exportar, en formato ISO 8601 (YYYY-MM-DD).
+  - `to` (opcional): Fecha de fin (inclusive) del rango a exportar, en formato ISO 8601 (YYYY-MM-DD).
 
-  Reference: https://docs.veriko.mx/en/v1/usage/export-api-usage
-  Guide: https://docs.veriko.mx/en/how-to/monitor-usage
+  Referencia: https://docs.veriko.mx/es/v1/usage/export-api-usage
+  Guía: https://docs.veriko.mx/es/how-to/monitor-usage
 }

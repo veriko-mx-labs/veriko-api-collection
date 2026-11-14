@@ -1,5 +1,5 @@
 meta {
-  name: Get the dashboard summary
+  name: Consultar el resumen del panel
   type: http
   seq: 1
 }
@@ -15,7 +15,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -26,10 +26,10 @@ settings {
 }
 
 docs {
-  Returns the aggregate counters of the account and its most recent validations.
+  Devuelve los contadores agregados de la cuenta y sus validaciones más recientes.
 
-  Query parameters:
-  - `limit` (optional): Filter, Maximum number of recent validations to return.
+  Parámetros de consulta:
+  - `limit` (opcional): Filtro: número máximo de validaciones recientes que se devuelven.
 
-  Reference: https://docs.veriko.mx/en/v1/dashboard/get-dashboard-summary
+  Referencia: https://docs.veriko.mx/es/v1/dashboard/get-dashboard-summary
 }

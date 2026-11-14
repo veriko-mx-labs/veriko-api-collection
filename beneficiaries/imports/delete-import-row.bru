@@ -1,5 +1,5 @@
 meta {
-  name: Remove a preview row (destructive)
+  name: Quitar una fila de la vista previa (destructiva)
   type: http
   seq: 6
   tags: [
@@ -14,7 +14,7 @@ delete {
 }
 
 tests {
-  test("responds with 204", function () {
+  test("responde 204", function () {
     expect(res.getStatus()).to.equal(204);
   });
 }
@@ -25,12 +25,12 @@ settings {
 }
 
 docs {
-  Removes a row from an import job before confirmation.
+  Quita una fila de un trabajo de importación antes de confirmarlo.
 
-  Destructive request. Only jobs in `preview_ready` accept it; other states return `422 job_not_editable`.
+  Petición destructiva. Sólo la aceptan los trabajos en `preview_ready`; en los demás estados responde `422 job_not_editable`.
 
-  Uses `import_id`, `import_row_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `import_id` e `import_row_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define las variables en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/delete-beneficiary-import-row
-  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/delete-beneficiary-import-row
+  Guía: https://docs.veriko.mx/es/how-to/beneficiary-import
 }

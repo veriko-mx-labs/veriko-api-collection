@@ -1,5 +1,5 @@
 meta {
-  name: 08 Register a webhook endpoint
+  name: 08 Registrar un endpoint de webhook
   type: http
   seq: 8
 }
@@ -22,7 +22,7 @@ body:json {
       "validation.retry.resolved",
       "validation.retry.exhausted"
     ],
-    "description": "veriko-api-collection example"
+    "description": "Ejemplo de la colección"
   }
 }
 
@@ -34,7 +34,7 @@ script:post-response {
 }
 
 tests {
-  test("responds with 201", function () {
+  test("responde 201", function () {
     expect(res.getStatus()).to.equal(201);
   });
 }
@@ -45,14 +45,14 @@ settings {
 }
 
 docs {
-  Registers an HTTPS endpoint that receives the subscribed events.
+  Registra un endpoint HTTPS que recibe los eventos a los que te suscribes.
 
-  `url` must resolve to a public address. Set `webhook_receiver_url` in the environment to your own receiver, for example a temporary endpoint from webhook.site.
+  `url` debe resolver a una dirección pública. Define `webhook_receiver_url` en el entorno con tu propio receptor, por ejemplo un endpoint temporal de webhook.site.
 
-  The signing `secret` appears only in this response. The script saves it as `webhook_secret`.
+  El `secret` de firma aparece sólo en esta respuesta. El script lo guarda como `webhook_secret`.
 
-  Saves `webhook_id`, `webhook_secret`.
+  Guarda `webhook_id` y `webhook_secret`.
 
-  Reference: https://docs.veriko.mx/en/v1/webhooks/create-webhook
-  Guide: https://docs.veriko.mx/en/how-to/set-up-webhooks
+  Referencia: https://docs.veriko.mx/es/v1/webhooks/create-webhook
+  Guía: https://docs.veriko.mx/es/how-to/set-up-webhooks
 }

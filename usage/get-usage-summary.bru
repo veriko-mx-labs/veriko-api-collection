@@ -1,5 +1,5 @@
 meta {
-  name: Get the quota summary
+  name: Consultar el resumen de la cuota
   type: http
   seq: 2
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,8 +22,8 @@ settings {
 }
 
 docs {
-  Returns the plan limit, the validations consumed and remaining, and the percentage used.
+  Devuelve el límite del plan, las validaciones consumidas y restantes, y el porcentaje usado.
 
-  Reference: https://docs.veriko.mx/en/v1/usage/get-usage-summary
-  Guide: https://docs.veriko.mx/en/how-to/monitor-usage
+  Referencia: https://docs.veriko.mx/es/v1/usage/get-usage-summary
+  Guía: https://docs.veriko.mx/es/how-to/monitor-usage
 }

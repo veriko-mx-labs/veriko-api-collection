@@ -1,5 +1,5 @@
 meta {
-  name: Get the SPEI calendar
+  name: Consultar el calendario SPEI
   type: http
   seq: 3
 }
@@ -22,7 +22,7 @@ script:post-response {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -33,10 +33,10 @@ settings {
 }
 
 docs {
-  Returns the SPEI non-business days of a year and the official provision they come from.
+  Devuelve los días inhábiles de SPEI de un año y la disposición oficial de la que provienen.
 
-  Saves `calendar_etag`.
+  Guarda `calendar_etag`.
 
-  Reference: https://docs.veriko.mx/en/v1/public/get-spei-calendar
-  Guide: https://docs.veriko.mx/en/concepts/timezone-handling
+  Referencia: https://docs.veriko.mx/es/v1/public/get-spei-calendar
+  Guía: https://docs.veriko.mx/es/concepts/timezone-handling
 }

@@ -1,5 +1,5 @@
 meta {
-  name: Get the plan comparison
+  name: Consultar la comparación de planes
   type: http
   seq: 2
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,8 +22,8 @@ settings {
 }
 
 docs {
-  Returns the plan comparison table as structured data.
+  Devuelve la tabla de comparación de planes como datos estructurados.
 
-  Reference: https://docs.veriko.mx/en/v1/plans/get-public-plan-comparison
-  Guide: https://docs.veriko.mx/en/how-to/show-plans-and-prices
+  Referencia: https://docs.veriko.mx/es/v1/plans/get-public-plan-comparison
+  Guía: https://docs.veriko.mx/es/how-to/show-plans-and-prices
 }

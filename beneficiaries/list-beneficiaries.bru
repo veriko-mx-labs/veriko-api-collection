@@ -1,5 +1,5 @@
 meta {
-  name: List beneficiaries
+  name: Listar beneficiarios
   type: http
   seq: 1
 }
@@ -15,7 +15,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -26,11 +26,11 @@ settings {
 }
 
 docs {
-  Lists the saved beneficiary accounts: CLABE, card and phone (DiMo). The list is not paginated.
+  Lista las cuentas de beneficiarios guardadas: CLABE, tarjeta y celular (DiMo). La lista no va paginada.
 
-  Query parameters:
-  - `with_archived` (optional): Archived filter: empty or omitted = all; `0` = active only; `1` = archived only.
+  Parámetros de consulta:
+  - `with_archived` (opcional): Filtro de archivados: vacío u omitido = todas; `0` = sólo activas; `1` = sólo archivadas.
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/list-beneficiaries
-  Guide: https://docs.veriko.mx/en/how-to/manage-beneficiaries
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/list-beneficiaries
+  Guía: https://docs.veriko.mx/es/how-to/manage-beneficiaries
 }

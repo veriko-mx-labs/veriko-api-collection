@@ -1,5 +1,5 @@
 meta {
-  name: Export deliveries of all endpoints
+  name: Exportar las entregas de todos los endpoints
   type: http
   seq: 8
 }
@@ -26,7 +26,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -37,22 +37,22 @@ settings {
 }
 
 docs {
-  Downloads the delivery history of every endpoint as CSV or XLSX.
+  Descarga el historial de entregas de todos los endpoints en CSV o XLSX.
 
-  Query parameters:
-  - `endpoint_id` (optional): Filter, unique identifier of the webhook endpoint (UUID v4).
-  - `status` (optional): Delivery state.
-  - `event_type` (optional): Type of event that produced the delivery.
-  - `q` (optional): Searches the delivery id, the endpoint's id, URL and description, the event type, the validation id and the response's HTTP code.
-  - `validation_id` (optional): Only the deliveries of this validation (UUID v4).
-  - `response_status` (optional): HTTP code the receiver answered with, comma-separated.
-  - `from` (optional): Deliveries created from this moment on, inclusive.
-  - `to` (optional): Deliveries created up to this moment, inclusive.
-  - `min_attempt` (optional): Only deliveries whose attempt number is at least this.
-  - `min_response_time_ms` (optional): Only deliveries whose receiver took at least this many milliseconds to answer.
-  - `format` (optional): Output format.
-  - `limit` (optional): Trims the number of rows in the file.
+  Parámetros de consulta:
+  - `endpoint_id` (opcional): Filtro: identificador único del endpoint de webhook (UUID v4).
+  - `status` (opcional): Estado de la entrega.
+  - `event_type` (opcional): Tipo de evento que originó la entrega.
+  - `q` (opcional): Busca en el identificador de la entrega, el identificador, la URL y la descripción del endpoint, el tipo de evento, el identificador de la validación y el código HTTP de la respuesta.
+  - `validation_id` (opcional): Sólo las entregas de esta validación (UUID v4).
+  - `response_status` (opcional): Código HTTP con el que respondió el receptor, separados por coma.
+  - `from` (opcional): Entregas creadas a partir de este momento, inclusive.
+  - `to` (opcional): Entregas creadas hasta este momento, inclusive.
+  - `min_attempt` (opcional): Sólo las entregas cuyo número de intento sea al menos este.
+  - `min_response_time_ms` (opcional): Sólo las entregas cuyo receptor tardó al menos estos milisegundos en responder.
+  - `format` (opcional): Formato del archivo.
+  - `limit` (opcional): Recorta el número de filas del archivo.
 
-  Reference: https://docs.veriko.mx/en/v1/webhooks/export-all-deliveries
-  Guide: https://docs.veriko.mx/en/concepts/webhooks-architecture
+  Referencia: https://docs.veriko.mx/es/v1/webhooks/export-all-deliveries
+  Guía: https://docs.veriko.mx/es/concepts/webhooks-architecture
 }

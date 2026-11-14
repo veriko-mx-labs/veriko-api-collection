@@ -1,5 +1,5 @@
 meta {
-  name: Archive a beneficiary (destructive)
+  name: Archivar un beneficiario (destructiva)
   type: http
   seq: 7
   tags: [
@@ -14,7 +14,7 @@ delete {
 }
 
 tests {
-  test("responds with 204", function () {
+  test("responde 204", function () {
     expect(res.getStatus()).to.equal(204);
   });
 }
@@ -25,12 +25,12 @@ settings {
 }
 
 docs {
-  Archives a beneficiary account.
+  Archiva la cuenta de un beneficiario.
 
-  Destructive request. The account leaves the active list; validation history stays. Registering the same number again reactivates it.
+  Petición destructiva. La cuenta sale de la lista activa; el historial de validaciones se conserva. Registrar el mismo número otra vez la reactiva.
 
-  Uses `beneficiary_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `beneficiary_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/delete-beneficiary
-  Guide: https://docs.veriko.mx/en/how-to/manage-beneficiaries
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/delete-beneficiary
+  Guía: https://docs.veriko.mx/es/how-to/manage-beneficiaries
 }

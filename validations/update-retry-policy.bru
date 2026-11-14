@@ -1,5 +1,5 @@
 meta {
-  name: Update the retry policy of a validation (destructive)
+  name: Actualizar la política de reintentos de una validación (destructiva)
   type: http
   seq: 15
   tags: [
@@ -32,7 +32,7 @@ body:json {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -43,12 +43,12 @@ settings {
 }
 
 docs {
-  Activates an automatic retry policy for a validation with a `not_found`, `cep_unavailable` or `error` verdict.
+  Activa una política de reintentos automáticos para una validación con veredicto `not_found`, `cep_unavailable` o `error`.
 
-  Destructive request. Changes the retry cycle of the validation. It is not accepted for validations from a bulk import, already resolved, or older than seven days.
+  Petición destructiva. Cambia el ciclo de reintentos de la validación. No se acepta en validaciones de una importación masiva, ya resueltas o de más de siete días.
 
-  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/validations/update-validation-retry-policy
-  Guide: https://docs.veriko.mx/en/how-to/configure-retry-policy
+  Referencia: https://docs.veriko.mx/es/v1/validations/update-validation-retry-policy
+  Guía: https://docs.veriko.mx/es/how-to/configure-retry-policy
 }

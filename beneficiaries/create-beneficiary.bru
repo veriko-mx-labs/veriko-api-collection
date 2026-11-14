@@ -1,5 +1,5 @@
 meta {
-  name: Create a beneficiary
+  name: Crear un beneficiario
   type: http
   seq: 2
 }
@@ -13,7 +13,7 @@ post {
 body:json {
   {
     "account_number": "012180004412345678",
-    "label": "Example supplier"
+    "label": "Proveedor de ejemplo"
   }
 }
 
@@ -24,7 +24,7 @@ script:post-response {
 }
 
 tests {
-  test("registers the beneficiary", function () {
+  test("registra el beneficiario", function () {
     expect([200, 201]).to.include(res.getStatus());
     expect(res.body.data.id).to.be.a("string");
   });
@@ -36,12 +36,12 @@ settings {
 }
 
 docs {
-  Registers a beneficiary account. The type is detected from the length of the number.
+  Registra la cuenta de un beneficiario. El tipo se detecta por la longitud del número.
 
-  A phone number (10 digits) needs `bank_code`. Registering an archived account reactivates it and responds `200`.
+  Un celular (10 dígitos) necesita `bank_code`. Registrar una cuenta archivada la reactiva y responde `200`.
 
-  Saves `beneficiary_id`.
+  Guarda `beneficiary_id`.
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/create-beneficiary
-  Guide: https://docs.veriko.mx/en/how-to/manage-beneficiaries
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/create-beneficiary
+  Guía: https://docs.veriko.mx/es/how-to/manage-beneficiaries
 }

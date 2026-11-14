@@ -1,5 +1,5 @@
 meta {
-  name: List retry attempts
+  name: Listar los intentos de reintento
   type: http
   seq: 14
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,10 +22,10 @@ settings {
 }
 
 docs {
-  Returns the chronological history of the automatic retries of a validation.
+  Devuelve el historial cronológico de los reintentos automáticos de una validación.
 
-  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/validations/list-validation-retry-attempts
-  Guide: https://docs.veriko.mx/en/concepts/retry-policy
+  Referencia: https://docs.veriko.mx/es/v1/validations/list-validation-retry-attempts
+  Guía: https://docs.veriko.mx/es/concepts/retry-policy
 }

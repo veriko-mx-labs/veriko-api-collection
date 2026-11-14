@@ -159,9 +159,9 @@ const variables = environment.variables.map((variable) => ({
 
 const collection = {
   info: {
-    name: 'Veriko API: SPEI transfer verification against the Banxico CEP',
+    name: 'API de Veriko: verificación de transferencias SPEI contra el CEP de Banxico',
     description:
-      'Requests for every public machine-to-machine operation of the Veriko API, generated from the Bruno collection in this repository. Import the `Veriko production` environment, set `api_key` and start with the Getting started folder. Requests that validate a transfer consume quota. See README.md.',
+      'Peticiones para cada operación pública de máquina a máquina de la API de Veriko, generadas a partir de la colección de Bruno de este repositorio. Importa el entorno `Veriko producción`, define `api_key` y empieza con la carpeta Flujo típico. Las peticiones que validan una transferencia consumen cuota. Consulta el README.md.',
     schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
   },
   auth: {
@@ -183,7 +183,7 @@ const environmentValues = USER_VARIABLES.map((name) => {
   };
 });
 const postmanEnvironment = {
-  name: 'Veriko production',
+  name: 'Veriko producción',
   values: environmentValues,
   _postman_variable_scope: 'environment',
 };

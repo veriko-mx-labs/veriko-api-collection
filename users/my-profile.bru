@@ -1,5 +1,5 @@
 meta {
-  name: Get my profile
+  name: Consultar mi perfil
   type: http
   seq: 1
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,8 +22,8 @@ settings {
 }
 
 docs {
-  Returns the profile, API key prefix, subscription, 2FA state and effective permissions of the authenticated user.
+  Devuelve el perfil, el prefijo de la clave de API, la suscripción, el estado de 2FA y los permisos efectivos del usuario autenticado.
 
-  Reference: https://docs.veriko.mx/en/v1/users/my-profile
-  Guide: https://docs.veriko.mx/en/how-to/inspect-my-account
+  Referencia: https://docs.veriko.mx/es/v1/users/my-profile
+  Guía: https://docs.veriko.mx/es/how-to/inspect-my-account
 }

@@ -1,5 +1,5 @@
 meta {
-  name: Get the monthly statement
+  name: Consultar el estado de cuenta mensual
   type: http
   seq: 6
 }
@@ -17,7 +17,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -28,13 +28,13 @@ settings {
 }
 
 docs {
-  Generates the monthly statement as PDF, XLSX, CSV or HTML.
+  Genera el estado de cuenta mensual en PDF, XLSX, CSV o HTML.
 
-  Query parameters:
-  - `month` (required): Statement month in `YYYY-MM` format.
-  - `format` (optional): Requested file format for the download.
-  - `user_id` (optional): Administrators only, UUID of the user to query.
+  Parámetros de consulta:
+  - `month` (obligatorio): Mes del estado de cuenta en formato `YYYY-MM`.
+  - `format` (opcional): Formato del archivo que se descarga.
+  - `user_id` (opcional): Sólo para administradores: UUID del usuario que se consulta.
 
-  Reference: https://docs.veriko.mx/en/v1/finance/get-finance-statement
-  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+  Referencia: https://docs.veriko.mx/es/v1/finance/get-finance-statement
+  Guía: https://docs.veriko.mx/es/how-to/generate-finance-report
 }

@@ -1,5 +1,5 @@
 meta {
-  name: Summarize by bank
+  name: Resumir por banco
   type: http
   seq: 3
 }
@@ -18,7 +18,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -29,14 +29,14 @@ settings {
 }
 
 docs {
-  Groups the verifications of a month by receiving bank.
+  Agrupa las verificaciones de un mes por banco receptor.
 
-  Query parameters:
-  - `month` (required): Month to report in `YYYY-MM` format.
-  - `format` (optional): Requested file format for the download.
-  - `user_id` (optional): Administrators only, UUID of the user to query.
-  - `limit` (optional): Trims the number of rows when the output is `csv` or `xlsx`.
+  Parámetros de consulta:
+  - `month` (obligatorio): Mes a reportar en formato `YYYY-MM`.
+  - `format` (opcional): Formato del archivo que se descarga.
+  - `user_id` (opcional): Sólo para administradores: UUID del usuario que se consulta.
+  - `limit` (opcional): Recorta el número de filas cuando la salida es `csv` o `xlsx`.
 
-  Reference: https://docs.veriko.mx/en/v1/finance/get-finance-by-bank
-  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+  Referencia: https://docs.veriko.mx/es/v1/finance/get-finance-by-bank
+  Guía: https://docs.veriko.mx/es/how-to/generate-finance-report
 }

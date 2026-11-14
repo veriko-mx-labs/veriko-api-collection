@@ -1,5 +1,5 @@
 meta {
-  name: 07 List validations
+  name: 07 Listar validaciones
   type: http
   seq: 7
 }
@@ -18,7 +18,7 @@ params:query {
   ~from: 2026-04-01
   ~to: 2026-04-30
   ~search: MXBA
-  ~client_ref: collection-example
+  ~client_ref: coleccion-ejemplo
   ~playground: 1
   ~with_deleted: 0
   ~batch_id: 1
@@ -30,7 +30,7 @@ params:query {
 }
 
 tests {
-  test("returns a page of validations", function () {
+  test("devuelve una página de validaciones", function () {
     expect(res.getStatus()).to.equal(200);
     expect(res.body.data).to.be.an("array");
     expect(res.body.meta.pagination.per_page).to.be.at.most(50);
@@ -43,26 +43,26 @@ settings {
 }
 
 docs {
-  Lists the validation history, newest first, with combinable filters.
+  Lista el historial de validaciones, de la más reciente a la más antigua, con filtros que se combinan.
 
-  Query parameters:
-  - `page` (optional): Requested page; values below `1` are adjusted to `1`.
-  - `per_page` (optional): Items per page; adjusted to the `1` to `50` range.
-  - `status` (optional): Lifecycle state.
-  - `type` (optional): Mode: `direct` for manual validation or `ocr` for image-based validation.
-  - `from` (optional): Inclusive start date, applied to the validation creation date.
-  - `to` (optional): Inclusive end date, applied to the validation creation date.
-  - `search` (optional): Case-insensitive text search over the submitted, normalized, and Banxico response data.
-  - `client_ref` (optional): Exact match with the `client_ref` sent when validating.
-  - `playground` (optional): Keeps only playground validations.
-  - `with_deleted` (optional): Scope for withdrawn records: omitted includes active and withdrawn records; `0` keeps active records only and `1`, withdrawn records only.
-  - `batch_id` (optional): Identifier of the import job that generated the validations.
-  - `bank` (optional): SPEI code of the sending or receiving bank in the original request.
-  - `banks` (optional): Comma-separated SPEI codes (up to 50); returns the validations whose sending or receiving bank is any of them.
-  - `amount_min` (optional): Inclusive minimum amount, as a number.
-  - `amount_max` (optional): Inclusive maximum amount, as a number.
-  - `retry_state` (optional): Retry cycle state: `pending`, `resolved`, `exhausted`, or `cancelled`.
+  Parámetros de consulta:
+  - `page` (opcional): Página que se pide; los valores menores que `1` se ajustan a `1`.
+  - `per_page` (opcional): Elementos por página; se ajusta al intervalo de `1` a `50`.
+  - `status` (opcional): Estado del ciclo de vida.
+  - `type` (opcional): Modalidad: `direct` para validación manual u `ocr` para validación por imagen.
+  - `from` (opcional): Fecha inicial, inclusive; se aplica a la fecha de creación de la validación.
+  - `to` (opcional): Fecha final, inclusive; se aplica a la fecha de creación de la validación.
+  - `search` (opcional): Búsqueda de texto, sin distinguir mayúsculas, en los datos enviados, normalizados y de la respuesta de Banxico.
+  - `client_ref` (opcional): Coincidencia exacta con la `client_ref` que enviaste al validar.
+  - `playground` (opcional): Deja sólo las validaciones del Playground.
+  - `with_deleted` (opcional): Alcance de los registros retirados: omitido incluye activos y retirados; `0` deja sólo los activos y `1`, sólo los retirados.
+  - `batch_id` (opcional): Identificador del trabajo de importación que generó las validaciones.
+  - `bank` (opcional): Clave SPEI del banco emisor o receptor de la petición original.
+  - `banks` (opcional): Claves SPEI separadas por coma (hasta 50); devuelve las validaciones cuyo banco emisor o receptor sea cualquiera de ellas.
+  - `amount_min` (opcional): Monto mínimo, inclusive, como número.
+  - `amount_max` (opcional): Monto máximo, inclusive, como número.
+  - `retry_state` (opcional): Estado del ciclo de reintentos: `pending`, `resolved`, `exhausted` o `cancelled`.
 
-  Reference: https://docs.veriko.mx/en/v1/validations/list-validations
-  Guide: https://docs.veriko.mx/en/concepts/pagination
+  Referencia: https://docs.veriko.mx/es/v1/validations/list-validations
+  Guía: https://docs.veriko.mx/es/concepts/pagination
 }

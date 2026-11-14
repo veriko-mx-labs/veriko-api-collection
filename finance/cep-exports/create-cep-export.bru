@@ -1,5 +1,5 @@
 meta {
-  name: Request a CEP export
+  name: Solicitar una exportación de CEP
   type: http
   seq: 1
 }
@@ -28,7 +28,7 @@ script:post-response {
 }
 
 tests {
-  test("queues the export", function () {
+  test("pone en cola la exportación", function () {
     expect(res.getStatus()).to.equal(202);
     expect(res.body.data.id).to.be.a("string");
   });
@@ -40,12 +40,12 @@ settings {
 }
 
 docs {
-  Queues the CEP archive of a date range and returns `202` at once.
+  Pone en cola el archivo de CEP de un rango de fechas y responde `202` de inmediato.
 
-  Sends an `Idempotency-Key`. Poll the export with `cep_export_id`.
+  Envía un `Idempotency-Key`. Sondea la exportación con `cep_export_id`.
 
-  Saves `cep_export_id`.
+  Guarda `cep_export_id`.
 
-  Reference: https://docs.veriko.mx/en/v1/finance/create-finance-cep-export
-  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+  Referencia: https://docs.veriko.mx/es/v1/finance/create-finance-cep-export
+  Guía: https://docs.veriko.mx/es/how-to/generate-finance-report
 }

@@ -1,5 +1,5 @@
 meta {
-  name: Cancel pending retries (destructive)
+  name: Cancelar los reintentos pendientes (destructiva)
   type: http
   seq: 16
   tags: [
@@ -18,7 +18,7 @@ headers {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -29,12 +29,12 @@ settings {
 }
 
 docs {
-  Cancels the active automatic retry cycle of a validation.
+  Cancela el ciclo activo de reintentos automáticos de una validación.
 
-  Destructive request. Ends the retry cycle with `terminal_state: cancelled`. A cycle that is not active returns `422 retry_not_active`.
+  Petición destructiva. Termina el ciclo de reintentos con `terminal_state: cancelled`. Un ciclo que no está activo responde `422 retry_not_active`.
 
-  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/validations/cancel-validation-retries
-  Guide: https://docs.veriko.mx/en/concepts/retry-policy
+  Referencia: https://docs.veriko.mx/es/v1/validations/cancel-validation-retries
+  Guía: https://docs.veriko.mx/es/concepts/retry-policy
 }

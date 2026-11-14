@@ -1,5 +1,5 @@
 meta {
-  name: List SPEI banks
+  name: Listar los bancos SPEI
   type: http
   seq: 1
 }
@@ -22,7 +22,7 @@ script:post-response {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -33,12 +33,12 @@ settings {
 }
 
 docs {
-  Returns the catalog of banks that participate in SPEI, updated weekly from Banxico.
+  Devuelve el catálogo de bancos que participan en SPEI, que se actualiza cada semana desde Banxico.
 
-  Enable `If-None-Match` to get `304` when the catalog did not change.
+  Activa `If-None-Match` para recibir `304` cuando el catálogo no cambió.
 
-  Saves `banks_etag`.
+  Guarda `banks_etag`.
 
-  Reference: https://docs.veriko.mx/en/v1/public/list-banks
-  Guide: https://docs.veriko.mx/en/bank-directory
+  Referencia: https://docs.veriko.mx/es/v1/public/list-banks
+  Guía: https://docs.veriko.mx/es/bank-directory
 }

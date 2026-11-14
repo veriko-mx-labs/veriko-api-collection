@@ -1,5 +1,5 @@
 meta {
-  name: List CEP exports
+  name: Listar exportaciones de CEP
   type: http
   seq: 2
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,8 +22,8 @@ settings {
 }
 
 docs {
-  Lists the last 20 CEP exports of the caller, newest first.
+  Lista las últimas 20 exportaciones de CEP de quien consulta, de la más reciente a la más antigua.
 
-  Reference: https://docs.veriko.mx/en/v1/finance/list-finance-cep-exports
-  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+  Referencia: https://docs.veriko.mx/es/v1/finance/list-finance-cep-exports
+  Guía: https://docs.veriko.mx/es/how-to/generate-finance-report
 }

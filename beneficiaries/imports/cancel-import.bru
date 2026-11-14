@@ -1,5 +1,5 @@
 meta {
-  name: Cancel an import (destructive)
+  name: Cancelar una importación (destructiva)
   type: http
   seq: 8
   tags: [
@@ -14,7 +14,7 @@ delete {
 }
 
 tests {
-  test("responds with 204", function () {
+  test("responde 204", function () {
     expect(res.getStatus()).to.equal(204);
   });
 }
@@ -25,12 +25,12 @@ settings {
 }
 
 docs {
-  Cancels an import job that was not confirmed yet.
+  Cancela un trabajo de importación que aún no se confirmó.
 
-  Destructive request. Applies to `pending`, `parsing` and `preview_ready` jobs. Jobs in a terminal state return `404`.
+  Petición destructiva. Aplica a los trabajos en `pending`, `parsing` y `preview_ready`. Los que están en un estado terminal responden `404`.
 
-  Uses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `import_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/cancel-beneficiary-import
-  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/cancel-beneficiary-import
+  Guía: https://docs.veriko.mx/es/how-to/beneficiary-import
 }

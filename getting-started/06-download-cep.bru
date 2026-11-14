@@ -1,5 +1,5 @@
 meta {
-  name: 06 Download the CEP
+  name: 06 Descargar el CEP
   type: http
   seq: 6
 }
@@ -15,7 +15,7 @@ params:query {
 }
 
 tests {
-  test("returns the CEP, or 404 cep_not_available when the verdict has none", function () {
+  test("devuelve el CEP, o 404 cep_not_available si el veredicto no tiene", function () {
     expect([200, 404]).to.include(res.getStatus());
     if (res.getStatus() === 200) {
       expect(res.getHeader("content-type")).to.include("xml");
@@ -29,15 +29,15 @@ settings {
 }
 
 docs {
-  Downloads the official Banxico CEP of the polled validation as XML.
+  Descarga como XML el CEP oficial de Banxico de la validación que sondeaste.
 
-  Responds `404` with `cep_not_available` when the verdict has no CEP, which is the case for example data. Use `format=pdf` for the PDF.
+  Responde `404` con `cep_not_available` cuando el veredicto no tiene CEP, como pasa con los datos de ejemplo. Usa `format=pdf` para el PDF.
 
-  Query parameters:
-  - `format` (optional): Certificate format: `xml` (default) or `pdf`.
+  Parámetros de consulta:
+  - `format` (opcional): Formato del certificado: `xml` (predeterminado) o `pdf`.
 
-  Uses `queued_validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `queued_validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/validations/download-cep
-  Guide: https://docs.veriko.mx/en/how-to/inspect-validations
+  Referencia: https://docs.veriko.mx/es/v1/validations/download-cep
+  Guía: https://docs.veriko.mx/es/how-to/inspect-validations
 }

@@ -1,5 +1,5 @@
 meta {
-  name: Download CEPs as a ZIP
+  name: Descargar CEP en un ZIP
   type: http
   seq: 7
 }
@@ -17,7 +17,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -28,15 +28,15 @@ settings {
 }
 
 docs {
-  Downloads every available CEP of a date range as one ZIP.
+  Descarga en un solo ZIP todos los CEP disponibles de un rango de fechas.
 
-  Use the export requests for large ranges.
+  Para rangos grandes usa las peticiones de exportación.
 
-  Query parameters:
-  - `from` (required): Start date (inclusive, `YYYY-MM-DD`).
-  - `to` (required): End date (inclusive, `YYYY-MM-DD`).
-  - `user_id` (optional): Administrators only, UUID of the user to query.
+  Parámetros de consulta:
+  - `from` (obligatorio): Fecha de inicio (inclusive, `YYYY-MM-DD`).
+  - `to` (obligatorio): Fecha de fin (inclusive, `YYYY-MM-DD`).
+  - `user_id` (opcional): Sólo para administradores: UUID del usuario que se consulta.
 
-  Reference: https://docs.veriko.mx/en/v1/finance/get-finance-ceps
-  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+  Referencia: https://docs.veriko.mx/es/v1/finance/get-finance-ceps
+  Guía: https://docs.veriko.mx/es/how-to/generate-finance-report
 }

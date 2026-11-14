@@ -1,5 +1,5 @@
 meta {
-  name: Look up an account in your beneficiaries
+  name: Buscar una cuenta en tus beneficiarios
   type: http
   seq: 5
 }
@@ -15,7 +15,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -26,13 +26,13 @@ settings {
 }
 
 docs {
-  Looks up an exact account number in the beneficiaries of the account.
+  Busca un número de cuenta exacto entre los beneficiarios de la cuenta.
 
-  Responds `404` when the number is not in your list.
+  Responde `404` cuando el número no está en tu lista.
 
-  Query parameters:
-  - `account` (required): Full account number: 10 digits (phone), 16 (card) or 18 (CLABE).
+  Parámetros de consulta:
+  - `account` (obligatorio): Número de cuenta completo: 10 dígitos (celular), 16 (tarjeta) o 18 (CLABE).
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/lookup-beneficiary-account
-  Guide: https://docs.veriko.mx/en/how-to/manage-beneficiaries
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/lookup-beneficiary-account
+  Guía: https://docs.veriko.mx/es/how-to/manage-beneficiaries
 }

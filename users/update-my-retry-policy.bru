@@ -1,5 +1,5 @@
 meta {
-  name: Update my default retry policy (destructive)
+  name: Actualizar mi política de reintentos (destructiva)
   type: http
   seq: 3
   tags: [
@@ -32,7 +32,7 @@ body:json {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -43,10 +43,10 @@ settings {
 }
 
 docs {
-  Sets the default retry policy for future validations.
+  Define la política de reintentos predeterminada para las validaciones futuras.
 
-  Destructive request. Changes the account configuration. A value beyond a cap is rejected with `422 retry_policy_invalid`.
+  Petición destructiva. Cambia la configuración de la cuenta. Un valor que rebasa un tope se rechaza con `422 retry_policy_invalid`.
 
-  Reference: https://docs.veriko.mx/en/v1/users/update-my-retry-policy
-  Guide: https://docs.veriko.mx/en/how-to/configure-retry-policy
+  Referencia: https://docs.veriko.mx/es/v1/users/update-my-retry-policy
+  Guía: https://docs.veriko.mx/es/how-to/configure-retry-policy
 }

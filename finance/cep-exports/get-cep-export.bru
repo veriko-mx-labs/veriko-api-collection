@@ -1,5 +1,5 @@
 meta {
-  name: Poll a CEP export
+  name: Sondear una exportación de CEP
   type: http
   seq: 3
 }
@@ -17,14 +17,14 @@ script:post-response {
   const state = res.getStatus() === 200 ? res.body.data.attributes.status : "stop";
   if (state !== "stop" && !TERMINAL_EXPORT.includes(state) && polls < 30) {
     await bru.sleep(3000);
-    bru.runner.setNextRequest("Poll a CEP export");
+    bru.runner.setNextRequest("Sondear una exportación de CEP");
   } else {
     bru.setVar("cep_export_polls", "0");
   }
 }
 
 tests {
-  test("returns the export", function () {
+  test("devuelve la exportación", function () {
     expect(res.getStatus()).to.equal(200);
     expect(res.body.data.attributes.status).to.be.a("string");
   });
@@ -36,12 +36,12 @@ settings {
 }
 
 docs {
-  Returns the state of a CEP export and repeats in the runner until it is terminal.
+  Devuelve el estado de una exportación de CEP y se repite en el ejecutor hasta que sea terminal.
 
-  The terminal states are `ready`, `failed` and `expired`. While the state is `queued` or `building`, the script waits 3 seconds and repeats the request, up to 30 times.
+  Los estados terminales son `ready`, `failed` y `expired`. Mientras el estado sea `queued` o `building`, el script espera 3 segundos y repite la petición, hasta 30 veces.
 
-  Uses `cep_export_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `cep_export_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/finance/get-finance-cep-export
-  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+  Referencia: https://docs.veriko.mx/es/v1/finance/get-finance-cep-export
+  Guía: https://docs.veriko.mx/es/how-to/generate-finance-report
 }

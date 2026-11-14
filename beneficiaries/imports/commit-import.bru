@@ -1,5 +1,5 @@
 meta {
-  name: Confirm the import (destructive)
+  name: Confirmar la importación (destructiva)
   type: http
   seq: 7
   tags: [
@@ -14,7 +14,7 @@ post {
 }
 
 tests {
-  test("responds with 202", function () {
+  test("responde 202", function () {
     expect(res.getStatus()).to.equal(202);
   });
 }
@@ -25,14 +25,14 @@ settings {
 }
 
 docs {
-  Confirms the import job and saves its valid rows as beneficiaries.
+  Confirma el trabajo de importación y guarda sus filas válidas como beneficiarios.
 
-  Destructive request. Creates beneficiaries. Archive them one by one with `DELETE /v1/beneficiaries/{id}` to undo it.
+  Petición destructiva. Crea beneficiarios. Para deshacerlo, archívalos uno por uno con `DELETE /v1/beneficiaries/{id}`.
 
-  The commit is asynchronous: poll the import status until `completed` or `failed`.
+  La confirmación es asíncrona: sondea el estado de la importación hasta `completed` o `failed`.
 
-  Uses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `import_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/commit-beneficiary-import
-  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/commit-beneficiary-import
+  Guía: https://docs.veriko.mx/es/how-to/beneficiary-import
 }

@@ -1,5 +1,5 @@
 meta {
-  name: Get the rate limits
+  name: Consultar los límites de tasa
   type: http
   seq: 5
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,8 +22,8 @@ settings {
 }
 
 docs {
-  Returns the rate limits that apply to the account, by context.
+  Devuelve los límites de tasa que aplican a la cuenta, por contexto.
 
-  Reference: https://docs.veriko.mx/en/v1/usage/get-usage-limits
-  Guide: https://docs.veriko.mx/en/concepts/rate-limits
+  Referencia: https://docs.veriko.mx/es/v1/usage/get-usage-limits
+  Guía: https://docs.veriko.mx/es/concepts/rate-limits
 }

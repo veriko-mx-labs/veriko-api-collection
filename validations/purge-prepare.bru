@@ -1,5 +1,5 @@
 meta {
-  name: Prepare the permanent deletion (destructive)
+  name: Preparar la eliminación permanente (destructiva)
   type: http
   seq: 20
   tags: [
@@ -20,7 +20,7 @@ script:post-response {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -31,14 +31,14 @@ settings {
 }
 
 docs {
-  Describes what the permanent deletion would remove and issues the `confirmation_token`.
+  Describe lo que quitaría el borrado permanente y emite el `confirmation_token`.
 
-  Destructive request. This step changes nothing, but it opens the irreversible purge. The token expires in 120 seconds and is saved as `purge_token`.
+  Petición destructiva. Este paso no cambia nada, pero abre la purga irreversible. El token vence en 120 segundos y se guarda como `purge_token`.
 
-  Uses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Saves `purge_token`.
+  Guarda `purge_token`.
 
-  Reference: https://docs.veriko.mx/en/v1/validations/prepare-validation-purge
-  Guide: https://docs.veriko.mx/en/how-to/purge-a-validation
+  Referencia: https://docs.veriko.mx/es/v1/validations/prepare-validation-purge
+  Guía: https://docs.veriko.mx/es/how-to/purge-a-validation
 }

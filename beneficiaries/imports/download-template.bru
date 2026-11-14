@@ -1,5 +1,5 @@
 meta {
-  name: Download the import template
+  name: Descargar la plantilla de importación
   type: http
   seq: 1
 }
@@ -15,7 +15,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -26,11 +26,11 @@ settings {
 }
 
 docs {
-  Returns the import template with the fixed headers `alias`, `cuenta` and `banco` and example rows.
+  Devuelve la plantilla de importación con los encabezados fijos `alias`, `cuenta` y `banco` y filas de ejemplo.
 
-  Query parameters:
-  - `format` (required): Format of the downloaded template.
+  Parámetros de consulta:
+  - `format` (obligatorio): Formato de la plantilla que se descarga.
 
-  Reference: https://docs.veriko.mx/en/v1/beneficiaries/download-beneficiary-import-template
-  Guide: https://docs.veriko.mx/en/how-to/beneficiary-import
+  Referencia: https://docs.veriko.mx/es/v1/beneficiaries/download-beneficiary-import-template
+  Guía: https://docs.veriko.mx/es/how-to/beneficiary-import
 }

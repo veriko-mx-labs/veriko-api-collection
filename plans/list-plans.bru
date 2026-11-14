@@ -1,5 +1,5 @@
 meta {
-  name: List public plans
+  name: Listar los planes públicos
   type: http
   seq: 1
 }
@@ -11,7 +11,7 @@ get {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -22,8 +22,8 @@ settings {
 }
 
 docs {
-  Returns the active public plans with their prices and features.
+  Devuelve los planes públicos activos con sus precios y características.
 
-  Reference: https://docs.veriko.mx/en/v1/plans/list-public-plans
-  Guide: https://docs.veriko.mx/en/how-to/show-plans-and-prices
+  Referencia: https://docs.veriko.mx/es/v1/plans/list-public-plans
+  Guía: https://docs.veriko.mx/es/how-to/show-plans-and-prices
 }

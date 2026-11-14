@@ -1,5 +1,5 @@
 meta {
-  name: Get the monthly summary
+  name: Consultar el resumen mensual
   type: http
   seq: 1
 }
@@ -16,7 +16,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -27,12 +27,12 @@ settings {
 }
 
 docs {
-  Returns the KPIs of a month: verdict counts, amounts, success rate and breakdowns.
+  Devuelve los indicadores de un mes: conteo de veredictos, montos, tasa de éxito y desgloses.
 
-  Query parameters:
-  - `month` (required): Month to query in `YYYY-MM` format.
-  - `user_id` (optional): Administrators only, UUID of the user to query.
+  Parámetros de consulta:
+  - `month` (obligatorio): Mes a consultar en formato `YYYY-MM`.
+  - `user_id` (opcional): Sólo para administradores: UUID del usuario que se consulta.
 
-  Reference: https://docs.veriko.mx/en/v1/finance/get-finance-summary
-  Guide: https://docs.veriko.mx/en/how-to/generate-finance-report
+  Referencia: https://docs.veriko.mx/es/v1/finance/get-finance-summary
+  Guía: https://docs.veriko.mx/es/how-to/generate-finance-report
 }

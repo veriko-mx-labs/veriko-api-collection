@@ -1,5 +1,5 @@
 meta {
-  name: 09 Test the webhook
+  name: 09 Probar el webhook
   type: http
   seq: 9
 }
@@ -11,9 +11,9 @@ post {
 }
 
 tests {
-  test("the receiver answered with a 2xx status", function () {
+  test("el receptor respondió con un estado 2xx", function () {
     expect(res.getStatus()).to.equal(200);
-    expect(res.body.data.attributes.delivered, res.body.data.attributes.error || "receiver did not answer 2xx").to.equal(true);
+    expect(res.body.data.attributes.delivered, res.body.data.attributes.error || "el receptor no respondió 2xx").to.equal(true);
   });
 }
 
@@ -23,12 +23,12 @@ settings {
 }
 
 docs {
-  Sends a synthetic delivery to the endpoint registered in step 08.
+  Envía una entrega sintética al endpoint que registraste en el paso 08.
 
-  The response is `200` even when the receiver fails. The test checks `delivered`; when it is `false`, read `error` and `http_status`.
+  La respuesta es `200` aunque el receptor falle. La prueba revisa `delivered`; cuando es `false`, lee `error` y `http_status`.
 
-  Uses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.
+  Usa `webhook_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.
 
-  Reference: https://docs.veriko.mx/en/v1/webhooks/send-webhook-test
-  Guide: https://docs.veriko.mx/en/how-to/set-up-webhooks
+  Referencia: https://docs.veriko.mx/es/v1/webhooks/send-webhook-test
+  Guía: https://docs.veriko.mx/es/how-to/set-up-webhooks
 }

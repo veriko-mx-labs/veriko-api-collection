@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Veriko API: SPEI transfer verification against the Banxico CEP",
-    "description": "Requests for every public machine-to-machine operation of the Veriko API, generated from the Bruno collection in this repository. Import the `Veriko production` environment, set `api_key` and start with the Getting started folder. Requests that validate a transfer consume quota. See README.md.",
+    "name": "API de Veriko: verificación de transferencias SPEI contra el CEP de Banxico",
+    "description": "Peticiones para cada operación pública de máquina a máquina de la API de Veriko, generadas a partir de la colección de Bruno de este repositorio. Importa el entorno `Veriko producción`, define `api_key` y empieza con la carpeta Flujo típico. Las peticiones que validan una transferencia consumen cuota. Consulta el README.md.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -16,11 +16,11 @@
   },
   "item": [
     {
-      "name": "Getting started",
-      "description": "Guided flow. Run the requests in order, from 01 to 13.\n\nSteps 01 to 04 consume quota. Step 05 polls until the verdict is terminal and needs the Bruno runner or the Postman collection runner to repeat itself.\n\nStep 13 deletes the webhook endpoint created in step 08; leave it out of runs where you keep the endpoint.",
+      "name": "Flujo típico",
+      "description": "Flujo guiado. Corre las peticiones en orden, del 01 al 13.\n\nLos pasos 01 a 04 consumen cuota. El paso 05 sondea hasta que el veredicto sea terminal y necesita el ejecutor de colecciones de Bruno o el de Postman para repetirse.\n\nEl paso 13 elimina el endpoint de webhook que creó el paso 08; déjalo fuera de las corridas donde quieras conservar el endpoint.",
       "item": [
         {
-          "name": "01 Validate by fields",
+          "name": "01 Validar por campos",
           "request": {
             "method": "POST",
             "header": [
@@ -45,10 +45,10 @@
                 }
               ]
             },
-            "description": "Validates a SPEI transfer from its fields and returns the verdict in the same response.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nA `202` response with `meta.async_reason: sync_deadline` means Banxico took longer than 45 seconds. The validation continues in the background; continue with step 05.\n\nThe body holds example data. A transfer that does not exist returns `not_found`.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id` (on 202).\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-direct\nGuide: https://docs.veriko.mx/en/how-to/validate-spei",
+            "description": "Valida una transferencia SPEI a partir de sus campos y devuelve el veredicto en la misma respuesta.\n\nConsume cuota. Cada validación aceptada cuenta contra el plan, y un `not_found` se cobra igual que un `valid`.\n\nUna respuesta `202` con `meta.async_reason: sync_deadline` significa que Banxico tardó más de 45 segundos. La validación sigue en segundo plano; continúa con el paso 05.\n\nEl cuerpo trae datos de ejemplo. Una transferencia que no existe devuelve `not_found`.\n\nParámetros de consulta:\n- `async` (opcional): Ponlo en `1` para poner en cola la validación. La respuesta es `202` con el identificador de la validación.\n\nGuarda `validation_id` y `queued_validation_id` (con 202).\n\nReferencia: https://docs.veriko.mx/es/v1/validations/validate-direct\nGuía: https://docs.veriko.mx/es/how-to/validate-spei",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"send_date\": \"2025-03-15\",\n  \"amount\": 15000.5,\n  \"tracking_key\": \"MXBA20250315001234\",\n  \"numeric_reference\": \"1234567\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"BBVA MEXICO\",\n  \"beneficiary_account\": \"012180004412345678\",\n  \"client_ref\": \"collection-example\"\n}",
+              "raw": "{\n  \"send_date\": \"2025-03-15\",\n  \"amount\": 15000.5,\n  \"tracking_key\": \"MXBA20250315001234\",\n  \"numeric_reference\": \"1234567\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"BBVA MEXICO\",\n  \"beneficiary_account\": \"012180004412345678\",\n  \"client_ref\": \"coleccion-ejemplo\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -65,13 +65,13 @@
                   "if (pm.response.code === 200) {",
                   "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
                   "} else if (pm.response.code === 202) {",
-                  "  // sync_deadline: Banxico took longer than 45 seconds. Poll the validation.",
+                  "  // sync_deadline: Banxico tardó más de 45 segundos. Sondea la validación.",
                   "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
                   "  pm.collectionVariables.set(\"poll_count\", \"0\");",
                   "}",
-                  "pm.test(\"returns a verdict, or hands the validation off with 202 sync_deadline\", function () {",
+                  "pm.test(\"devuelve un veredicto, o pasa la validación a segundo plano con 202 sync_deadline\", function () {",
                   "  pm.expect([200, 202]).to.include(pm.response.code);",
                   "  if (pm.response.code === 200) {",
                   "    pm.expect(pm.response.json().data.attributes.status).to.be.a(\"string\");",
@@ -85,7 +85,7 @@
           ]
         },
         {
-          "name": "02 Validate by image",
+          "name": "02 Validar por imagen",
           "request": {
             "method": "POST",
             "header": [
@@ -110,10 +110,10 @@
                 }
               ]
             },
-            "description": "Validates a SPEI transfer from the image of its receipt, extracting the data by OCR.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nSends `image_url` from the `receipt_image_url` variable. Set it to a receipt you host over HTTPS, or replace the body with `image` (base64).\n\nA receipt that is not readable or not a SPEI receipt returns `422` and still consumes quota.\n\nA `202` response with `sync_deadline` continues in step 05.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id` (on 202).\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-ocr\nGuide: https://docs.veriko.mx/en/how-to/validate-ocr",
+            "description": "Valida una transferencia SPEI a partir de la imagen de su comprobante y extrae los datos por OCR.\n\nConsume cuota. Cada validación aceptada cuenta contra el plan, y un `not_found` se cobra igual que un `valid`.\n\nEnvía `image_url` con el valor de la variable `receipt_image_url`. Apúntala a un comprobante que alojes por HTTPS o reemplaza el cuerpo con `image` (base64).\n\nUn comprobante que no se puede leer o que no es de SPEI responde `422` y aun así consume cuota.\n\nUna respuesta `202` con `sync_deadline` continúa en el paso 05.\n\nParámetros de consulta:\n- `async` (opcional): Ponlo en `1` para poner en cola la validación. La respuesta es `202` con el identificador de la validación.\n\nGuarda `validation_id` y `queued_validation_id` (con 202).\n\nReferencia: https://docs.veriko.mx/es/v1/validations/validate-ocr\nGuía: https://docs.veriko.mx/es/how-to/validate-ocr",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"image_url\": \"{{receipt_image_url}}\",\n  \"client_ref\": \"collection-example-ocr\"\n}",
+              "raw": "{\n  \"image_url\": \"{{receipt_image_url}}\",\n  \"client_ref\": \"coleccion-ejemplo-ocr\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -130,13 +130,13 @@
                   "if (pm.response.code === 200) {",
                   "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
                   "} else if (pm.response.code === 202) {",
-                  "  // sync_deadline: Banxico took longer than 45 seconds. Poll the validation.",
+                  "  // sync_deadline: Banxico tardó más de 45 segundos. Sondea la validación.",
                   "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
                   "  pm.collectionVariables.set(\"poll_count\", \"0\");",
                   "}",
-                  "pm.test(\"returns a verdict, hands off with 202, or rejects the receipt with 422\", function () {",
+                  "pm.test(\"devuelve un veredicto, pasa a segundo plano con 202 o rechaza el comprobante con 422\", function () {",
                   "  pm.expect([200, 202, 422]).to.include(pm.response.code);",
                   "  if (pm.response.code === 202) {",
                   "    pm.expect(pm.response.json().meta.async_reason).to.equal(\"sync_deadline\");",
@@ -148,7 +148,7 @@
           ]
         },
         {
-          "name": "03 Enqueue by fields",
+          "name": "03 Poner en cola por campos",
           "request": {
             "method": "POST",
             "header": [
@@ -172,10 +172,10 @@
                 }
               ]
             },
-            "description": "Queues the validation of a SPEI transfer and returns `202` at once, without a verdict.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nPoll the validation in step 05.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id`, `queued_validation_etag`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-direct\nGuide: https://docs.veriko.mx/en/how-to/validate-spei",
+            "description": "Pone en cola la validación de una transferencia SPEI y responde `202` de inmediato, sin veredicto.\n\nConsume cuota. Cada validación aceptada cuenta contra el plan, y un `not_found` se cobra igual que un `valid`.\n\nSondea la validación en el paso 05.\n\nParámetros de consulta:\n- `async` (opcional): Ponlo en `1` para poner en cola la validación. La respuesta es `202` con el identificador de la validación.\n\nGuarda `validation_id`, `queued_validation_id` y `queued_validation_etag`.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/validate-direct\nGuía: https://docs.veriko.mx/es/how-to/validate-spei",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"send_date\": \"2025-03-16\",\n  \"amount\": 8200,\n  \"tracking_key\": \"MXBA20250316007788\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"SCOTIABANK\",\n  \"beneficiary_account\": \"044180001122334455\",\n  \"client_ref\": \"collection-example-async\"\n}",
+              "raw": "{\n  \"send_date\": \"2025-03-16\",\n  \"amount\": 8200,\n  \"tracking_key\": \"MXBA20250316007788\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"SCOTIABANK\",\n  \"beneficiary_account\": \"044180001122334455\",\n  \"client_ref\": \"coleccion-ejemplo-async\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -195,7 +195,7 @@
                   "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
                   "  pm.collectionVariables.set(\"poll_count\", \"0\");",
                   "}",
-                  "pm.test(\"accepts the validation and returns its identifier\", function () {",
+                  "pm.test(\"acepta la validación y devuelve su identificador\", function () {",
                   "  pm.expect([202]).to.include(pm.response.code);",
                   "  if (pm.response.code === 202) {",
                   "    pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
@@ -208,7 +208,7 @@
           ]
         },
         {
-          "name": "04 Enqueue by image",
+          "name": "04 Poner en cola por imagen",
           "request": {
             "method": "POST",
             "header": [
@@ -232,10 +232,10 @@
                 }
               ]
             },
-            "description": "Queues the validation of a SPEI receipt image and returns `202` at once, without a verdict.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nSends `image_url` from the `receipt_image_url` variable. A receipt that is rejected returns `422` and still consumes quota.\n\nPoll the validation in step 05.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id`, `queued_validation_etag`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-ocr\nGuide: https://docs.veriko.mx/en/how-to/validate-ocr",
+            "description": "Pone en cola la validación de la imagen de un comprobante SPEI y responde `202` de inmediato, sin veredicto.\n\nConsume cuota. Cada validación aceptada cuenta contra el plan, y un `not_found` se cobra igual que un `valid`.\n\nEnvía `image_url` con el valor de la variable `receipt_image_url`. Un comprobante rechazado responde `422` y aun así consume cuota.\n\nSondea la validación en el paso 05.\n\nParámetros de consulta:\n- `async` (opcional): Ponlo en `1` para poner en cola la validación. La respuesta es `202` con el identificador de la validación.\n\nGuarda `validation_id`, `queued_validation_id` y `queued_validation_etag`.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/validate-ocr\nGuía: https://docs.veriko.mx/es/how-to/validate-ocr",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"image_url\": \"{{receipt_image_url}}\",\n  \"client_ref\": \"collection-example-ocr\"\n}",
+              "raw": "{\n  \"image_url\": \"{{receipt_image_url}}\",\n  \"client_ref\": \"coleccion-ejemplo-ocr\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -255,7 +255,7 @@
                   "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
                   "  pm.collectionVariables.set(\"poll_count\", \"0\");",
                   "}",
-                  "pm.test(\"accepts the validation and returns its identifier\", function () {",
+                  "pm.test(\"acepta la validación y devuelve su identificador\", function () {",
                   "  pm.expect([202, 422]).to.include(pm.response.code);",
                   "  if (pm.response.code === 202) {",
                   "    pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
@@ -268,7 +268,7 @@
           ]
         },
         {
-          "name": "05 Poll the verdict",
+          "name": "05 Sondear el veredicto",
           "request": {
             "method": "GET",
             "header": [
@@ -288,7 +288,7 @@
               ],
               "query": []
             },
-            "description": "Polls `queued_validation_id` until the validation reaches a terminal state.\n\nThe terminal states are `valid`, `not_found`, `cep_unavailable`, `invalid`, `returned`, `failed` and `error`. `queued` and `processing` are not terminal.\n\nHonors `Retry-After` and `meta.next_poll_after_seconds`. The script waits that long, sends the last `ETag` in `If-None-Match`, and repeats the request in the runner up to 30 times or until `expires_at`.\n\nA single send without the runner returns one reading.\n\nUses `queued_validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nSaves `queued_validation_etag`, `validation_status`.\n\nReference: https://docs.veriko.mx/en/v1/validations/get-validation\nGuide: https://docs.veriko.mx/en/concepts/async-validations"
+            "description": "Sondea `queued_validation_id` hasta que la validación llegue a un estado terminal.\n\nLos estados terminales son `valid`, `not_found`, `cep_unavailable`, `invalid`, `returned`, `failed` y `error`. `queued` y `processing` no son terminales.\n\nRespeta `Retry-After` y `meta.next_poll_after_seconds`. El script espera ese tiempo, envía el último `ETag` en `If-None-Match` y repite la petición en el ejecutor hasta 30 veces o hasta `expires_at`.\n\nUn envío suelto, sin el ejecutor, devuelve una sola lectura.\n\nUsa `queued_validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nGuarda `queued_validation_etag` y `validation_status`.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/get-validation\nGuía: https://docs.veriko.mx/es/concepts/async-validations"
           },
           "event": [
             {
@@ -311,20 +311,20 @@
                   "  if (TERMINAL.includes(attributes.status)) {",
                   "    done = true;",
                   "  } else if (attributes.expires_at && Date.now() > Date.parse(attributes.expires_at)) {",
-                  "    done = true; // the validation expired (ttl_expired); stop polling",
+                  "    done = true; // la validación venció (ttl_expired); deja de sondear",
                   "  }",
                   "} else if (pm.response.code !== 304) {",
-                  "  done = true; // 404, 422 and the rest do not change by polling",
+                  "  done = true; // 404, 422 y el resto no cambian al sondear",
                   "}",
                   "const polls = Number(pm.collectionVariables.get(\"poll_count\") || 0) + 1;",
                   "pm.collectionVariables.set(\"poll_count\", String(polls));",
                   "if (!done && polls < MAX_POLLS) {",
                   "  await new Promise((resolve) => setTimeout(resolve, waitSeconds * 1000));",
-                  "  pm.execution.setNextRequest(\"05 Poll the verdict\");",
+                  "  pm.execution.setNextRequest(\"05 Sondear el veredicto\");",
                   "} else {",
                   "  pm.collectionVariables.set(\"poll_count\", \"0\");",
                   "}",
-                  "pm.test(\"returns the current state, or 304 when nothing changed\", function () {",
+                  "pm.test(\"devuelve el estado actual, o 304 si nada cambió\", function () {",
                   "  pm.expect([200, 304]).to.include(pm.response.code);",
                   "  if (pm.response.code === 200) {",
                   "    pm.expect(pm.response.json().data.attributes.status).to.be.a(\"string\");",
@@ -336,7 +336,7 @@
           ]
         },
         {
-          "name": "06 Download the CEP",
+          "name": "06 Descargar el CEP",
           "request": {
             "method": "GET",
             "header": [],
@@ -357,7 +357,7 @@
                 }
               ]
             },
-            "description": "Downloads the official Banxico CEP of the polled validation as XML.\n\nResponds `404` with `cep_not_available` when the verdict has no CEP, which is the case for example data. Use `format=pdf` for the PDF.\n\nQuery parameters:\n- `format` (optional): Certificate format: `xml` (default) or `pdf`.\n\nUses `queued_validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/download-cep\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+            "description": "Descarga como XML el CEP oficial de Banxico de la validación que sondeaste.\n\nResponde `404` con `cep_not_available` cuando el veredicto no tiene CEP, como pasa con los datos de ejemplo. Usa `format=pdf` para el PDF.\n\nParámetros de consulta:\n- `format` (opcional): Formato del certificado: `xml` (predeterminado) o `pdf`.\n\nUsa `queued_validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/download-cep\nGuía: https://docs.veriko.mx/es/how-to/inspect-validations"
           },
           "event": [
             {
@@ -365,7 +365,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"returns the CEP, or 404 cep_not_available when the verdict has none\", function () {",
+                  "pm.test(\"devuelve el CEP, o 404 cep_not_available si el veredicto no tiene\", function () {",
                   "  pm.expect([200, 404]).to.include(pm.response.code);",
                   "  if (pm.response.code === 200) {",
                   "    pm.expect(pm.response.headers.get(\"content-type\")).to.include(\"xml\");",
@@ -377,7 +377,7 @@
           ]
         },
         {
-          "name": "07 List validations",
+          "name": "07 Listar validaciones",
           "request": {
             "method": "GET",
             "header": [],
@@ -425,7 +425,7 @@
                 },
                 {
                   "key": "client_ref",
-                  "value": "collection-example",
+                  "value": "coleccion-ejemplo",
                   "disabled": true
                 },
                 {
@@ -470,7 +470,7 @@
                 }
               ]
             },
-            "description": "Lists the validation history, newest first, with combinable filters.\n\nQuery parameters:\n- `page` (optional): Requested page; values below `1` are adjusted to `1`.\n- `per_page` (optional): Items per page; adjusted to the `1` to `50` range.\n- `status` (optional): Lifecycle state.\n- `type` (optional): Mode: `direct` for manual validation or `ocr` for image-based validation.\n- `from` (optional): Inclusive start date, applied to the validation creation date.\n- `to` (optional): Inclusive end date, applied to the validation creation date.\n- `search` (optional): Case-insensitive text search over the submitted, normalized, and Banxico response data.\n- `client_ref` (optional): Exact match with the `client_ref` sent when validating.\n- `playground` (optional): Keeps only playground validations.\n- `with_deleted` (optional): Scope for withdrawn records: omitted includes active and withdrawn records; `0` keeps active records only and `1`, withdrawn records only.\n- `batch_id` (optional): Identifier of the import job that generated the validations.\n- `bank` (optional): SPEI code of the sending or receiving bank in the original request.\n- `banks` (optional): Comma-separated SPEI codes (up to 50); returns the validations whose sending or receiving bank is any of them.\n- `amount_min` (optional): Inclusive minimum amount, as a number.\n- `amount_max` (optional): Inclusive maximum amount, as a number.\n- `retry_state` (optional): Retry cycle state: `pending`, `resolved`, `exhausted`, or `cancelled`.\n\nReference: https://docs.veriko.mx/en/v1/validations/list-validations\nGuide: https://docs.veriko.mx/en/concepts/pagination"
+            "description": "Lista el historial de validaciones, de la más reciente a la más antigua, con filtros que se combinan.\n\nParámetros de consulta:\n- `page` (opcional): Página que se pide; los valores menores que `1` se ajustan a `1`.\n- `per_page` (opcional): Elementos por página; se ajusta al intervalo de `1` a `50`.\n- `status` (opcional): Estado del ciclo de vida.\n- `type` (opcional): Modalidad: `direct` para validación manual u `ocr` para validación por imagen.\n- `from` (opcional): Fecha inicial, inclusive; se aplica a la fecha de creación de la validación.\n- `to` (opcional): Fecha final, inclusive; se aplica a la fecha de creación de la validación.\n- `search` (opcional): Búsqueda de texto, sin distinguir mayúsculas, en los datos enviados, normalizados y de la respuesta de Banxico.\n- `client_ref` (opcional): Coincidencia exacta con la `client_ref` que enviaste al validar.\n- `playground` (opcional): Deja sólo las validaciones del Playground.\n- `with_deleted` (opcional): Alcance de los registros retirados: omitido incluye activos y retirados; `0` deja sólo los activos y `1`, sólo los retirados.\n- `batch_id` (opcional): Identificador del trabajo de importación que generó las validaciones.\n- `bank` (opcional): Clave SPEI del banco emisor o receptor de la petición original.\n- `banks` (opcional): Claves SPEI separadas por coma (hasta 50); devuelve las validaciones cuyo banco emisor o receptor sea cualquiera de ellas.\n- `amount_min` (opcional): Monto mínimo, inclusive, como número.\n- `amount_max` (opcional): Monto máximo, inclusive, como número.\n- `retry_state` (opcional): Estado del ciclo de reintentos: `pending`, `resolved`, `exhausted` o `cancelled`.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/list-validations\nGuía: https://docs.veriko.mx/es/concepts/pagination"
           },
           "event": [
             {
@@ -478,7 +478,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"returns a page of validations\", function () {",
+                  "pm.test(\"devuelve una página de validaciones\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "  pm.expect(pm.response.json().data).to.be.an(\"array\");",
                   "  pm.expect(pm.response.json().meta.pagination.per_page).to.be.at.most(50);",
@@ -489,7 +489,7 @@
           ]
         },
         {
-          "name": "08 Register a webhook endpoint",
+          "name": "08 Registrar un endpoint de webhook",
           "request": {
             "method": "POST",
             "header": [],
@@ -503,10 +503,10 @@
               ],
               "query": []
             },
-            "description": "Registers an HTTPS endpoint that receives the subscribed events.\n\n`url` must resolve to a public address. Set `webhook_receiver_url` in the environment to your own receiver, for example a temporary endpoint from webhook.site.\n\nThe signing `secret` appears only in this response. The script saves it as `webhook_secret`.\n\nSaves `webhook_id`, `webhook_secret`.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/create-webhook\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks",
+            "description": "Registra un endpoint HTTPS que recibe los eventos a los que te suscribes.\n\n`url` debe resolver a una dirección pública. Define `webhook_receiver_url` en el entorno con tu propio receptor, por ejemplo un endpoint temporal de webhook.site.\n\nEl `secret` de firma aparece sólo en esta respuesta. El script lo guarda como `webhook_secret`.\n\nGuarda `webhook_id` y `webhook_secret`.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/create-webhook\nGuía: https://docs.veriko.mx/es/how-to/set-up-webhooks",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"url\": \"{{webhook_receiver_url}}\",\n  \"events\": [\n    \"validation.completed\",\n    \"validation.failed\",\n    \"validation.error\",\n    \"validation.returned\",\n    \"validation.retry.scheduled\",\n    \"validation.retry.resolved\",\n    \"validation.retry.exhausted\"\n  ],\n  \"description\": \"veriko-api-collection example\"\n}",
+              "raw": "{\n  \"url\": \"{{webhook_receiver_url}}\",\n  \"events\": [\n    \"validation.completed\",\n    \"validation.failed\",\n    \"validation.error\",\n    \"validation.returned\",\n    \"validation.retry.scheduled\",\n    \"validation.retry.resolved\",\n    \"validation.retry.exhausted\"\n  ],\n  \"description\": \"Ejemplo de la colección\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -524,7 +524,7 @@
                   "  pm.collectionVariables.set(\"webhook_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"webhook_secret\", pm.response.json().data.attributes.secret);",
                   "}",
-                  "pm.test(\"responds with 201\", function () {",
+                  "pm.test(\"responde 201\", function () {",
                   "  pm.expect(pm.response.code).to.equal(201);",
                   "});"
                 ]
@@ -533,7 +533,7 @@
           ]
         },
         {
-          "name": "09 Test the webhook",
+          "name": "09 Probar el webhook",
           "request": {
             "method": "POST",
             "header": [],
@@ -549,7 +549,7 @@
               ],
               "query": []
             },
-            "description": "Sends a synthetic delivery to the endpoint registered in step 08.\n\nThe response is `200` even when the receiver fails. The test checks `delivered`; when it is `false`, read `error` and `http_status`.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/send-webhook-test\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks"
+            "description": "Envía una entrega sintética al endpoint que registraste en el paso 08.\n\nLa respuesta es `200` aunque el receptor falle. La prueba revisa `delivered`; cuando es `false`, lee `error` y `http_status`.\n\nUsa `webhook_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/send-webhook-test\nGuía: https://docs.veriko.mx/es/how-to/set-up-webhooks"
           },
           "event": [
             {
@@ -557,9 +557,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"the receiver answered with a 2xx status\", function () {",
+                  "pm.test(\"el receptor respondió con un estado 2xx\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
-                  "  pm.expect(pm.response.json().data.attributes.delivered, pm.response.json().data.attributes.error || \"receiver did not answer 2xx\").to.equal(true);",
+                  "  pm.expect(pm.response.json().data.attributes.delivered, pm.response.json().data.attributes.error || \"el receptor no respondió 2xx\").to.equal(true);",
                   "});"
                 ]
               }
@@ -567,7 +567,7 @@
           ]
         },
         {
-          "name": "10 List webhook deliveries",
+          "name": "10 Listar las entregas del webhook",
           "request": {
             "method": "GET",
             "header": [],
@@ -592,7 +592,7 @@
                 }
               ]
             },
-            "description": "Lists the delivery attempts of the endpoint, including the test delivery.\n\nQuery parameters:\n- `page` (optional): Page requested, starting at 1.\n- `per_page` (optional): How many deliveries each page carries.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/list-webhook-deliveries\nGuide: https://docs.veriko.mx/en/concepts/webhooks-architecture"
+            "description": "Lista los intentos de entrega del endpoint, incluida la entrega de prueba.\n\nParámetros de consulta:\n- `page` (opcional): Página que se pide, empezando en 1.\n- `per_page` (opcional): Cuántas entregas trae cada página.\n\nUsa `webhook_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/list-webhook-deliveries\nGuía: https://docs.veriko.mx/es/concepts/webhooks-architecture"
           },
           "event": [
             {
@@ -600,7 +600,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -609,7 +609,7 @@
           ]
         },
         {
-          "name": "11 List SPEI banks",
+          "name": "11 Listar los bancos SPEI",
           "request": {
             "method": "GET",
             "header": [
@@ -630,7 +630,7 @@
               ],
               "query": []
             },
-            "description": "Returns the catalog of banks that participate in SPEI. It does not need an API key.\n\nEnable `If-None-Match` to get `304` when the catalog did not change.\n\nSaves `banks_etag`.\n\nReference: https://docs.veriko.mx/en/v1/public/list-banks\nGuide: https://docs.veriko.mx/en/bank-directory",
+            "description": "Devuelve el catálogo de bancos que participan en SPEI. No necesita clave de API.\n\nActiva `If-None-Match` para recibir `304` cuando el catálogo no cambió.\n\nGuarda `banks_etag`.\n\nReferencia: https://docs.veriko.mx/es/v1/public/list-banks\nGuía: https://docs.veriko.mx/es/bank-directory",
             "auth": {
               "type": "noauth"
             }
@@ -645,7 +645,7 @@
                   "if (etag) {",
                   "  pm.collectionVariables.set(\"banks_etag\", etag);",
                   "}",
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -654,7 +654,7 @@
           ]
         },
         {
-          "name": "12 Banxico status",
+          "name": "12 Estado de Banxico",
           "request": {
             "method": "GET",
             "header": [],
@@ -669,7 +669,7 @@
               ],
               "query": []
             },
-            "description": "Returns the operational status of the Banxico validation service: `operational`, `degraded` or `down`.\n\nCheck it before a run of synchronous validations.\n\nReference: https://docs.veriko.mx/en/v1/banxico-status/banxico-public-status"
+            "description": "Devuelve el estado operativo del servicio de validación de Banxico: `operational`, `degraded` o `down`.\n\nRevísalo antes de enviar varias validaciones síncronas seguidas.\n\nReferencia: https://docs.veriko.mx/es/v1/banxico-status/banxico-public-status"
           },
           "event": [
             {
@@ -677,7 +677,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -686,7 +686,7 @@
           ]
         },
         {
-          "name": "13 Delete the webhook endpoint (destructive)",
+          "name": "13 Eliminar el endpoint de webhook (destructiva)",
           "request": {
             "method": "DELETE",
             "header": [],
@@ -701,7 +701,7 @@
               ],
               "query": []
             },
-            "description": "Deletes the endpoint registered in step 08.\n\nDestructive request. Deletes the endpoint and its whole delivery history. It cannot be undone.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/delete-webhook\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks"
+            "description": "Elimina el endpoint que registraste en el paso 08.\n\nPetición destructiva. Elimina el endpoint y todo su historial de entregas. No se puede deshacer.\n\nUsa `webhook_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/delete-webhook\nGuía: https://docs.veriko.mx/es/how-to/set-up-webhooks"
           },
           "event": [
             {
@@ -709,7 +709,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 204\", function () {",
+                  "pm.test(\"responde 204\", function () {",
                   "  pm.expect(pm.response.code).to.equal(204);",
                   "});"
                 ]
@@ -720,10 +720,10 @@
       ]
     },
     {
-      "name": "Users",
+      "name": "Usuarios",
       "item": [
         {
-          "name": "Get my profile",
+          "name": "Consultar mi perfil",
           "request": {
             "method": "GET",
             "header": [],
@@ -738,7 +738,7 @@
               ],
               "query": []
             },
-            "description": "Returns the profile, API key prefix, subscription, 2FA state and effective permissions of the authenticated user.\n\nReference: https://docs.veriko.mx/en/v1/users/my-profile\nGuide: https://docs.veriko.mx/en/how-to/inspect-my-account"
+            "description": "Devuelve el perfil, el prefijo de la clave de API, la suscripción, el estado de 2FA y los permisos efectivos del usuario autenticado.\n\nReferencia: https://docs.veriko.mx/es/v1/users/my-profile\nGuía: https://docs.veriko.mx/es/how-to/inspect-my-account"
           },
           "event": [
             {
@@ -746,7 +746,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -755,7 +755,7 @@
           ]
         },
         {
-          "name": "Get my default retry policy",
+          "name": "Consultar mi política de reintentos",
           "request": {
             "method": "GET",
             "header": [],
@@ -771,7 +771,7 @@
               ],
               "query": []
             },
-            "description": "Returns the retry policy that applies to every validation without its own `retry_policy`.\n\nReference: https://docs.veriko.mx/en/v1/users/get-my-retry-policy\nGuide: https://docs.veriko.mx/en/how-to/configure-retry-policy"
+            "description": "Devuelve la política de reintentos que aplica a cada validación que no trae su propio `retry_policy`.\n\nReferencia: https://docs.veriko.mx/es/v1/users/get-my-retry-policy\nGuía: https://docs.veriko.mx/es/how-to/configure-retry-policy"
           },
           "event": [
             {
@@ -779,7 +779,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -788,7 +788,7 @@
           ]
         },
         {
-          "name": "Update my default retry policy (destructive)",
+          "name": "Actualizar mi política de reintentos (destructiva)",
           "request": {
             "method": "PUT",
             "header": [
@@ -809,7 +809,7 @@
               ],
               "query": []
             },
-            "description": "Sets the default retry policy for future validations.\n\nDestructive request. Changes the account configuration. A value beyond a cap is rejected with `422 retry_policy_invalid`.\n\nReference: https://docs.veriko.mx/en/v1/users/update-my-retry-policy\nGuide: https://docs.veriko.mx/en/how-to/configure-retry-policy",
+            "description": "Define la política de reintentos predeterminada para las validaciones futuras.\n\nPetición destructiva. Cambia la configuración de la cuenta. Un valor que rebasa un tope se rechaza con `422 retry_policy_invalid`.\n\nReferencia: https://docs.veriko.mx/es/v1/users/update-my-retry-policy\nGuía: https://docs.veriko.mx/es/how-to/configure-retry-policy",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"retry_policy\": {\n    \"enabled\": true,\n    \"max_retries\": 3,\n    \"interval_seconds\": 600,\n    \"outcomes\": [\n      \"not_found\",\n      \"cep_unavailable\"\n    ]\n  }\n}",
@@ -826,7 +826,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -837,10 +837,10 @@
       ]
     },
     {
-      "name": "Validations",
+      "name": "Validaciones",
       "item": [
         {
-          "name": "Validate by fields",
+          "name": "Validar por campos",
           "request": {
             "method": "POST",
             "header": [
@@ -865,10 +865,10 @@
                 }
               ]
             },
-            "description": "Validates a SPEI transfer from its fields and returns the verdict in the same response.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nThe body holds example data. A transfer that does not exist returns `not_found` and is billed like a `valid` one.\n\nA `202` response with `meta.async_reason: sync_deadline` means Banxico took longer than 45 seconds; poll `GET /v1/validations/{id}`.\n\nEnable `async` to queue the validation instead.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id` (on 202).\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-direct\nGuide: https://docs.veriko.mx/en/how-to/validate-spei",
+            "description": "Valida una transferencia SPEI a partir de sus campos y devuelve el veredicto en la misma respuesta.\n\nConsume cuota. Cada validación aceptada cuenta contra el plan, y un `not_found` se cobra igual que un `valid`.\n\nEl cuerpo trae datos de ejemplo. Una transferencia que no existe devuelve `not_found` y se cobra igual que una `valid`.\n\nUna respuesta `202` con `meta.async_reason: sync_deadline` significa que Banxico tardó más de 45 segundos; sondea `GET /v1/validations/{id}`.\n\nActiva `async` para poner en cola la validación.\n\nParámetros de consulta:\n- `async` (opcional): Ponlo en `1` para poner en cola la validación. La respuesta es `202` con el identificador de la validación.\n\nGuarda `validation_id` y `queued_validation_id` (con 202).\n\nReferencia: https://docs.veriko.mx/es/v1/validations/validate-direct\nGuía: https://docs.veriko.mx/es/how-to/validate-spei",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"send_date\": \"2025-03-15\",\n  \"amount\": 15000.5,\n  \"tracking_key\": \"MXBA20250315001234\",\n  \"numeric_reference\": \"1234567\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"BBVA MEXICO\",\n  \"beneficiary_account\": \"012180004412345678\",\n  \"client_ref\": \"collection-example\"\n}",
+              "raw": "{\n  \"send_date\": \"2025-03-15\",\n  \"amount\": 15000.5,\n  \"tracking_key\": \"MXBA20250315001234\",\n  \"numeric_reference\": \"1234567\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"BBVA MEXICO\",\n  \"beneficiary_account\": \"012180004412345678\",\n  \"client_ref\": \"coleccion-ejemplo\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -885,13 +885,13 @@
                   "if (pm.response.code === 200) {",
                   "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
                   "} else if (pm.response.code === 202) {",
-                  "  // sync_deadline: Banxico took longer than 45 seconds. Poll the validation.",
+                  "  // sync_deadline: Banxico tardó más de 45 segundos. Sondea la validación.",
                   "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
                   "  pm.collectionVariables.set(\"poll_count\", \"0\");",
                   "}",
-                  "pm.test(\"returns a verdict, or hands the validation off with 202 sync_deadline\", function () {",
+                  "pm.test(\"devuelve un veredicto, o pasa la validación a segundo plano con 202 sync_deadline\", function () {",
                   "  pm.expect([200, 202]).to.include(pm.response.code);",
                   "  if (pm.response.code === 200) {",
                   "    pm.expect(pm.response.json().data.attributes.status).to.be.a(\"string\");",
@@ -905,7 +905,7 @@
           ]
         },
         {
-          "name": "Validate by fields, queued",
+          "name": "Validar por campos, en cola",
           "request": {
             "method": "POST",
             "header": [
@@ -929,10 +929,10 @@
                 }
               ]
             },
-            "description": "Queues the validation of a SPEI transfer and returns `202` at once, without a verdict.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nPoll `GET /v1/validations/{id}` with `queued_validation_id`, or subscribe to the `validation.*` webhook events.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id`, `queued_validation_etag`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-direct\nGuide: https://docs.veriko.mx/en/how-to/validate-spei",
+            "description": "Pone en cola la validación de una transferencia SPEI y responde `202` de inmediato, sin veredicto.\n\nConsume cuota. Cada validación aceptada cuenta contra el plan, y un `not_found` se cobra igual que un `valid`.\n\nSondea `GET /v1/validations/{id}` con `queued_validation_id` o suscríbete a los eventos de webhook `validation.*`.\n\nParámetros de consulta:\n- `async` (opcional): Ponlo en `1` para poner en cola la validación. La respuesta es `202` con el identificador de la validación.\n\nGuarda `validation_id`, `queued_validation_id` y `queued_validation_etag`.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/validate-direct\nGuía: https://docs.veriko.mx/es/how-to/validate-spei",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"send_date\": \"2025-03-16\",\n  \"amount\": 8200,\n  \"tracking_key\": \"MXBA20250316007788\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"SCOTIABANK\",\n  \"beneficiary_account\": \"044180001122334455\",\n  \"client_ref\": \"collection-example-async\"\n}",
+              "raw": "{\n  \"send_date\": \"2025-03-16\",\n  \"amount\": 8200,\n  \"tracking_key\": \"MXBA20250316007788\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"SCOTIABANK\",\n  \"beneficiary_account\": \"044180001122334455\",\n  \"client_ref\": \"coleccion-ejemplo-async\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -952,7 +952,7 @@
                   "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
                   "  pm.collectionVariables.set(\"poll_count\", \"0\");",
                   "}",
-                  "pm.test(\"accepts the validation and returns its identifier\", function () {",
+                  "pm.test(\"acepta la validación y devuelve su identificador\", function () {",
                   "  pm.expect([202]).to.include(pm.response.code);",
                   "  if (pm.response.code === 202) {",
                   "    pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
@@ -965,7 +965,7 @@
           ]
         },
         {
-          "name": "Validate by fields, idempotent",
+          "name": "Validar por campos, idempotente",
           "request": {
             "method": "POST",
             "header": [
@@ -990,10 +990,10 @@
                 }
               ]
             },
-            "description": "Sends the same validation twice under one `Idempotency-Key`. The second send replays the first response.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nSend this request twice. The first send creates the key in `idempotency_key`; the second reuses it and carries `Idempotent-Replayed: true`, without consuming quota again.\n\nA different body under the same key returns `422 idempotency_key_reused`; a send while the first is running returns `409 idempotency_key_in_progress`. Keys last 24 hours.\n\nClear `idempotency_key` to start over.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `idempotency_key`, `validation_id`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-direct\nGuide: https://docs.veriko.mx/en/how-to/validate-spei",
+            "description": "Envía la misma validación dos veces con un mismo `Idempotency-Key`. El segundo envío repite la primera respuesta.\n\nConsume cuota. Cada validación aceptada cuenta contra el plan, y un `not_found` se cobra igual que un `valid`.\n\nEnvía esta petición dos veces. El primer envío crea la clave en `idempotency_key`; el segundo la reutiliza y trae `Idempotent-Replayed: true`, sin consumir cuota otra vez.\n\nUn cuerpo distinto con la misma clave responde `422 idempotency_key_reused`; un envío mientras corre el primero responde `409 idempotency_key_in_progress`. Las claves duran 24 horas.\n\nVacía `idempotency_key` para empezar de nuevo.\n\nParámetros de consulta:\n- `async` (opcional): Ponlo en `1` para poner en cola la validación. La respuesta es `202` con el identificador de la validación.\n\nGuarda `idempotency_key` y `validation_id`.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/validate-direct\nGuía: https://docs.veriko.mx/es/how-to/validate-spei",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"send_date\": \"2025-03-15\",\n  \"amount\": 15000.5,\n  \"tracking_key\": \"MXBA20250315001234\",\n  \"numeric_reference\": \"1234567\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"BBVA MEXICO\",\n  \"beneficiary_account\": \"012180004412345678\",\n  \"client_ref\": \"collection-example-idempotent\"\n}",
+              "raw": "{\n  \"send_date\": \"2025-03-15\",\n  \"amount\": 15000.5,\n  \"tracking_key\": \"MXBA20250315001234\",\n  \"numeric_reference\": \"1234567\",\n  \"sender_bank\": \"BANCO NACIONAL DE MEXICO\",\n  \"receiver_bank\": \"BBVA MEXICO\",\n  \"beneficiary_account\": \"012180004412345678\",\n  \"client_ref\": \"coleccion-ejemplo-idempotent\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1023,13 +1023,13 @@
                   "if (pm.response.code === 200) {",
                   "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
                   "} else if (pm.response.code === 202) {",
-                  "  // sync_deadline: Banxico took longer than 45 seconds. Poll the validation.",
+                  "  // sync_deadline: Banxico tardó más de 45 segundos. Sondea la validación.",
                   "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
                   "  pm.collectionVariables.set(\"poll_count\", \"0\");",
                   "}",
-                  "pm.test(\"replays the first response on the second send\", function () {",
+                  "pm.test(\"repite la primera respuesta en el segundo envío\", function () {",
                   "  pm.expect([200, 202]).to.include(pm.response.code);",
                   "  if (pm.collectionVariables.get(\"idempotency_replay\") === \"yes\") {",
                   "    pm.expect(pm.response.headers.get(\"idempotent-replayed\")).to.equal(\"true\");",
@@ -1041,7 +1041,7 @@
           ]
         },
         {
-          "name": "Validate by image URL",
+          "name": "Validar por URL de imagen",
           "request": {
             "method": "POST",
             "header": [
@@ -1066,10 +1066,10 @@
                 }
               ]
             },
-            "description": "Validates a SPEI transfer from the image or PDF of its receipt, extracting the data by OCR.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nSends `image_url` from the `receipt_image_url` variable. The host must serve the file over HTTPS.\n\nA receipt that is not readable or not a SPEI receipt returns `422` (`image_not_readable_receipt`, `image_not_spei_receipt`) and still consumes quota.\n\nEnable `async` to queue the validation instead.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id` (on 202).\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-ocr\nGuide: https://docs.veriko.mx/en/how-to/validate-ocr",
+            "description": "Valida una transferencia SPEI a partir de la imagen o el PDF de su comprobante y extrae los datos por OCR.\n\nConsume cuota. Cada validación aceptada cuenta contra el plan, y un `not_found` se cobra igual que un `valid`.\n\nEnvía `image_url` con el valor de la variable `receipt_image_url`. El servidor debe entregar el archivo por HTTPS.\n\nUn comprobante que no se puede leer o que no es de SPEI responde `422` (`image_not_readable_receipt`, `image_not_spei_receipt`) y aun así consume cuota.\n\nActiva `async` para poner en cola la validación.\n\nParámetros de consulta:\n- `async` (opcional): Ponlo en `1` para poner en cola la validación. La respuesta es `202` con el identificador de la validación.\n\nGuarda `validation_id` y `queued_validation_id` (con 202).\n\nReferencia: https://docs.veriko.mx/es/v1/validations/validate-ocr\nGuía: https://docs.veriko.mx/es/how-to/validate-ocr",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"image_url\": \"{{receipt_image_url}}\",\n  \"client_ref\": \"collection-example-ocr\"\n}",
+              "raw": "{\n  \"image_url\": \"{{receipt_image_url}}\",\n  \"client_ref\": \"coleccion-ejemplo-ocr\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1086,13 +1086,13 @@
                   "if (pm.response.code === 200) {",
                   "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
                   "} else if (pm.response.code === 202) {",
-                  "  // sync_deadline: Banxico took longer than 45 seconds. Poll the validation.",
+                  "  // sync_deadline: Banxico tardó más de 45 segundos. Sondea la validación.",
                   "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
                   "  pm.collectionVariables.set(\"poll_count\", \"0\");",
                   "}",
-                  "pm.test(\"returns a verdict, hands off with 202, or rejects the receipt with 422\", function () {",
+                  "pm.test(\"devuelve un veredicto, pasa a segundo plano con 202 o rechaza el comprobante con 422\", function () {",
                   "  pm.expect([200, 202, 422]).to.include(pm.response.code);",
                   "});"
                 ]
@@ -1101,7 +1101,7 @@
           ]
         },
         {
-          "name": "Validate by image (base64)",
+          "name": "Validar por imagen (base64)",
           "request": {
             "method": "POST",
             "header": [
@@ -1126,10 +1126,10 @@
                 }
               ]
             },
-            "description": "Validates a SPEI transfer from a receipt sent inline as base64 in `image`.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nSet `receipt_image_base64` in the environment to the base64 of your receipt, up to 12 MB.\n\nA receipt that is not readable or not a SPEI receipt returns `422` and still consumes quota.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-ocr\nGuide: https://docs.veriko.mx/en/how-to/validate-ocr",
+            "description": "Valida una transferencia SPEI a partir de un comprobante que se envía en línea, en base64, en `image`.\n\nConsume cuota. Cada validación aceptada cuenta contra el plan, y un `not_found` se cobra igual que un `valid`.\n\nDefine `receipt_image_base64` en el entorno con el base64 de tu comprobante, de hasta 12 MB.\n\nUn comprobante que no se puede leer o que no es de SPEI responde `422` y aun así consume cuota.\n\nParámetros de consulta:\n- `async` (opcional): Ponlo en `1` para poner en cola la validación. La respuesta es `202` con el identificador de la validación.\n\nGuarda `validation_id`.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/validate-ocr\nGuía: https://docs.veriko.mx/es/how-to/validate-ocr",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"image\": \"{{receipt_image_base64}}\",\n  \"client_ref\": \"collection-example-ocr-image\"\n}",
+              "raw": "{\n  \"image\": \"{{receipt_image_base64}}\",\n  \"client_ref\": \"coleccion-ejemplo-ocr-image\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1146,13 +1146,13 @@
                   "if (pm.response.code === 200) {",
                   "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
                   "} else if (pm.response.code === 202) {",
-                  "  // sync_deadline: Banxico took longer than 45 seconds. Poll the validation.",
+                  "  // sync_deadline: Banxico tardó más de 45 segundos. Sondea la validación.",
                   "  pm.collectionVariables.set(\"validation_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"queued_validation_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
                   "  pm.collectionVariables.set(\"poll_count\", \"0\");",
                   "}",
-                  "pm.test(\"returns a verdict, hands off with 202, or rejects the receipt with 422\", function () {",
+                  "pm.test(\"devuelve un veredicto, pasa a segundo plano con 202 o rechaza el comprobante con 422\", function () {",
                   "  pm.expect([200, 202, 422]).to.include(pm.response.code);",
                   "});"
                 ]
@@ -1161,7 +1161,7 @@
           ]
         },
         {
-          "name": "Validate by image URL, queued",
+          "name": "Validar por URL de imagen, en cola",
           "request": {
             "method": "POST",
             "header": [
@@ -1185,10 +1185,10 @@
                 }
               ]
             },
-            "description": "Queues the validation of a SPEI receipt image and returns `202` at once, without a verdict.\n\nConsumes quota. Every accepted validation counts against the plan, and a `not_found` is billed like a `valid`.\n\nA receipt that is rejected returns `422` and still consumes quota.\n\nQuery parameters:\n- `async` (optional): Set to `1` to queue the validation. The response is `202` with the validation identifier.\n\nSaves `validation_id`, `queued_validation_id`, `queued_validation_etag`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validate-ocr\nGuide: https://docs.veriko.mx/en/how-to/validate-ocr",
+            "description": "Pone en cola la validación de la imagen de un comprobante SPEI y responde `202` de inmediato, sin veredicto.\n\nConsume cuota. Cada validación aceptada cuenta contra el plan, y un `not_found` se cobra igual que un `valid`.\n\nUn comprobante rechazado responde `422` y aun así consume cuota.\n\nParámetros de consulta:\n- `async` (opcional): Ponlo en `1` para poner en cola la validación. La respuesta es `202` con el identificador de la validación.\n\nGuarda `validation_id`, `queued_validation_id` y `queued_validation_etag`.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/validate-ocr\nGuía: https://docs.veriko.mx/es/how-to/validate-ocr",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"image_url\": \"{{receipt_image_url}}\",\n  \"client_ref\": \"collection-example-ocr\"\n}",
+              "raw": "{\n  \"image_url\": \"{{receipt_image_url}}\",\n  \"client_ref\": \"coleccion-ejemplo-ocr\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1208,7 +1208,7 @@
                   "  pm.collectionVariables.set(\"queued_validation_etag\", pm.response.headers.get(\"etag\") || \"\");",
                   "  pm.collectionVariables.set(\"poll_count\", \"0\");",
                   "}",
-                  "pm.test(\"accepts the validation and returns its identifier\", function () {",
+                  "pm.test(\"acepta la validación y devuelve su identificador\", function () {",
                   "  pm.expect([202, 422]).to.include(pm.response.code);",
                   "  if (pm.response.code === 202) {",
                   "    pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
@@ -1221,7 +1221,7 @@
           ]
         },
         {
-          "name": "List validations",
+          "name": "Listar validaciones",
           "request": {
             "method": "GET",
             "header": [],
@@ -1269,7 +1269,7 @@
                 },
                 {
                   "key": "client_ref",
-                  "value": "collection-example",
+                  "value": "coleccion-ejemplo",
                   "disabled": true
                 },
                 {
@@ -1314,7 +1314,7 @@
                 }
               ]
             },
-            "description": "Lists the validation history, newest first, with combinable filters.\n\n`per_page` accepts 1 to 50.\n\nQuery parameters:\n- `page` (optional): Requested page; values below `1` are adjusted to `1`.\n- `per_page` (optional): Items per page; adjusted to the `1` to `50` range.\n- `status` (optional): Lifecycle state.\n- `type` (optional): Mode: `direct` for manual validation or `ocr` for image-based validation.\n- `from` (optional): Inclusive start date, applied to the validation creation date.\n- `to` (optional): Inclusive end date, applied to the validation creation date.\n- `search` (optional): Case-insensitive text search over the submitted, normalized, and Banxico response data.\n- `client_ref` (optional): Exact match with the `client_ref` sent when validating.\n- `playground` (optional): Keeps only playground validations.\n- `with_deleted` (optional): Scope for withdrawn records: omitted includes active and withdrawn records; `0` keeps active records only and `1`, withdrawn records only.\n- `batch_id` (optional): Identifier of the import job that generated the validations.\n- `bank` (optional): SPEI code of the sending or receiving bank in the original request.\n- `banks` (optional): Comma-separated SPEI codes (up to 50); returns the validations whose sending or receiving bank is any of them.\n- `amount_min` (optional): Inclusive minimum amount, as a number.\n- `amount_max` (optional): Inclusive maximum amount, as a number.\n- `retry_state` (optional): Retry cycle state: `pending`, `resolved`, `exhausted`, or `cancelled`.\n\nReference: https://docs.veriko.mx/en/v1/validations/list-validations\nGuide: https://docs.veriko.mx/en/concepts/pagination"
+            "description": "Lista el historial de validaciones, de la más reciente a la más antigua, con filtros que se combinan.\n\n`per_page` acepta de 1 a 50.\n\nParámetros de consulta:\n- `page` (opcional): Página que se pide; los valores menores que `1` se ajustan a `1`.\n- `per_page` (opcional): Elementos por página; se ajusta al intervalo de `1` a `50`.\n- `status` (opcional): Estado del ciclo de vida.\n- `type` (opcional): Modalidad: `direct` para validación manual u `ocr` para validación por imagen.\n- `from` (opcional): Fecha inicial, inclusive; se aplica a la fecha de creación de la validación.\n- `to` (opcional): Fecha final, inclusive; se aplica a la fecha de creación de la validación.\n- `search` (opcional): Búsqueda de texto, sin distinguir mayúsculas, en los datos enviados, normalizados y de la respuesta de Banxico.\n- `client_ref` (opcional): Coincidencia exacta con la `client_ref` que enviaste al validar.\n- `playground` (opcional): Deja sólo las validaciones del Playground.\n- `with_deleted` (opcional): Alcance de los registros retirados: omitido incluye activos y retirados; `0` deja sólo los activos y `1`, sólo los retirados.\n- `batch_id` (opcional): Identificador del trabajo de importación que generó las validaciones.\n- `bank` (opcional): Clave SPEI del banco emisor o receptor de la petición original.\n- `banks` (opcional): Claves SPEI separadas por coma (hasta 50); devuelve las validaciones cuyo banco emisor o receptor sea cualquiera de ellas.\n- `amount_min` (opcional): Monto mínimo, inclusive, como número.\n- `amount_max` (opcional): Monto máximo, inclusive, como número.\n- `retry_state` (opcional): Estado del ciclo de reintentos: `pending`, `resolved`, `exhausted` o `cancelled`.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/list-validations\nGuía: https://docs.veriko.mx/es/concepts/pagination"
           },
           "event": [
             {
@@ -1322,7 +1322,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"returns a page of validations\", function () {",
+                  "pm.test(\"devuelve una página de validaciones\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "  pm.expect(pm.response.json().data).to.be.an(\"array\");",
                   "});"
@@ -1332,7 +1332,7 @@
           ]
         },
         {
-          "name": "Get validation statistics",
+          "name": "Consultar las estadísticas de validaciones",
           "request": {
             "method": "GET",
             "header": [],
@@ -1368,7 +1368,7 @@
                 },
                 {
                   "key": "client_ref",
-                  "value": "collection-example",
+                  "value": "coleccion-ejemplo",
                   "disabled": true
                 },
                 {
@@ -1418,7 +1418,7 @@
                 }
               ]
             },
-            "description": "Returns aggregate counters of the account validations, with the same filters as the list.\n\nQuery parameters:\n- `type` (optional): Mode: `direct` for manual validation; `ocr` for image-based validation.\n- `from` (optional): Inclusive start date, applied to the validation creation date.\n- `to` (optional): Inclusive end date, applied to the validation creation date.\n- `search` (optional): Case-insensitive text search over the submitted, normalized, and Banxico response data.\n- `client_ref` (optional): Exact match with the `client_ref` sent when validating.\n- `playground` (optional): Keeps only playground validations.\n- `with_deleted` (optional): Scope for withdrawn records: omitted includes active and withdrawn records; `0` keeps active records only and `1`, withdrawn records only.\n- `batch_id` (optional): Identifier of the import job that generated the validations.\n- `bank` (optional): SPEI code of the sending or receiving bank in the original request.\n- `banks` (optional): Comma-separated SPEI codes (up to 50); returns the validations whose sending or receiving bank is any of them.\n- `amount_min` (optional): Inclusive minimum amount for the counted validations.\n- `amount_max` (optional): Inclusive maximum amount for the counted validations.\n- `status` (optional): Accepted for parity with `GET /v1/validations`, but it does not change any counter.\n- `retry_state` (optional): Retry cycle state: `pending`, `resolved`, `exhausted`, or `cancelled`.\n\nReference: https://docs.veriko.mx/en/v1/validations/validation-stats\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+            "description": "Devuelve contadores agregados de las validaciones de la cuenta, con los mismos filtros que el listado.\n\nParámetros de consulta:\n- `type` (opcional): Modalidad: `direct` para validación manual; `ocr` para validación por imagen.\n- `from` (opcional): Fecha inicial, inclusive; se aplica a la fecha de creación de la validación.\n- `to` (opcional): Fecha final, inclusive; se aplica a la fecha de creación de la validación.\n- `search` (opcional): Búsqueda de texto, sin distinguir mayúsculas, en los datos enviados, normalizados y de la respuesta de Banxico.\n- `client_ref` (opcional): Coincidencia exacta con la `client_ref` que enviaste al validar.\n- `playground` (opcional): Deja sólo las validaciones del Playground.\n- `with_deleted` (opcional): Alcance de los registros retirados: omitido incluye activos y retirados; `0` deja sólo los activos y `1`, sólo los retirados.\n- `batch_id` (opcional): Identificador del trabajo de importación que generó las validaciones.\n- `bank` (opcional): Clave SPEI del banco emisor o receptor de la petición original.\n- `banks` (opcional): Claves SPEI separadas por coma (hasta 50); devuelve las validaciones cuyo banco emisor o receptor sea cualquiera de ellas.\n- `amount_min` (opcional): Monto mínimo, inclusive, de las validaciones que se cuentan.\n- `amount_max` (opcional): Monto máximo, inclusive, de las validaciones que se cuentan.\n- `status` (opcional): Se acepta por paridad con `GET /v1/validations`, pero no cambia ningún contador.\n- `retry_state` (opcional): Estado del ciclo de reintentos: `pending`, `resolved`, `exhausted` o `cancelled`.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/validation-stats\nGuía: https://docs.veriko.mx/es/how-to/inspect-validations"
           },
           "event": [
             {
@@ -1426,7 +1426,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -1435,7 +1435,7 @@
           ]
         },
         {
-          "name": "Export validations",
+          "name": "Exportar validaciones",
           "request": {
             "method": "GET",
             "header": [],
@@ -1480,7 +1480,7 @@
                 },
                 {
                   "key": "client_ref",
-                  "value": "collection-example",
+                  "value": "coleccion-ejemplo",
                   "disabled": true
                 },
                 {
@@ -1530,7 +1530,7 @@
                 }
               ]
             },
-            "description": "Downloads the validations that match the filters as CSV or XLSX, up to 100,000 rows.\n\nQuery parameters:\n- `format` (optional): File format: `csv` (default) or `xlsx`.\n- `status` (optional): Lifecycle state.\n- `type` (optional): Mode: `direct` for manual validation; `ocr` for image-based validation.\n- `from` (optional): Inclusive start date, applied to the validation creation date.\n- `to` (optional): Inclusive end date, applied to the validation creation date.\n- `search` (optional): Case-insensitive text search over the submitted, normalized, and Banxico response data.\n- `client_ref` (optional): Exact match with the `client_ref` sent when validating.\n- `playground` (optional): Keeps only playground validations.\n- `with_deleted` (optional): Scope for withdrawn records: omitted includes active and withdrawn records; `0` keeps active records only and `1`, withdrawn records only.\n- `batch_id` (optional): Identifier of the import job that generated the validations.\n- `retry_state` (optional): Retry cycle state: `pending`, `resolved`, `exhausted`, or `cancelled`.\n- `bank` (optional): SPEI code of the sending or receiving bank in the original request.\n- `banks` (optional): Comma-separated SPEI codes (up to 50); returns the validations whose sending or receiving bank is any of them.\n- `amount_min` (optional): Inclusive minimum amount.\n- `amount_max` (optional): Inclusive maximum amount.\n- `limit` (optional): Requested row maximum.\n\nReference: https://docs.veriko.mx/en/v1/validations/export-validations\nGuide: https://docs.veriko.mx/en/concepts/exports-and-formats"
+            "description": "Descarga las validaciones que coinciden con los filtros en CSV o XLSX, hasta 100,000 filas.\n\nParámetros de consulta:\n- `format` (opcional): Formato del archivo: `csv` (predeterminado) o `xlsx`.\n- `status` (opcional): Estado del ciclo de vida.\n- `type` (opcional): Modalidad: `direct` para validación manual; `ocr` para validación por imagen.\n- `from` (opcional): Fecha inicial, inclusive; se aplica a la fecha de creación de la validación.\n- `to` (opcional): Fecha final, inclusive; se aplica a la fecha de creación de la validación.\n- `search` (opcional): Búsqueda de texto, sin distinguir mayúsculas, en los datos enviados, normalizados y de la respuesta de Banxico.\n- `client_ref` (opcional): Coincidencia exacta con la `client_ref` que enviaste al validar.\n- `playground` (opcional): Deja sólo las validaciones del Playground.\n- `with_deleted` (opcional): Alcance de los registros retirados: omitido incluye activos y retirados; `0` deja sólo los activos y `1`, sólo los retirados.\n- `batch_id` (opcional): Identificador del trabajo de importación que generó las validaciones.\n- `retry_state` (opcional): Estado del ciclo de reintentos: `pending`, `resolved`, `exhausted` o `cancelled`.\n- `bank` (opcional): Clave SPEI del banco emisor o receptor de la petición original.\n- `banks` (opcional): Claves SPEI separadas por coma (hasta 50); devuelve las validaciones cuyo banco emisor o receptor sea cualquiera de ellas.\n- `amount_min` (opcional): Monto mínimo, inclusive.\n- `amount_max` (opcional): Monto máximo, inclusive.\n- `limit` (opcional): Máximo de filas que se pide.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/export-validations\nGuía: https://docs.veriko.mx/es/concepts/exports-and-formats"
           },
           "event": [
             {
@@ -1538,7 +1538,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -1547,7 +1547,7 @@
           ]
         },
         {
-          "name": "Get a validation",
+          "name": "Consultar una validación",
           "request": {
             "method": "GET",
             "header": [
@@ -1568,7 +1568,7 @@
               ],
               "query": []
             },
-            "description": "Returns the full record of a validation: verdict, normalized data and retry state.\n\nWhile the state is `queued` or `processing`, `Retry-After` and `meta.next_poll_after_seconds` say when to poll again. Enable `If-None-Match` to get `304` when nothing changed.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nSaves `validation_etag`.\n\nReference: https://docs.veriko.mx/en/v1/validations/get-validation\nGuide: https://docs.veriko.mx/en/concepts/async-validations"
+            "description": "Devuelve el registro completo de una validación: veredicto, datos normalizados y estado de los reintentos.\n\nMientras el estado sea `queued` o `processing`, `Retry-After` y `meta.next_poll_after_seconds` indican cuándo volver a sondear. Activa `If-None-Match` para recibir `304` cuando nada cambió.\n\nUsa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nGuarda `validation_etag`.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/get-validation\nGuía: https://docs.veriko.mx/es/concepts/async-validations"
           },
           "event": [
             {
@@ -1580,7 +1580,7 @@
                   "if (etag) {",
                   "  pm.collectionVariables.set(\"validation_etag\", etag);",
                   "}",
-                  "pm.test(\"returns the validation\", function () {",
+                  "pm.test(\"devuelve la validación\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "  pm.expect(pm.response.json().data.attributes.status).to.be.a(\"string\");",
                   "});"
@@ -1590,7 +1590,7 @@
           ]
         },
         {
-          "name": "Download the CEP (XML)",
+          "name": "Descargar el CEP (XML)",
           "request": {
             "method": "GET",
             "header": [],
@@ -1611,7 +1611,7 @@
                 }
               ]
             },
-            "description": "Downloads the official Banxico CEP of a `valid` or `returned` validation as XML.\n\nResponds `400 invalid_export_format` for an unknown format, `404 cep_not_available` when the verdict has no CEP, and `410` when the validation was purged.\n\nQuery parameters:\n- `format` (optional): Certificate format: `xml` (default) or `pdf`.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/download-cep\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+            "description": "Descarga como XML el CEP oficial de Banxico de una validación `valid` o `returned`.\n\nResponde `400 invalid_export_format` con un formato desconocido, `404 cep_not_available` cuando el veredicto no tiene CEP y `410` cuando la validación se purgó.\n\nParámetros de consulta:\n- `format` (opcional): Formato del certificado: `xml` (predeterminado) o `pdf`.\n\nUsa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/download-cep\nGuía: https://docs.veriko.mx/es/how-to/inspect-validations"
           },
           "event": [
             {
@@ -1619,7 +1619,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"returns the CEP as XML\", function () {",
+                  "pm.test(\"devuelve el CEP en XML\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "  pm.expect(pm.response.headers.get(\"content-type\")).to.include(\"xml\");",
                   "});"
@@ -1629,7 +1629,7 @@
           ]
         },
         {
-          "name": "Download the CEP (PDF)",
+          "name": "Descargar el CEP (PDF)",
           "request": {
             "method": "GET",
             "header": [],
@@ -1650,7 +1650,7 @@
                 }
               ]
             },
-            "description": "Downloads the official Banxico CEP of a `valid` or `returned` validation as PDF.\n\nQuery parameters:\n- `format` (optional): Certificate format: `xml` (default) or `pdf`.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/download-cep\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+            "description": "Descarga como PDF el CEP oficial de Banxico de una validación `valid` o `returned`.\n\nParámetros de consulta:\n- `format` (opcional): Formato del certificado: `xml` (predeterminado) o `pdf`.\n\nUsa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/download-cep\nGuía: https://docs.veriko.mx/es/how-to/inspect-validations"
           },
           "event": [
             {
@@ -1658,7 +1658,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"returns the CEP as PDF\", function () {",
+                  "pm.test(\"devuelve el CEP en PDF\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "  pm.expect(pm.response.headers.get(\"content-type\")).to.include(\"pdf\");",
                   "});"
@@ -1668,7 +1668,7 @@
           ]
         },
         {
-          "name": "Get the receipt image",
+          "name": "Consultar la imagen del comprobante",
           "request": {
             "method": "GET",
             "header": [],
@@ -1684,7 +1684,7 @@
               ],
               "query": []
             },
-            "description": "Returns the receipt kept for an OCR validation.\n\nResponds `404 image_not_available` without an image, and `410` when the validation was created with `retain_image=false`.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/get-validation-image\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+            "description": "Devuelve el comprobante que se guardó de una validación por OCR.\n\nResponde `404 image_not_available` si no hay imagen y `410` cuando la validación se creó con `retain_image=false`.\n\nUsa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/get-validation-image\nGuía: https://docs.veriko.mx/es/how-to/inspect-validations"
           },
           "event": [
             {
@@ -1692,7 +1692,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -1701,7 +1701,7 @@
           ]
         },
         {
-          "name": "List retry attempts",
+          "name": "Listar los intentos de reintento",
           "request": {
             "method": "GET",
             "header": [],
@@ -1717,7 +1717,7 @@
               ],
               "query": []
             },
-            "description": "Returns the chronological history of the automatic retries of a validation.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/list-validation-retry-attempts\nGuide: https://docs.veriko.mx/en/concepts/retry-policy"
+            "description": "Devuelve el historial cronológico de los reintentos automáticos de una validación.\n\nUsa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/list-validation-retry-attempts\nGuía: https://docs.veriko.mx/es/concepts/retry-policy"
           },
           "event": [
             {
@@ -1725,7 +1725,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -1734,7 +1734,7 @@
           ]
         },
         {
-          "name": "Update the retry policy of a validation (destructive)",
+          "name": "Actualizar la política de reintentos de una validación (destructiva)",
           "request": {
             "method": "PUT",
             "header": [
@@ -1755,7 +1755,7 @@
               ],
               "query": []
             },
-            "description": "Activates an automatic retry policy for a validation with a `not_found`, `cep_unavailable` or `error` verdict.\n\nDestructive request. Changes the retry cycle of the validation. It is not accepted for validations from a bulk import, already resolved, or older than seven days.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/update-validation-retry-policy\nGuide: https://docs.veriko.mx/en/how-to/configure-retry-policy",
+            "description": "Activa una política de reintentos automáticos para una validación con veredicto `not_found`, `cep_unavailable` o `error`.\n\nPetición destructiva. Cambia el ciclo de reintentos de la validación. No se acepta en validaciones de una importación masiva, ya resueltas o de más de siete días.\n\nUsa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/update-validation-retry-policy\nGuía: https://docs.veriko.mx/es/how-to/configure-retry-policy",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"retry_policy\": {\n    \"enabled\": true,\n    \"max_retries\": 3,\n    \"interval_seconds\": 600,\n    \"outcomes\": [\n      \"not_found\",\n      \"cep_unavailable\"\n    ]\n  }\n}",
@@ -1772,7 +1772,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -1781,7 +1781,7 @@
           ]
         },
         {
-          "name": "Cancel pending retries (destructive)",
+          "name": "Cancelar los reintentos pendientes (destructiva)",
           "request": {
             "method": "POST",
             "header": [
@@ -1802,7 +1802,7 @@
               ],
               "query": []
             },
-            "description": "Cancels the active automatic retry cycle of a validation.\n\nDestructive request. Ends the retry cycle with `terminal_state: cancelled`. A cycle that is not active returns `422 retry_not_active`.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/cancel-validation-retries\nGuide: https://docs.veriko.mx/en/concepts/retry-policy"
+            "description": "Cancela el ciclo activo de reintentos automáticos de una validación.\n\nPetición destructiva. Termina el ciclo de reintentos con `terminal_state: cancelled`. Un ciclo que no está activo responde `422 retry_not_active`.\n\nUsa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/cancel-validation-retries\nGuía: https://docs.veriko.mx/es/concepts/retry-policy"
           },
           "event": [
             {
@@ -1810,7 +1810,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -1819,7 +1819,7 @@
           ]
         },
         {
-          "name": "Recheck a validation",
+          "name": "Volver a verificar una validación",
           "request": {
             "method": "POST",
             "header": [],
@@ -1835,7 +1835,7 @@
               ],
               "query": []
             },
-            "description": "Queries Banxico again for the payment status of a `valid` validation and moves it to `returned` if the payment was returned.\n\nIt queries Banxico and does not consume quota.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/recheck-validation\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+            "description": "Consulta de nuevo a Banxico el estado del pago de una validación `valid` y la pasa a `returned` si el pago se devolvió.\n\nConsulta a Banxico y no consume cuota.\n\nUsa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/recheck-validation\nGuía: https://docs.veriko.mx/es/how-to/inspect-validations"
           },
           "event": [
             {
@@ -1843,7 +1843,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -1852,7 +1852,7 @@
           ]
         },
         {
-          "name": "Send the CEP to Telegram",
+          "name": "Enviar el CEP a Telegram",
           "request": {
             "method": "POST",
             "header": [],
@@ -1869,7 +1869,7 @@
               ],
               "query": []
             },
-            "description": "Starts the delivery of the CEP as a PDF to the Telegram chat linked to the account.\n\nResponds `409` with `cep_not_available` or `telegram_not_linked` when the CEP or the link is missing.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/send-cep-to-telegram\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+            "description": "Inicia el envío del CEP en PDF al chat de Telegram vinculado a la cuenta.\n\nResponde `409` con `cep_not_available` o `telegram_not_linked` cuando falta el CEP o la vinculación.\n\nUsa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/send-cep-to-telegram\nGuía: https://docs.veriko.mx/es/how-to/inspect-validations"
           },
           "event": [
             {
@@ -1877,7 +1877,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 202\", function () {",
+                  "pm.test(\"responde 202\", function () {",
                   "  pm.expect(pm.response.code).to.equal(202);",
                   "});"
                 ]
@@ -1886,7 +1886,7 @@
           ]
         },
         {
-          "name": "Withdraw a validation (destructive)",
+          "name": "Retirar una validación (destructiva)",
           "request": {
             "method": "DELETE",
             "header": [],
@@ -1901,7 +1901,7 @@
               ],
               "query": []
             },
-            "description": "Withdraws a validation from the history with a soft delete.\n\nDestructive request. The record keeps its result and reappears with `with_deleted=1`. For a permanent deletion use the purge requests.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/delete-validation\nGuide: https://docs.veriko.mx/en/how-to/inspect-validations"
+            "description": "Retira una validación del historial con un borrado lógico.\n\nPetición destructiva. El registro conserva su resultado y reaparece con `with_deleted=1`. Para borrarlo de forma permanente usa las peticiones de purga.\n\nUsa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/delete-validation\nGuía: https://docs.veriko.mx/es/how-to/inspect-validations"
           },
           "event": [
             {
@@ -1909,7 +1909,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 204\", function () {",
+                  "pm.test(\"responde 204\", function () {",
                   "  pm.expect(pm.response.code).to.equal(204);",
                   "});"
                 ]
@@ -1918,7 +1918,7 @@
           ]
         },
         {
-          "name": "Prepare the permanent deletion (destructive)",
+          "name": "Preparar la eliminación permanente (destructiva)",
           "request": {
             "method": "POST",
             "header": [],
@@ -1935,7 +1935,7 @@
               ],
               "query": []
             },
-            "description": "Describes what the permanent deletion would remove and issues the `confirmation_token`.\n\nDestructive request. This step changes nothing, but it opens the irreversible purge. The token expires in 120 seconds and is saved as `purge_token`.\n\nUses `validation_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nSaves `purge_token`.\n\nReference: https://docs.veriko.mx/en/v1/validations/prepare-validation-purge\nGuide: https://docs.veriko.mx/en/how-to/purge-a-validation"
+            "description": "Describe lo que quitaría el borrado permanente y emite el `confirmation_token`.\n\nPetición destructiva. Este paso no cambia nada, pero abre la purga irreversible. El token vence en 120 segundos y se guarda como `purge_token`.\n\nUsa `validation_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nGuarda `purge_token`.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/prepare-validation-purge\nGuía: https://docs.veriko.mx/es/how-to/purge-a-validation"
           },
           "event": [
             {
@@ -1946,7 +1946,7 @@
                   "if (pm.response.code === 200) {",
                   "  pm.collectionVariables.set(\"purge_token\", pm.response.json().data.attributes.confirmation_token);",
                   "}",
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -1955,7 +1955,7 @@
           ]
         },
         {
-          "name": "Execute the permanent deletion (destructive)",
+          "name": "Ejecutar la eliminación permanente (destructiva)",
           "request": {
             "method": "POST",
             "header": [],
@@ -1972,7 +1972,7 @@
               ],
               "query": []
             },
-            "description": "Permanently deletes the content of a validation with the token from the prepare step.\n\nDestructive request. Deletes the receipt, the CEP and the stored data of the validation. It cannot be undone.\n\nUses `validation_id`, `purge_token`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/validations/execute-validation-purge\nGuide: https://docs.veriko.mx/en/how-to/purge-a-validation",
+            "description": "Borra de forma permanente el contenido de una validación con el token del paso de preparación.\n\nPetición destructiva. Borra el comprobante, el CEP y los datos guardados de la validación. No se puede deshacer.\n\nUsa `validation_id` y `purge_token`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define las variables en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/validations/execute-validation-purge\nGuía: https://docs.veriko.mx/es/how-to/purge-a-validation",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"confirmation_token\": \"{{purge_token}}\"\n}",
@@ -1989,7 +1989,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -2000,14 +2000,14 @@
       ]
     },
     {
-      "name": "Beneficiaries",
+      "name": "Beneficiarios",
       "item": [
         {
-          "name": "Imports",
-          "description": "Bulk import of beneficiaries: upload a file, review the preview, fix rows, then confirm.\n\nSample file: `samples/beneficiaries.csv`.",
+          "name": "Importaciones",
+          "description": "Importación masiva de beneficiarios: sube un archivo, revisa la vista previa, corrige las filas y confirma.\n\nArchivo de ejemplo: `samples/beneficiaries.csv`.",
           "item": [
             {
-              "name": "Download the import template",
+              "name": "Descargar la plantilla de importación",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -2028,7 +2028,7 @@
                     }
                   ]
                 },
-                "description": "Returns the import template with the fixed headers `alias`, `cuenta` and `banco` and example rows.\n\nQuery parameters:\n- `format` (required): Format of the downloaded template.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/download-beneficiary-import-template\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import"
+                "description": "Devuelve la plantilla de importación con los encabezados fijos `alias`, `cuenta` y `banco` y filas de ejemplo.\n\nParámetros de consulta:\n- `format` (obligatorio): Formato de la plantilla que se descarga.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/download-beneficiary-import-template\nGuía: https://docs.veriko.mx/es/how-to/beneficiary-import"
               },
               "event": [
                 {
@@ -2036,7 +2036,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"responds with 200\", function () {",
+                      "pm.test(\"responde 200\", function () {",
                       "  pm.expect(pm.response.code).to.equal(200);",
                       "});"
                     ]
@@ -2045,7 +2045,7 @@
               ]
             },
             {
-              "name": "Start an import",
+              "name": "Iniciar una importación",
               "request": {
                 "method": "POST",
                 "header": [],
@@ -2060,7 +2060,7 @@
                   ],
                   "query": []
                 },
-                "description": "Uploads a file and opens an import job. Parsing runs in the background.\n\nAccepts CSV, XLS, XLSX, TXT, JSON or PDF up to 20 MB. This request sends `samples/beneficiaries.csv`.\n\nSaves `import_id`.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/create-beneficiary-import\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import",
+                "description": "Sube un archivo y abre un trabajo de importación. La lectura del archivo corre en segundo plano.\n\nAcepta CSV, XLS, XLSX, TXT, JSON o PDF de hasta 20 MB. Esta petición envía `samples/beneficiaries.csv`.\n\nGuarda `import_id`.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/create-beneficiary-import\nGuía: https://docs.veriko.mx/es/how-to/beneficiary-import",
                 "body": {
                   "mode": "formdata",
                   "formdata": [
@@ -2086,7 +2086,7 @@
                       "if (pm.response.code === 202) {",
                       "  pm.collectionVariables.set(\"import_id\", pm.response.json().data.id);",
                       "}",
-                      "pm.test(\"opens the import job\", function () {",
+                      "pm.test(\"abre el trabajo de importación\", function () {",
                       "  pm.expect(pm.response.code).to.equal(202);",
                       "  pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
                       "});"
@@ -2096,7 +2096,7 @@
               ]
             },
             {
-              "name": "Get the import status",
+              "name": "Consultar el estado de la importación",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -2112,7 +2112,7 @@
                   ],
                   "query": []
                 },
-                "description": "Returns the status and counters of an import job.\n\nPoll about every 2 seconds until `status` is `preview_ready`, `completed`, `failed` or `cancelled`.\n\nUses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/get-beneficiary-import\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import"
+                "description": "Devuelve el estado y los contadores de un trabajo de importación.\n\nSondea cada 2 segundos, más o menos, hasta que `status` sea `preview_ready`, `completed`, `failed` o `cancelled`.\n\nUsa `import_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/get-beneficiary-import\nGuía: https://docs.veriko.mx/es/how-to/beneficiary-import"
               },
               "event": [
                 {
@@ -2120,7 +2120,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"responds with 200\", function () {",
+                      "pm.test(\"responde 200\", function () {",
                       "  pm.expect(pm.response.code).to.equal(200);",
                       "});"
                     ]
@@ -2129,7 +2129,7 @@
               ]
             },
             {
-              "name": "Preview the import rows",
+              "name": "Ver las filas de la importación",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -2160,7 +2160,7 @@
                     }
                   ]
                 },
-                "description": "Returns the rows extracted from the file, paginated and filterable by bucket.\n\nAccount numbers in the preview are not masked.\n\nQuery parameters:\n- `buckets` (optional): Which rows to include, based on how they came out of the file.\n- `page` (optional): Page number (1-based).\n- `per_page` (optional): Rows per page (1-100).\n\nUses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nSaves `import_row_id`.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/get-beneficiary-import-preview\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import"
+                "description": "Devuelve las filas que se extrajeron del archivo, paginadas y filtrables por grupo.\n\nLos números de cuenta de la vista previa no van enmascarados.\n\nParámetros de consulta:\n- `buckets` (opcional): Qué filas incluir, según cómo salieron al leer el archivo.\n- `page` (opcional): Número de página, empezando en 1.\n- `per_page` (opcional): Filas por página, de 1 a 100.\n\nUsa `import_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nGuarda `import_row_id`.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/get-beneficiary-import-preview\nGuía: https://docs.veriko.mx/es/how-to/beneficiary-import"
               },
               "event": [
                 {
@@ -2171,7 +2171,7 @@
                       "if (pm.response.code === 200 && pm.response.json().data.length > 0) {",
                       "  pm.collectionVariables.set(\"import_row_id\", pm.response.json().data[0].id);",
                       "}",
-                      "pm.test(\"responds with 200\", function () {",
+                      "pm.test(\"responde 200\", function () {",
                       "  pm.expect(pm.response.code).to.equal(200);",
                       "});"
                     ]
@@ -2180,7 +2180,7 @@
               ]
             },
             {
-              "name": "Edit a preview row (destructive)",
+              "name": "Editar una fila de la vista previa (destructiva)",
               "request": {
                 "method": "PATCH",
                 "header": [],
@@ -2198,10 +2198,10 @@
                   ],
                   "query": []
                 },
-                "description": "Corrects a preview row before the import is confirmed.\n\nDestructive request. Overwrites the fields you send and reprocesses the row.\n\nUses `import_id`, `import_row_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/patch-beneficiary-import-row\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import",
+                "description": "Corrige una fila de la vista previa antes de confirmar la importación.\n\nPetición destructiva. Sobrescribe los campos que envíes y vuelve a procesar la fila.\n\nUsa `import_id` e `import_row_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define las variables en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/patch-beneficiary-import-row\nGuía: https://docs.veriko.mx/es/how-to/beneficiary-import",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"parsed_label\": \"Example supplier\",\n  \"parsed_account_type\": \"clabe\"\n}",
+                  "raw": "{\n  \"parsed_label\": \"Proveedor de ejemplo\",\n  \"parsed_account_type\": \"clabe\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2215,7 +2215,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"responds with 200\", function () {",
+                      "pm.test(\"responde 200\", function () {",
                       "  pm.expect(pm.response.code).to.equal(200);",
                       "});"
                     ]
@@ -2224,7 +2224,7 @@
               ]
             },
             {
-              "name": "Remove a preview row (destructive)",
+              "name": "Quitar una fila de la vista previa (destructiva)",
               "request": {
                 "method": "DELETE",
                 "header": [],
@@ -2242,7 +2242,7 @@
                   ],
                   "query": []
                 },
-                "description": "Removes a row from an import job before confirmation.\n\nDestructive request. Only jobs in `preview_ready` accept it; other states return `422 job_not_editable`.\n\nUses `import_id`, `import_row_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/delete-beneficiary-import-row\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import"
+                "description": "Quita una fila de un trabajo de importación antes de confirmarlo.\n\nPetición destructiva. Sólo la aceptan los trabajos en `preview_ready`; en los demás estados responde `422 job_not_editable`.\n\nUsa `import_id` e `import_row_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define las variables en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/delete-beneficiary-import-row\nGuía: https://docs.veriko.mx/es/how-to/beneficiary-import"
               },
               "event": [
                 {
@@ -2250,7 +2250,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"responds with 204\", function () {",
+                      "pm.test(\"responde 204\", function () {",
                       "  pm.expect(pm.response.code).to.equal(204);",
                       "});"
                     ]
@@ -2259,7 +2259,7 @@
               ]
             },
             {
-              "name": "Confirm the import (destructive)",
+              "name": "Confirmar la importación (destructiva)",
               "request": {
                 "method": "POST",
                 "header": [],
@@ -2276,7 +2276,7 @@
                   ],
                   "query": []
                 },
-                "description": "Confirms the import job and saves its valid rows as beneficiaries.\n\nDestructive request. Creates beneficiaries. Archive them one by one with `DELETE /v1/beneficiaries/{id}` to undo it.\n\nThe commit is asynchronous: poll the import status until `completed` or `failed`.\n\nUses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/commit-beneficiary-import\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import"
+                "description": "Confirma el trabajo de importación y guarda sus filas válidas como beneficiarios.\n\nPetición destructiva. Crea beneficiarios. Para deshacerlo, archívalos uno por uno con `DELETE /v1/beneficiaries/{id}`.\n\nLa confirmación es asíncrona: sondea el estado de la importación hasta `completed` o `failed`.\n\nUsa `import_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/commit-beneficiary-import\nGuía: https://docs.veriko.mx/es/how-to/beneficiary-import"
               },
               "event": [
                 {
@@ -2284,7 +2284,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"responds with 202\", function () {",
+                      "pm.test(\"responde 202\", function () {",
                       "  pm.expect(pm.response.code).to.equal(202);",
                       "});"
                     ]
@@ -2293,7 +2293,7 @@
               ]
             },
             {
-              "name": "Cancel an import (destructive)",
+              "name": "Cancelar una importación (destructiva)",
               "request": {
                 "method": "DELETE",
                 "header": [],
@@ -2309,7 +2309,7 @@
                   ],
                   "query": []
                 },
-                "description": "Cancels an import job that was not confirmed yet.\n\nDestructive request. Applies to `pending`, `parsing` and `preview_ready` jobs. Jobs in a terminal state return `404`.\n\nUses `import_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/cancel-beneficiary-import\nGuide: https://docs.veriko.mx/en/how-to/beneficiary-import"
+                "description": "Cancela un trabajo de importación que aún no se confirmó.\n\nPetición destructiva. Aplica a los trabajos en `pending`, `parsing` y `preview_ready`. Los que están en un estado terminal responden `404`.\n\nUsa `import_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/cancel-beneficiary-import\nGuía: https://docs.veriko.mx/es/how-to/beneficiary-import"
               },
               "event": [
                 {
@@ -2317,7 +2317,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"responds with 204\", function () {",
+                      "pm.test(\"responde 204\", function () {",
                       "  pm.expect(pm.response.code).to.equal(204);",
                       "});"
                     ]
@@ -2328,7 +2328,7 @@
           ]
         },
         {
-          "name": "List beneficiaries",
+          "name": "Listar beneficiarios",
           "request": {
             "method": "GET",
             "header": [],
@@ -2348,7 +2348,7 @@
                 }
               ]
             },
-            "description": "Lists the saved beneficiary accounts: CLABE, card and phone (DiMo). The list is not paginated.\n\nQuery parameters:\n- `with_archived` (optional): Archived filter: empty or omitted = all; `0` = active only; `1` = archived only.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/list-beneficiaries\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries"
+            "description": "Lista las cuentas de beneficiarios guardadas: CLABE, tarjeta y celular (DiMo). La lista no va paginada.\n\nParámetros de consulta:\n- `with_archived` (opcional): Filtro de archivados: vacío u omitido = todas; `0` = sólo activas; `1` = sólo archivadas.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/list-beneficiaries\nGuía: https://docs.veriko.mx/es/how-to/manage-beneficiaries"
           },
           "event": [
             {
@@ -2356,7 +2356,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -2365,7 +2365,7 @@
           ]
         },
         {
-          "name": "Create a beneficiary",
+          "name": "Crear un beneficiario",
           "request": {
             "method": "POST",
             "header": [],
@@ -2379,10 +2379,10 @@
               ],
               "query": []
             },
-            "description": "Registers a beneficiary account. The type is detected from the length of the number.\n\nA phone number (10 digits) needs `bank_code`. Registering an archived account reactivates it and responds `200`.\n\nSaves `beneficiary_id`.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/create-beneficiary\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries",
+            "description": "Registra la cuenta de un beneficiario. El tipo se detecta por la longitud del número.\n\nUn celular (10 dígitos) necesita `bank_code`. Registrar una cuenta archivada la reactiva y responde `200`.\n\nGuarda `beneficiary_id`.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/create-beneficiary\nGuía: https://docs.veriko.mx/es/how-to/manage-beneficiaries",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"account_number\": \"012180004412345678\",\n  \"label\": \"Example supplier\"\n}",
+              "raw": "{\n  \"account_number\": \"012180004412345678\",\n  \"label\": \"Proveedor de ejemplo\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2399,7 +2399,7 @@
                   "if ([200, 201].includes(pm.response.code)) {",
                   "  pm.collectionVariables.set(\"beneficiary_id\", pm.response.json().data.id);",
                   "}",
-                  "pm.test(\"registers the beneficiary\", function () {",
+                  "pm.test(\"registra el beneficiario\", function () {",
                   "  pm.expect([200, 201]).to.include(pm.response.code);",
                   "  pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
                   "});"
@@ -2409,7 +2409,7 @@
           ]
         },
         {
-          "name": "Update a beneficiary (destructive)",
+          "name": "Actualizar un beneficiario (destructiva)",
           "request": {
             "method": "PUT",
             "header": [],
@@ -2424,10 +2424,10 @@
               ],
               "query": []
             },
-            "description": "Updates the label, the account number or the bank code of a beneficiary.\n\nDestructive request. A new `account_number` replaces the account and derives the bank again.\n\nUses `beneficiary_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/update-beneficiary\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries",
+            "description": "Actualiza la etiqueta, el número de cuenta o la clave de banco de un beneficiario.\n\nPetición destructiva. Un `account_number` nuevo reemplaza la cuenta y vuelve a derivar el banco.\n\nUsa `beneficiary_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/update-beneficiary\nGuía: https://docs.veriko.mx/es/how-to/manage-beneficiaries",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"label\": \"Example supplier (updated)\"\n}",
+              "raw": "{\n  \"label\": \"Proveedor de ejemplo (actualizado)\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2441,7 +2441,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -2450,7 +2450,7 @@
           ]
         },
         {
-          "name": "Validate an account structure",
+          "name": "Validar la estructura de una cuenta",
           "request": {
             "method": "GET",
             "header": [],
@@ -2475,7 +2475,7 @@
                 }
               ]
             },
-            "description": "Checks the structure of a CLABE, card or phone number, including the check digit, and resolves the bank.\n\nA malformed number is a result (`checksum_valid=false`), not a `422`. It does not consume quota.\n\nQuery parameters:\n- `account` (required): Account digits (complete or partial).\n- `type` (optional): Forces the input interpretation instead of auto-detecting by length.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/validate-account\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries"
+            "description": "Revisa la estructura de una CLABE, una tarjeta o un celular, con su dígito verificador, y resuelve el banco.\n\nUn número mal formado es un resultado (`checksum_valid=false`), no un `422`. No consume cuota.\n\nParámetros de consulta:\n- `account` (obligatorio): Dígitos de la cuenta (completos o parciales).\n- `type` (opcional): Fuerza la interpretación del dato en lugar de detectarla por la longitud.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/validate-account\nGuía: https://docs.veriko.mx/es/how-to/manage-beneficiaries"
           },
           "event": [
             {
@@ -2483,7 +2483,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -2492,7 +2492,7 @@
           ]
         },
         {
-          "name": "Look up an account in your beneficiaries",
+          "name": "Buscar una cuenta en tus beneficiarios",
           "request": {
             "method": "GET",
             "header": [],
@@ -2512,7 +2512,7 @@
                 }
               ]
             },
-            "description": "Looks up an exact account number in the beneficiaries of the account.\n\nResponds `404` when the number is not in your list.\n\nQuery parameters:\n- `account` (required): Full account number: 10 digits (phone), 16 (card) or 18 (CLABE).\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/lookup-beneficiary-account\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries"
+            "description": "Busca un número de cuenta exacto entre los beneficiarios de la cuenta.\n\nResponde `404` cuando el número no está en tu lista.\n\nParámetros de consulta:\n- `account` (obligatorio): Número de cuenta completo: 10 dígitos (celular), 16 (tarjeta) o 18 (CLABE).\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/lookup-beneficiary-account\nGuía: https://docs.veriko.mx/es/how-to/manage-beneficiaries"
           },
           "event": [
             {
@@ -2520,7 +2520,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -2529,7 +2529,7 @@
           ]
         },
         {
-          "name": "Export beneficiaries",
+          "name": "Exportar beneficiarios",
           "request": {
             "method": "GET",
             "header": [],
@@ -2559,7 +2559,7 @@
                 }
               ]
             },
-            "description": "Downloads the beneficiaries as CSV or XLSX, up to 100,000 rows.\n\nAccount numbers are masked, except the CLABE.\n\nQuery parameters:\n- `with_archived` (optional): Archived filter: empty or omitted = all; `0` = active only; `1` = archived only.\n- `format` (optional): Output format.\n- `limit` (optional): Trims the number of rows in the file.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/export-beneficiaries\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries"
+            "description": "Descarga los beneficiarios en CSV o XLSX, hasta 100,000 filas.\n\nLos números de cuenta salen enmascarados, salvo la CLABE.\n\nParámetros de consulta:\n- `with_archived` (opcional): Filtro de archivados: vacío u omitido = todas; `0` = sólo activas; `1` = sólo archivadas.\n- `format` (opcional): Formato del archivo.\n- `limit` (opcional): Recorta el número de filas del archivo.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/export-beneficiaries\nGuía: https://docs.veriko.mx/es/how-to/manage-beneficiaries"
           },
           "event": [
             {
@@ -2567,7 +2567,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -2576,7 +2576,7 @@
           ]
         },
         {
-          "name": "Archive a beneficiary (destructive)",
+          "name": "Archivar un beneficiario (destructiva)",
           "request": {
             "method": "DELETE",
             "header": [],
@@ -2591,7 +2591,7 @@
               ],
               "query": []
             },
-            "description": "Archives a beneficiary account.\n\nDestructive request. The account leaves the active list; validation history stays. Registering the same number again reactivates it.\n\nUses `beneficiary_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/beneficiaries/delete-beneficiary\nGuide: https://docs.veriko.mx/en/how-to/manage-beneficiaries"
+            "description": "Archiva la cuenta de un beneficiario.\n\nPetición destructiva. La cuenta sale de la lista activa; el historial de validaciones se conserva. Registrar el mismo número otra vez la reactiva.\n\nUsa `beneficiary_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/beneficiaries/delete-beneficiary\nGuía: https://docs.veriko.mx/es/how-to/manage-beneficiaries"
           },
           "event": [
             {
@@ -2599,7 +2599,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 204\", function () {",
+                  "pm.test(\"responde 204\", function () {",
                   "  pm.expect(pm.response.code).to.equal(204);",
                   "});"
                 ]
@@ -2613,7 +2613,7 @@
       "name": "Webhooks",
       "item": [
         {
-          "name": "List webhook endpoints",
+          "name": "Listar los endpoints de webhook",
           "request": {
             "method": "GET",
             "header": [],
@@ -2627,7 +2627,7 @@
               ],
               "query": []
             },
-            "description": "Lists the registered endpoints with their status and subscribed events. The secret is not included.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/list-webhooks\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks"
+            "description": "Lista los endpoints registrados con su estado y los eventos a los que se suscriben. No incluye el secreto.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/list-webhooks\nGuía: https://docs.veriko.mx/es/how-to/set-up-webhooks"
           },
           "event": [
             {
@@ -2635,7 +2635,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -2644,7 +2644,7 @@
           ]
         },
         {
-          "name": "Create a webhook endpoint",
+          "name": "Crear un endpoint de webhook",
           "request": {
             "method": "POST",
             "header": [],
@@ -2658,10 +2658,10 @@
               ],
               "query": []
             },
-            "description": "Registers an HTTPS endpoint that receives the subscribed events.\n\n`url` must resolve to a public address. The signing `secret` appears only in this response and is saved as `webhook_secret`. Deliveries carry it as `X-Webhook-Signature`.\n\nSaves `webhook_id`, `webhook_secret`.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/create-webhook\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks",
+            "description": "Registra un endpoint HTTPS que recibe los eventos a los que te suscribes.\n\n`url` debe resolver a una dirección pública. El `secret` de firma aparece sólo en esta respuesta y se guarda como `webhook_secret`. Las entregas lo llevan en `X-Webhook-Signature`.\n\nGuarda `webhook_id` y `webhook_secret`.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/create-webhook\nGuía: https://docs.veriko.mx/es/how-to/set-up-webhooks",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"url\": \"{{webhook_receiver_url}}\",\n  \"events\": [\n    \"validation.completed\",\n    \"validation.failed\",\n    \"validation.error\",\n    \"validation.returned\",\n    \"validation.retry.scheduled\",\n    \"validation.retry.resolved\",\n    \"validation.retry.exhausted\"\n  ],\n  \"description\": \"veriko-api-collection example\"\n}",
+              "raw": "{\n  \"url\": \"{{webhook_receiver_url}}\",\n  \"events\": [\n    \"validation.completed\",\n    \"validation.failed\",\n    \"validation.error\",\n    \"validation.returned\",\n    \"validation.retry.scheduled\",\n    \"validation.retry.resolved\",\n    \"validation.retry.exhausted\"\n  ],\n  \"description\": \"Ejemplo de la colección\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2679,7 +2679,7 @@
                   "  pm.collectionVariables.set(\"webhook_id\", pm.response.json().data.id);",
                   "  pm.collectionVariables.set(\"webhook_secret\", pm.response.json().data.attributes.secret);",
                   "}",
-                  "pm.test(\"creates the endpoint and returns the secret once\", function () {",
+                  "pm.test(\"crea el endpoint y devuelve el secreto una sola vez\", function () {",
                   "  pm.expect(pm.response.code).to.equal(201);",
                   "  pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
                   "  pm.expect(pm.response.json().data.attributes.secret).to.be.a(\"string\");",
@@ -2690,7 +2690,7 @@
           ]
         },
         {
-          "name": "Update a webhook endpoint (destructive)",
+          "name": "Actualizar un endpoint de webhook (destructiva)",
           "request": {
             "method": "PUT",
             "header": [],
@@ -2705,10 +2705,10 @@
               ],
               "query": []
             },
-            "description": "Updates the URL, the events or the status of an endpoint.\n\nDestructive request. Only the fields you send change. The signing secret stays the same.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/update-webhook\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks",
+            "description": "Actualiza la URL, los eventos o el estado de un endpoint.\n\nPetición destructiva. Sólo cambian los campos que envíes. El secreto de firma sigue igual.\n\nUsa `webhook_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/update-webhook\nGuía: https://docs.veriko.mx/es/how-to/set-up-webhooks",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"description\": \"veriko-api-collection example (updated)\",\n  \"status\": \"active\"\n}",
+              "raw": "{\n  \"description\": \"Ejemplo de la colección (actualizado)\",\n  \"status\": \"active\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2722,7 +2722,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -2731,7 +2731,7 @@
           ]
         },
         {
-          "name": "Send a test event",
+          "name": "Enviar un evento de prueba",
           "request": {
             "method": "POST",
             "header": [],
@@ -2747,7 +2747,7 @@
               ],
               "query": []
             },
-            "description": "Sends a synthetic delivery to the endpoint and reports how the receiver answered.\n\nThe response is `200` even when the receiver fails. The test checks `delivered`.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/send-webhook-test\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks"
+            "description": "Envía una entrega sintética al endpoint e informa cómo respondió el receptor.\n\nLa respuesta es `200` aunque el receptor falle. La prueba revisa `delivered`.\n\nUsa `webhook_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/send-webhook-test\nGuía: https://docs.veriko.mx/es/how-to/set-up-webhooks"
           },
           "event": [
             {
@@ -2755,9 +2755,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"the receiver answered with a 2xx status\", function () {",
+                  "pm.test(\"el receptor respondió con un estado 2xx\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
-                  "  pm.expect(pm.response.json().data.attributes.delivered, pm.response.json().data.attributes.error || \"receiver did not answer 2xx\").to.equal(true);",
+                  "  pm.expect(pm.response.json().data.attributes.delivered, pm.response.json().data.attributes.error || \"el receptor no respondió 2xx\").to.equal(true);",
                   "});"
                 ]
               }
@@ -2765,7 +2765,7 @@
           ]
         },
         {
-          "name": "List deliveries of an endpoint",
+          "name": "Listar las entregas de un endpoint",
           "request": {
             "method": "GET",
             "header": [],
@@ -2790,7 +2790,7 @@
                 }
               ]
             },
-            "description": "Lists the delivery attempts of one endpoint, newest first.\n\nQuery parameters:\n- `page` (optional): Page requested, starting at 1.\n- `per_page` (optional): How many deliveries each page carries.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/list-webhook-deliveries\nGuide: https://docs.veriko.mx/en/concepts/webhooks-architecture"
+            "description": "Lista los intentos de entrega de un endpoint, del más reciente al más antiguo.\n\nParámetros de consulta:\n- `page` (opcional): Página que se pide, empezando en 1.\n- `per_page` (opcional): Cuántas entregas trae cada página.\n\nUsa `webhook_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/list-webhook-deliveries\nGuía: https://docs.veriko.mx/es/concepts/webhooks-architecture"
           },
           "event": [
             {
@@ -2798,7 +2798,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -2807,7 +2807,7 @@
           ]
         },
         {
-          "name": "Export deliveries of an endpoint",
+          "name": "Exportar las entregas de un endpoint",
           "request": {
             "method": "GET",
             "header": [],
@@ -2834,7 +2834,7 @@
                 }
               ]
             },
-            "description": "Downloads up to 100,000 delivery records of one endpoint as CSV or XLSX.\n\nQuery parameters:\n- `format` (optional): Output format.\n- `limit` (optional): Trims the number of rows in the file.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/export-webhook-deliveries\nGuide: https://docs.veriko.mx/en/concepts/webhooks-architecture"
+            "description": "Descarga hasta 100,000 registros de entregas de un endpoint en CSV o XLSX.\n\nParámetros de consulta:\n- `format` (opcional): Formato del archivo.\n- `limit` (opcional): Recorta el número de filas del archivo.\n\nUsa `webhook_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/export-webhook-deliveries\nGuía: https://docs.veriko.mx/es/concepts/webhooks-architecture"
           },
           "event": [
             {
@@ -2842,7 +2842,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -2851,7 +2851,7 @@
           ]
         },
         {
-          "name": "List deliveries of all endpoints",
+          "name": "Listar las entregas de todos los endpoints",
           "request": {
             "method": "GET",
             "header": [],
@@ -2925,7 +2925,7 @@
                 }
               ]
             },
-            "description": "Lists the deliveries of every endpoint, with text search and filters.\n\nQuery parameters:\n- `page` (optional): Page requested, starting at 1.\n- `per_page` (optional): How many deliveries each page carries.\n- `endpoint_id` (optional): Filter, unique identifier of the webhook endpoint (UUID v4).\n- `status` (optional): Delivery state.\n- `event_type` (optional): Type of event that produced the delivery.\n- `q` (optional): Searches the delivery id, the endpoint's id, URL and description, the event type, the validation id and the response's HTTP code.\n- `validation_id` (optional): Only the deliveries of this validation (UUID v4).\n- `response_status` (optional): HTTP code the receiver answered with, comma-separated.\n- `from` (optional): Deliveries created from this moment on, inclusive.\n- `to` (optional): Deliveries created up to this moment, inclusive.\n- `min_attempt` (optional): Only deliveries whose attempt number is at least this.\n- `min_response_time_ms` (optional): Only deliveries whose receiver took at least this many milliseconds to answer.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/list-all-deliveries\nGuide: https://docs.veriko.mx/en/concepts/webhooks-architecture"
+            "description": "Lista las entregas de todos los endpoints, con búsqueda de texto y filtros.\n\nParámetros de consulta:\n- `page` (opcional): Página que se pide, empezando en 1.\n- `per_page` (opcional): Cuántas entregas trae cada página.\n- `endpoint_id` (opcional): Filtro: identificador único del endpoint de webhook (UUID v4).\n- `status` (opcional): Estado de la entrega.\n- `event_type` (opcional): Tipo de evento que originó la entrega.\n- `q` (opcional): Busca en el identificador de la entrega, el identificador, la URL y la descripción del endpoint, el tipo de evento, el identificador de la validación y el código HTTP de la respuesta.\n- `validation_id` (opcional): Sólo las entregas de esta validación (UUID v4).\n- `response_status` (opcional): Código HTTP con el que respondió el receptor, separados por coma.\n- `from` (opcional): Entregas creadas a partir de este momento, inclusive.\n- `to` (opcional): Entregas creadas hasta este momento, inclusive.\n- `min_attempt` (opcional): Sólo las entregas cuyo número de intento sea al menos este.\n- `min_response_time_ms` (opcional): Sólo las entregas cuyo receptor tardó al menos estos milisegundos en responder.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/list-all-deliveries\nGuía: https://docs.veriko.mx/es/concepts/webhooks-architecture"
           },
           "event": [
             {
@@ -2933,7 +2933,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -2942,7 +2942,7 @@
           ]
         },
         {
-          "name": "Export deliveries of all endpoints",
+          "name": "Exportar las entregas de todos los endpoints",
           "request": {
             "method": "GET",
             "header": [],
@@ -3018,7 +3018,7 @@
                 }
               ]
             },
-            "description": "Downloads the delivery history of every endpoint as CSV or XLSX.\n\nQuery parameters:\n- `endpoint_id` (optional): Filter, unique identifier of the webhook endpoint (UUID v4).\n- `status` (optional): Delivery state.\n- `event_type` (optional): Type of event that produced the delivery.\n- `q` (optional): Searches the delivery id, the endpoint's id, URL and description, the event type, the validation id and the response's HTTP code.\n- `validation_id` (optional): Only the deliveries of this validation (UUID v4).\n- `response_status` (optional): HTTP code the receiver answered with, comma-separated.\n- `from` (optional): Deliveries created from this moment on, inclusive.\n- `to` (optional): Deliveries created up to this moment, inclusive.\n- `min_attempt` (optional): Only deliveries whose attempt number is at least this.\n- `min_response_time_ms` (optional): Only deliveries whose receiver took at least this many milliseconds to answer.\n- `format` (optional): Output format.\n- `limit` (optional): Trims the number of rows in the file.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/export-all-deliveries\nGuide: https://docs.veriko.mx/en/concepts/webhooks-architecture"
+            "description": "Descarga el historial de entregas de todos los endpoints en CSV o XLSX.\n\nParámetros de consulta:\n- `endpoint_id` (opcional): Filtro: identificador único del endpoint de webhook (UUID v4).\n- `status` (opcional): Estado de la entrega.\n- `event_type` (opcional): Tipo de evento que originó la entrega.\n- `q` (opcional): Busca en el identificador de la entrega, el identificador, la URL y la descripción del endpoint, el tipo de evento, el identificador de la validación y el código HTTP de la respuesta.\n- `validation_id` (opcional): Sólo las entregas de esta validación (UUID v4).\n- `response_status` (opcional): Código HTTP con el que respondió el receptor, separados por coma.\n- `from` (opcional): Entregas creadas a partir de este momento, inclusive.\n- `to` (opcional): Entregas creadas hasta este momento, inclusive.\n- `min_attempt` (opcional): Sólo las entregas cuyo número de intento sea al menos este.\n- `min_response_time_ms` (opcional): Sólo las entregas cuyo receptor tardó al menos estos milisegundos en responder.\n- `format` (opcional): Formato del archivo.\n- `limit` (opcional): Recorta el número de filas del archivo.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/export-all-deliveries\nGuía: https://docs.veriko.mx/es/concepts/webhooks-architecture"
           },
           "event": [
             {
@@ -3026,7 +3026,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3035,7 +3035,7 @@
           ]
         },
         {
-          "name": "Regenerate the signing secret (destructive)",
+          "name": "Regenerar el secreto de firma (destructiva)",
           "request": {
             "method": "POST",
             "header": [],
@@ -3051,7 +3051,7 @@
               ],
               "query": []
             },
-            "description": "Rotates the secret that signs the deliveries of an endpoint.\n\nDestructive request. The new secret appears only in this response and is saved as `webhook_secret`. For 24 hours deliveries also carry the previous signature in `X-Webhook-Signature-Old`; with `\"immediate\": true` the previous secret stops working at once.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nSaves `webhook_secret`.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/regenerate-webhook-secret\nGuide: https://docs.veriko.mx/en/concepts/webhooks-architecture",
+            "description": "Rota el secreto que firma las entregas de un endpoint.\n\nPetición destructiva. El secreto nuevo aparece sólo en esta respuesta y se guarda como `webhook_secret`. Durante 24 horas las entregas también llevan la firma anterior en `X-Webhook-Signature-Old`; con `\"immediate\": true` el secreto anterior deja de servir al instante.\n\nUsa `webhook_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nGuarda `webhook_secret`.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/regenerate-webhook-secret\nGuía: https://docs.veriko.mx/es/concepts/webhooks-architecture",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"immediate\": false\n}",
@@ -3071,7 +3071,7 @@
                   "if (pm.response.code === 200) {",
                   "  pm.collectionVariables.set(\"webhook_secret\", pm.response.json().data.attributes.secret);",
                   "}",
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3080,7 +3080,7 @@
           ]
         },
         {
-          "name": "Delete a webhook endpoint (destructive)",
+          "name": "Eliminar un endpoint de webhook (destructiva)",
           "request": {
             "method": "DELETE",
             "header": [],
@@ -3095,7 +3095,7 @@
               ],
               "query": []
             },
-            "description": "Deletes an endpoint.\n\nDestructive request. Deletes the endpoint and its whole delivery history. It cannot be undone. To keep the history, set the status to `disabled` with the update request.\n\nUses `webhook_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/webhooks/delete-webhook\nGuide: https://docs.veriko.mx/en/how-to/set-up-webhooks"
+            "description": "Elimina un endpoint.\n\nPetición destructiva. Elimina el endpoint y todo su historial de entregas. No se puede deshacer. Para conservar el historial, pon el estado en `disabled` con la petición de actualización.\n\nUsa `webhook_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/webhooks/delete-webhook\nGuía: https://docs.veriko.mx/es/how-to/set-up-webhooks"
           },
           "event": [
             {
@@ -3103,7 +3103,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 204\", function () {",
+                  "pm.test(\"responde 204\", function () {",
                   "  pm.expect(pm.response.code).to.equal(204);",
                   "});"
                 ]
@@ -3114,14 +3114,14 @@
       ]
     },
     {
-      "name": "Finance",
+      "name": "Finanzas",
       "item": [
         {
-          "name": "CEP exports",
-          "description": "Background preparation of the CEP archive for large date ranges.",
+          "name": "Exportaciones de CEP",
+          "description": "Preparación en segundo plano del archivo de CEP para rangos de fechas grandes.",
           "item": [
             {
-              "name": "Request a CEP export",
+              "name": "Solicitar una exportación de CEP",
               "request": {
                 "method": "POST",
                 "header": [
@@ -3142,7 +3142,7 @@
                   ],
                   "query": []
                 },
-                "description": "Queues the CEP archive of a date range and returns `202` at once.\n\nSends an `Idempotency-Key`. Poll the export with `cep_export_id`.\n\nSaves `cep_export_id`.\n\nReference: https://docs.veriko.mx/en/v1/finance/create-finance-cep-export\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report",
+                "description": "Pone en cola el archivo de CEP de un rango de fechas y responde `202` de inmediato.\n\nEnvía un `Idempotency-Key`. Sondea la exportación con `cep_export_id`.\n\nGuarda `cep_export_id`.\n\nReferencia: https://docs.veriko.mx/es/v1/finance/create-finance-cep-export\nGuía: https://docs.veriko.mx/es/how-to/generate-finance-report",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"from\": \"2026-04-01\",\n  \"to\": \"2026-04-30\"\n}",
@@ -3162,7 +3162,7 @@
                       "if (pm.response.code === 202) {",
                       "  pm.collectionVariables.set(\"cep_export_id\", pm.response.json().data.id);",
                       "}",
-                      "pm.test(\"queues the export\", function () {",
+                      "pm.test(\"pone en cola la exportación\", function () {",
                       "  pm.expect(pm.response.code).to.equal(202);",
                       "  pm.expect(pm.response.json().data.id).to.be.a(\"string\");",
                       "});"
@@ -3172,7 +3172,7 @@
               ]
             },
             {
-              "name": "List CEP exports",
+              "name": "Listar exportaciones de CEP",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -3188,7 +3188,7 @@
                   ],
                   "query": []
                 },
-                "description": "Lists the last 20 CEP exports of the caller, newest first.\n\nReference: https://docs.veriko.mx/en/v1/finance/list-finance-cep-exports\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+                "description": "Lista las últimas 20 exportaciones de CEP de quien consulta, de la más reciente a la más antigua.\n\nReferencia: https://docs.veriko.mx/es/v1/finance/list-finance-cep-exports\nGuía: https://docs.veriko.mx/es/how-to/generate-finance-report"
               },
               "event": [
                 {
@@ -3196,7 +3196,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"responds with 200\", function () {",
+                      "pm.test(\"responde 200\", function () {",
                       "  pm.expect(pm.response.code).to.equal(200);",
                       "});"
                     ]
@@ -3205,7 +3205,7 @@
               ]
             },
             {
-              "name": "Poll a CEP export",
+              "name": "Sondear una exportación de CEP",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -3222,7 +3222,7 @@
                   ],
                   "query": []
                 },
-                "description": "Returns the state of a CEP export and repeats in the runner until it is terminal.\n\nThe terminal states are `ready`, `failed` and `expired`. While the state is `queued` or `building`, the script waits 3 seconds and repeats the request, up to 30 times.\n\nUses `cep_export_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-cep-export\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+                "description": "Devuelve el estado de una exportación de CEP y se repite en el ejecutor hasta que sea terminal.\n\nLos estados terminales son `ready`, `failed` y `expired`. Mientras el estado sea `queued` o `building`, el script espera 3 segundos y repite la petición, hasta 30 veces.\n\nUsa `cep_export_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/finance/get-finance-cep-export\nGuía: https://docs.veriko.mx/es/how-to/generate-finance-report"
               },
               "event": [
                 {
@@ -3236,11 +3236,11 @@
                       "const state = pm.response.code === 200 ? pm.response.json().data.attributes.status : \"stop\";",
                       "if (state !== \"stop\" && !TERMINAL_EXPORT.includes(state) && polls < 30) {",
                       "  await new Promise((resolve) => setTimeout(resolve, 3000));",
-                      "  pm.execution.setNextRequest(\"Poll a CEP export\");",
+                      "  pm.execution.setNextRequest(\"Sondear una exportación de CEP\");",
                       "} else {",
                       "  pm.collectionVariables.set(\"cep_export_polls\", \"0\");",
                       "}",
-                      "pm.test(\"returns the export\", function () {",
+                      "pm.test(\"devuelve la exportación\", function () {",
                       "  pm.expect(pm.response.code).to.equal(200);",
                       "  pm.expect(pm.response.json().data.attributes.status).to.be.a(\"string\");",
                       "});"
@@ -3250,7 +3250,7 @@
               ]
             },
             {
-              "name": "Download a CEP export",
+              "name": "Descargar una exportación de CEP",
               "request": {
                 "method": "GET",
                 "header": [],
@@ -3268,7 +3268,7 @@
                   ],
                   "query": []
                 },
-                "description": "Downloads the ZIP of a CEP export in the `ready` state.\n\nResponds `409 export_not_ready` while the export is in progress, and `410` after the archive expired.\n\nUses `cep_export_id`, saved by an earlier request. Run the requests in the order of the folder, or set the variable in the environment.\n\nReference: https://docs.veriko.mx/en/v1/finance/download-finance-cep-export\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+                "description": "Descarga el ZIP de una exportación de CEP en estado `ready`.\n\nResponde `409 export_not_ready` mientras la exportación está en curso y `410` cuando el archivo ya venció.\n\nUsa `cep_export_id`, que guardó una petición anterior. Corre las peticiones en el orden de la carpeta o define la variable en el entorno.\n\nReferencia: https://docs.veriko.mx/es/v1/finance/download-finance-cep-export\nGuía: https://docs.veriko.mx/es/how-to/generate-finance-report"
               },
               "event": [
                 {
@@ -3276,7 +3276,7 @@
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"responds with 200\", function () {",
+                      "pm.test(\"responde 200\", function () {",
                       "  pm.expect(pm.response.code).to.equal(200);",
                       "});"
                     ]
@@ -3287,7 +3287,7 @@
           ]
         },
         {
-          "name": "Get the monthly summary",
+          "name": "Consultar el resumen mensual",
           "request": {
             "method": "GET",
             "header": [],
@@ -3312,7 +3312,7 @@
                 }
               ]
             },
-            "description": "Returns the KPIs of a month: verdict counts, amounts, success rate and breakdowns.\n\nQuery parameters:\n- `month` (required): Month to query in `YYYY-MM` format.\n- `user_id` (optional): Administrators only, UUID of the user to query.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-summary\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+            "description": "Devuelve los indicadores de un mes: conteo de veredictos, montos, tasa de éxito y desgloses.\n\nParámetros de consulta:\n- `month` (obligatorio): Mes a consultar en formato `YYYY-MM`.\n- `user_id` (opcional): Sólo para administradores: UUID del usuario que se consulta.\n\nReferencia: https://docs.veriko.mx/es/v1/finance/get-finance-summary\nGuía: https://docs.veriko.mx/es/how-to/generate-finance-report"
           },
           "event": [
             {
@@ -3320,7 +3320,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3329,7 +3329,7 @@
           ]
         },
         {
-          "name": "Export the accounting file",
+          "name": "Exportar el archivo contable",
           "request": {
             "method": "GET",
             "header": [],
@@ -3368,7 +3368,7 @@
                 }
               ]
             },
-            "description": "Exports the monthly report with `DD/MM/YYYY` dates and a configurable decimal separator.\n\nQuery parameters:\n- `month` (required): Month to export in `YYYY-MM` format.\n- `decimal` (optional): Decimal separator.\n- `format` (optional): Requested file format for the download.\n- `user_id` (optional): Administrators only, UUID of the user to query.\n- `limit` (optional): Trims the number of rows when the output is `csv` or `xlsx`.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-accounting\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+            "description": "Exporta el reporte mensual con fechas `DD/MM/YYYY` y un separador decimal configurable.\n\nParámetros de consulta:\n- `month` (obligatorio): Mes a exportar en formato `YYYY-MM`.\n- `decimal` (opcional): Separador decimal.\n- `format` (opcional): Formato del archivo que se descarga.\n- `user_id` (opcional): Sólo para administradores: UUID del usuario que se consulta.\n- `limit` (opcional): Recorta el número de filas cuando la salida es `csv` o `xlsx`.\n\nReferencia: https://docs.veriko.mx/es/v1/finance/get-finance-accounting\nGuía: https://docs.veriko.mx/es/how-to/generate-finance-report"
           },
           "event": [
             {
@@ -3376,7 +3376,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3385,7 +3385,7 @@
           ]
         },
         {
-          "name": "Summarize by bank",
+          "name": "Resumir por banco",
           "request": {
             "method": "GET",
             "header": [],
@@ -3419,7 +3419,7 @@
                 }
               ]
             },
-            "description": "Groups the verifications of a month by receiving bank.\n\nQuery parameters:\n- `month` (required): Month to report in `YYYY-MM` format.\n- `format` (optional): Requested file format for the download.\n- `user_id` (optional): Administrators only, UUID of the user to query.\n- `limit` (optional): Trims the number of rows when the output is `csv` or `xlsx`.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-by-bank\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+            "description": "Agrupa las verificaciones de un mes por banco receptor.\n\nParámetros de consulta:\n- `month` (obligatorio): Mes a reportar en formato `YYYY-MM`.\n- `format` (opcional): Formato del archivo que se descarga.\n- `user_id` (opcional): Sólo para administradores: UUID del usuario que se consulta.\n- `limit` (opcional): Recorta el número de filas cuando la salida es `csv` o `xlsx`.\n\nReferencia: https://docs.veriko.mx/es/v1/finance/get-finance-by-bank\nGuía: https://docs.veriko.mx/es/how-to/generate-finance-report"
           },
           "event": [
             {
@@ -3427,7 +3427,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3436,7 +3436,7 @@
           ]
         },
         {
-          "name": "Summarize by counterparty",
+          "name": "Resumir por contraparte",
           "request": {
             "method": "GET",
             "header": [],
@@ -3470,7 +3470,7 @@
                 }
               ]
             },
-            "description": "Groups the verifications of a month by beneficiary account and bank.\n\nQuery parameters:\n- `month` (required): Month to report in `YYYY-MM` format.\n- `format` (optional): Requested file format for the download.\n- `user_id` (optional): Administrators only, UUID of the user to query.\n- `limit` (optional): Trims the number of rows when the output is `csv` or `xlsx`.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-counterparties\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+            "description": "Agrupa las verificaciones de un mes por cuenta beneficiaria y banco.\n\nParámetros de consulta:\n- `month` (obligatorio): Mes a reportar en formato `YYYY-MM`.\n- `format` (opcional): Formato del archivo que se descarga.\n- `user_id` (opcional): Sólo para administradores: UUID del usuario que se consulta.\n- `limit` (opcional): Recorta el número de filas cuando la salida es `csv` o `xlsx`.\n\nReferencia: https://docs.veriko.mx/es/v1/finance/get-finance-counterparties\nGuía: https://docs.veriko.mx/es/how-to/generate-finance-report"
           },
           "event": [
             {
@@ -3478,7 +3478,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3487,7 +3487,7 @@
           ]
         },
         {
-          "name": "Get the monthly report",
+          "name": "Consultar el reporte mensual",
           "request": {
             "method": "GET",
             "header": [],
@@ -3521,7 +3521,7 @@
                 }
               ]
             },
-            "description": "Returns the monthly list of verifications in 15 columns.\n\nQuery parameters:\n- `month` (required): Month to report in `YYYY-MM` format.\n- `format` (optional): Requested file format for the download.\n- `user_id` (optional): Administrators only, UUID of the user to query.\n- `limit` (optional): Trims the number of rows when the output is `csv` or `xlsx`.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-monthly\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+            "description": "Devuelve la lista mensual de verificaciones en 15 columnas.\n\nParámetros de consulta:\n- `month` (obligatorio): Mes a reportar en formato `YYYY-MM`.\n- `format` (opcional): Formato del archivo que se descarga.\n- `user_id` (opcional): Sólo para administradores: UUID del usuario que se consulta.\n- `limit` (opcional): Recorta el número de filas cuando la salida es `csv` o `xlsx`.\n\nReferencia: https://docs.veriko.mx/es/v1/finance/get-finance-monthly\nGuía: https://docs.veriko.mx/es/how-to/generate-finance-report"
           },
           "event": [
             {
@@ -3529,7 +3529,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3538,7 +3538,7 @@
           ]
         },
         {
-          "name": "Get the monthly statement",
+          "name": "Consultar el estado de cuenta mensual",
           "request": {
             "method": "GET",
             "header": [],
@@ -3567,7 +3567,7 @@
                 }
               ]
             },
-            "description": "Generates the monthly statement as PDF, XLSX, CSV or HTML.\n\nQuery parameters:\n- `month` (required): Statement month in `YYYY-MM` format.\n- `format` (optional): Requested file format for the download.\n- `user_id` (optional): Administrators only, UUID of the user to query.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-statement\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+            "description": "Genera el estado de cuenta mensual en PDF, XLSX, CSV o HTML.\n\nParámetros de consulta:\n- `month` (obligatorio): Mes del estado de cuenta en formato `YYYY-MM`.\n- `format` (opcional): Formato del archivo que se descarga.\n- `user_id` (opcional): Sólo para administradores: UUID del usuario que se consulta.\n\nReferencia: https://docs.veriko.mx/es/v1/finance/get-finance-statement\nGuía: https://docs.veriko.mx/es/how-to/generate-finance-report"
           },
           "event": [
             {
@@ -3575,7 +3575,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3584,7 +3584,7 @@
           ]
         },
         {
-          "name": "Download CEPs as a ZIP",
+          "name": "Descargar CEP en un ZIP",
           "request": {
             "method": "GET",
             "header": [],
@@ -3613,7 +3613,7 @@
                 }
               ]
             },
-            "description": "Downloads every available CEP of a date range as one ZIP.\n\nUse the export requests for large ranges.\n\nQuery parameters:\n- `from` (required): Start date (inclusive, `YYYY-MM-DD`).\n- `to` (required): End date (inclusive, `YYYY-MM-DD`).\n- `user_id` (optional): Administrators only, UUID of the user to query.\n\nReference: https://docs.veriko.mx/en/v1/finance/get-finance-ceps\nGuide: https://docs.veriko.mx/en/how-to/generate-finance-report"
+            "description": "Descarga en un solo ZIP todos los CEP disponibles de un rango de fechas.\n\nPara rangos grandes usa las peticiones de exportación.\n\nParámetros de consulta:\n- `from` (obligatorio): Fecha de inicio (inclusive, `YYYY-MM-DD`).\n- `to` (obligatorio): Fecha de fin (inclusive, `YYYY-MM-DD`).\n- `user_id` (opcional): Sólo para administradores: UUID del usuario que se consulta.\n\nReferencia: https://docs.veriko.mx/es/v1/finance/get-finance-ceps\nGuía: https://docs.veriko.mx/es/how-to/generate-finance-report"
           },
           "event": [
             {
@@ -3621,7 +3621,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3632,10 +3632,10 @@
       ]
     },
     {
-      "name": "Usage",
+      "name": "Uso",
       "item": [
         {
-          "name": "Get API usage",
+          "name": "Consultar el uso de la API",
           "request": {
             "method": "GET",
             "header": [],
@@ -3650,7 +3650,7 @@
               ],
               "query": []
             },
-            "description": "Returns the API usage of the account: requests today and this month, quota, recent requests and Banxico status.\n\nReference: https://docs.veriko.mx/en/v1/usage/get-api-usage\nGuide: https://docs.veriko.mx/en/how-to/monitor-usage"
+            "description": "Devuelve el uso de la API de la cuenta: peticiones de hoy y del mes, cuota, peticiones recientes y estado de Banxico.\n\nReferencia: https://docs.veriko.mx/es/v1/usage/get-api-usage\nGuía: https://docs.veriko.mx/es/how-to/monitor-usage"
           },
           "event": [
             {
@@ -3658,7 +3658,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3667,7 +3667,7 @@
           ]
         },
         {
-          "name": "Get the quota summary",
+          "name": "Consultar el resumen de la cuota",
           "request": {
             "method": "GET",
             "header": [],
@@ -3682,7 +3682,7 @@
               ],
               "query": []
             },
-            "description": "Returns the plan limit, the validations consumed and remaining, and the percentage used.\n\nReference: https://docs.veriko.mx/en/v1/usage/get-usage-summary\nGuide: https://docs.veriko.mx/en/how-to/monitor-usage"
+            "description": "Devuelve el límite del plan, las validaciones consumidas y restantes, y el porcentaje usado.\n\nReferencia: https://docs.veriko.mx/es/v1/usage/get-usage-summary\nGuía: https://docs.veriko.mx/es/how-to/monitor-usage"
           },
           "event": [
             {
@@ -3690,7 +3690,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3699,7 +3699,7 @@
           ]
         },
         {
-          "name": "Break down usage by operation",
+          "name": "Desglosar el uso por operación",
           "request": {
             "method": "GET",
             "header": [],
@@ -3720,7 +3720,7 @@
                 }
               ]
             },
-            "description": "Breaks down the usage of a period by billable operation.\n\nQuery parameters:\n- `period` (optional): Period to break down.\n\nReference: https://docs.veriko.mx/en/v1/usage/get-usage-breakdown\nGuide: https://docs.veriko.mx/en/how-to/monitor-usage"
+            "description": "Desglosa el uso de un periodo por operación facturable.\n\nParámetros de consulta:\n- `period` (opcional): Periodo a desglosar.\n\nReferencia: https://docs.veriko.mx/es/v1/usage/get-usage-breakdown\nGuía: https://docs.veriko.mx/es/how-to/monitor-usage"
           },
           "event": [
             {
@@ -3728,7 +3728,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3737,7 +3737,7 @@
           ]
         },
         {
-          "name": "Get the monthly usage history",
+          "name": "Consultar el historial mensual de uso",
           "request": {
             "method": "GET",
             "header": [],
@@ -3758,7 +3758,7 @@
                 }
               ]
             },
-            "description": "Returns the monthly validation usage, most recent first.\n\nQuery parameters:\n- `months` (optional): Number of months to include in the history (counting back from the moment of the query).\n\nReference: https://docs.veriko.mx/en/v1/usage/get-usage-history\nGuide: https://docs.veriko.mx/en/how-to/monitor-usage"
+            "description": "Devuelve el uso mensual de validaciones, del más reciente al más antiguo.\n\nParámetros de consulta:\n- `months` (opcional): Número de meses que incluye el historial (contados hacia atrás desde el momento de la consulta).\n\nReferencia: https://docs.veriko.mx/es/v1/usage/get-usage-history\nGuía: https://docs.veriko.mx/es/how-to/monitor-usage"
           },
           "event": [
             {
@@ -3766,7 +3766,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3775,7 +3775,7 @@
           ]
         },
         {
-          "name": "Get the rate limits",
+          "name": "Consultar los límites de tasa",
           "request": {
             "method": "GET",
             "header": [],
@@ -3790,7 +3790,7 @@
               ],
               "query": []
             },
-            "description": "Returns the rate limits that apply to the account, by context.\n\nReference: https://docs.veriko.mx/en/v1/usage/get-usage-limits\nGuide: https://docs.veriko.mx/en/concepts/rate-limits"
+            "description": "Devuelve los límites de tasa que aplican a la cuenta, por contexto.\n\nReferencia: https://docs.veriko.mx/es/v1/usage/get-usage-limits\nGuía: https://docs.veriko.mx/es/concepts/rate-limits"
           },
           "event": [
             {
@@ -3798,7 +3798,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3807,7 +3807,7 @@
           ]
         },
         {
-          "name": "Get the usage heatmap",
+          "name": "Consultar el mapa de calor del uso",
           "request": {
             "method": "GET",
             "header": [],
@@ -3828,7 +3828,7 @@
                 }
               ]
             },
-            "description": "Returns the validations grouped by day of the week and hour of the day.\n\nQuery parameters:\n- `days` (optional): Number of days to include in the heatmap.\n\nReference: https://docs.veriko.mx/en/v1/usage/get-usage-heatmap\nGuide: https://docs.veriko.mx/en/how-to/monitor-usage"
+            "description": "Devuelve las validaciones agrupadas por día de la semana y hora del día.\n\nParámetros de consulta:\n- `days` (opcional): Número de días que incluye el mapa de calor.\n\nReferencia: https://docs.veriko.mx/es/v1/usage/get-usage-heatmap\nGuía: https://docs.veriko.mx/es/how-to/monitor-usage"
           },
           "event": [
             {
@@ -3836,7 +3836,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3845,7 +3845,7 @@
           ]
         },
         {
-          "name": "Export API usage",
+          "name": "Exportar el uso de la API",
           "request": {
             "method": "GET",
             "header": [],
@@ -3881,7 +3881,7 @@
                 }
               ]
             },
-            "description": "Downloads the API activity log as CSV or XLSX, up to 100,000 rows.\n\nQuery parameters:\n- `format` (optional): Requested file format for the download.\n- `limit` (optional): Row cap for the download.\n- `from` (optional): Start date (inclusive) of the range to export, in ISO 8601 format (YYYY-MM-DD).\n- `to` (optional): End date (inclusive) of the range to export, in ISO 8601 format (YYYY-MM-DD).\n\nReference: https://docs.veriko.mx/en/v1/usage/export-api-usage\nGuide: https://docs.veriko.mx/en/how-to/monitor-usage"
+            "description": "Descarga el registro de actividad de la API en CSV o XLSX, hasta 100,000 filas.\n\nParámetros de consulta:\n- `format` (opcional): Formato del archivo que se descarga.\n- `limit` (opcional): Tope de filas de la descarga.\n- `from` (opcional): Fecha de inicio (inclusive) del rango a exportar, en formato ISO 8601 (YYYY-MM-DD).\n- `to` (opcional): Fecha de fin (inclusive) del rango a exportar, en formato ISO 8601 (YYYY-MM-DD).\n\nReferencia: https://docs.veriko.mx/es/v1/usage/export-api-usage\nGuía: https://docs.veriko.mx/es/how-to/monitor-usage"
           },
           "event": [
             {
@@ -3889,7 +3889,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3900,10 +3900,10 @@
       ]
     },
     {
-      "name": "Insights",
+      "name": "Métricas",
       "item": [
         {
-          "name": "Get the overview",
+          "name": "Consultar el panorama general",
           "request": {
             "method": "GET",
             "header": [],
@@ -3918,7 +3918,7 @@
               ],
               "query": []
             },
-            "description": "Returns the validation metrics of the account: totals, success rate, latency and verdict distribution.\n\nReference: https://docs.veriko.mx/en/v1/insights/get-user-insights-overview\nGuide: https://docs.veriko.mx/en/how-to/analyze-insights"
+            "description": "Devuelve las métricas de validación de la cuenta: totales, tasa de éxito, latencia y distribución de veredictos.\n\nReferencia: https://docs.veriko.mx/es/v1/insights/get-user-insights-overview\nGuía: https://docs.veriko.mx/es/how-to/analyze-insights"
           },
           "event": [
             {
@@ -3926,7 +3926,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3935,7 +3935,7 @@
           ]
         },
         {
-          "name": "Get the trends",
+          "name": "Consultar las tendencias",
           "request": {
             "method": "GET",
             "header": [],
@@ -3961,7 +3961,7 @@
                 }
               ]
             },
-            "description": "Returns a time series of the validations of the account.\n\nQuery parameters:\n- `range` (optional): Filter, Time window covered by the series: `24h` (last 24 hours), `7d` (last 7 days), `30d` (last 30 days), or `90d` (last 90 days).\n- `metric` (optional): Filter, Series to return.\n\nReference: https://docs.veriko.mx/en/v1/insights/get-user-insights-trends\nGuide: https://docs.veriko.mx/en/how-to/analyze-insights"
+            "description": "Devuelve una serie de tiempo de las validaciones de la cuenta.\n\nParámetros de consulta:\n- `range` (opcional): Filtro: ventana de tiempo que cubre la serie: `24h` (últimas 24 horas), `7d` (últimos 7 días), `30d` (últimos 30 días) o `90d` (últimos 90 días).\n- `metric` (opcional): Filtro: serie que se devuelve.\n\nReferencia: https://docs.veriko.mx/es/v1/insights/get-user-insights-trends\nGuía: https://docs.veriko.mx/es/how-to/analyze-insights"
           },
           "event": [
             {
@@ -3969,7 +3969,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -3978,7 +3978,7 @@
           ]
         },
         {
-          "name": "List the top banks",
+          "name": "Listar los bancos principales",
           "request": {
             "method": "GET",
             "header": [],
@@ -4004,7 +4004,7 @@
                 }
               ]
             },
-            "description": "Lists the banks of the last 30 days ranked by volume or error rate.\n\nQuery parameters:\n- `metric` (optional): Filter, Sorting criterion.\n- `limit` (optional): Filter, Maximum number of banks to return.\n\nReference: https://docs.veriko.mx/en/v1/insights/get-user-insights-top-banks\nGuide: https://docs.veriko.mx/en/how-to/analyze-insights"
+            "description": "Lista los bancos de los últimos 30 días, ordenados por volumen o por tasa de error.\n\nParámetros de consulta:\n- `metric` (opcional): Filtro: criterio de orden.\n- `limit` (opcional): Filtro: número máximo de bancos que se devuelven.\n\nReferencia: https://docs.veriko.mx/es/v1/insights/get-user-insights-top-banks\nGuía: https://docs.veriko.mx/es/how-to/analyze-insights"
           },
           "event": [
             {
@@ -4012,7 +4012,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -4021,7 +4021,7 @@
           ]
         },
         {
-          "name": "List the top beneficiaries",
+          "name": "Listar los beneficiarios principales",
           "request": {
             "method": "GET",
             "header": [],
@@ -4042,7 +4042,7 @@
                 }
               ]
             },
-            "description": "Lists the beneficiaries detected most often in the last 90 days.\n\nQuery parameters:\n- `limit` (optional): Filter, Maximum number of beneficiaries to return.\n\nReference: https://docs.veriko.mx/en/v1/insights/get-user-insights-top-beneficiaries\nGuide: https://docs.veriko.mx/en/how-to/analyze-insights"
+            "description": "Lista los beneficiarios que más se detectaron en los últimos 90 días.\n\nParámetros de consulta:\n- `limit` (opcional): Filtro: número máximo de beneficiarios que se devuelven.\n\nReferencia: https://docs.veriko.mx/es/v1/insights/get-user-insights-top-beneficiaries\nGuía: https://docs.veriko.mx/es/how-to/analyze-insights"
           },
           "event": [
             {
@@ -4050,7 +4050,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -4061,11 +4061,11 @@
       ]
     },
     {
-      "name": "Public",
-      "description": "Public catalogs. These requests do not send the API key.",
+      "name": "Público",
+      "description": "Catálogos públicos. Estas peticiones no envían la clave de API.",
       "item": [
         {
-          "name": "List SPEI banks",
+          "name": "Listar los bancos SPEI",
           "request": {
             "method": "GET",
             "header": [
@@ -4086,7 +4086,7 @@
               ],
               "query": []
             },
-            "description": "Returns the catalog of banks that participate in SPEI, updated weekly from Banxico.\n\nEnable `If-None-Match` to get `304` when the catalog did not change.\n\nSaves `banks_etag`.\n\nReference: https://docs.veriko.mx/en/v1/public/list-banks\nGuide: https://docs.veriko.mx/en/bank-directory",
+            "description": "Devuelve el catálogo de bancos que participan en SPEI, que se actualiza cada semana desde Banxico.\n\nActiva `If-None-Match` para recibir `304` cuando el catálogo no cambió.\n\nGuarda `banks_etag`.\n\nReferencia: https://docs.veriko.mx/es/v1/public/list-banks\nGuía: https://docs.veriko.mx/es/bank-directory",
             "auth": {
               "type": "noauth"
             }
@@ -4101,7 +4101,7 @@
                   "if (etag) {",
                   "  pm.collectionVariables.set(\"banks_etag\", etag);",
                   "}",
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -4110,7 +4110,7 @@
           ]
         },
         {
-          "name": "Look up the bank of a card",
+          "name": "Buscar el banco de una tarjeta",
           "request": {
             "method": "GET",
             "header": [],
@@ -4126,7 +4126,7 @@
               ],
               "query": []
             },
-            "description": "Resolves the issuing bank of a card from its BIN: 6 to 16 digits, of which the first 6 to 8 are used.\n\nReference: https://docs.veriko.mx/en/v1/public/lookup-bin\nGuide: https://docs.veriko.mx/en/card-lookup",
+            "description": "Resuelve el banco emisor de una tarjeta a partir de su BIN: de 6 a 16 dígitos, de los que se usan los primeros 6 a 8.\n\nReferencia: https://docs.veriko.mx/es/v1/public/lookup-bin\nGuía: https://docs.veriko.mx/es/card-lookup",
             "auth": {
               "type": "noauth"
             }
@@ -4137,7 +4137,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -4146,7 +4146,7 @@
           ]
         },
         {
-          "name": "Get the SPEI calendar",
+          "name": "Consultar el calendario SPEI",
           "request": {
             "method": "GET",
             "header": [
@@ -4168,7 +4168,7 @@
               ],
               "query": []
             },
-            "description": "Returns the SPEI non-business days of a year and the official provision they come from.\n\nSaves `calendar_etag`.\n\nReference: https://docs.veriko.mx/en/v1/public/get-spei-calendar\nGuide: https://docs.veriko.mx/en/concepts/timezone-handling",
+            "description": "Devuelve los días inhábiles de SPEI de un año y la disposición oficial de la que provienen.\n\nGuarda `calendar_etag`.\n\nReferencia: https://docs.veriko.mx/es/v1/public/get-spei-calendar\nGuía: https://docs.veriko.mx/es/concepts/timezone-handling",
             "auth": {
               "type": "noauth"
             }
@@ -4183,7 +4183,7 @@
                   "if (etag) {",
                   "  pm.collectionVariables.set(\"calendar_etag\", etag);",
                   "}",
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -4194,10 +4194,10 @@
       ]
     },
     {
-      "name": "Banxico status",
+      "name": "Estado de Banxico",
       "item": [
         {
-          "name": "Get the Banxico status",
+          "name": "Consultar el estado de Banxico",
           "request": {
             "method": "GET",
             "header": [],
@@ -4212,7 +4212,7 @@
               ],
               "query": []
             },
-            "description": "Returns the operational status of the Banxico validation service: `operational`, `degraded` or `down`.\n\nReference: https://docs.veriko.mx/en/v1/banxico-status/banxico-public-status"
+            "description": "Devuelve el estado operativo del servicio de validación de Banxico: `operational`, `degraded` o `down`.\n\nReferencia: https://docs.veriko.mx/es/v1/banxico-status/banxico-public-status"
           },
           "event": [
             {
@@ -4220,7 +4220,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -4229,7 +4229,7 @@
           ]
         },
         {
-          "name": "Get the Banxico health time series",
+          "name": "Consultar la serie de salud de Banxico",
           "request": {
             "method": "GET",
             "header": [],
@@ -4254,7 +4254,7 @@
                 }
               ]
             },
-            "description": "Returns the health history of the Banxico service, bucketed by minute or hour.\n\nQuery parameters:\n- `metric` (optional): Filter, Series to return.\n- `window` (optional): Filter, Window the series covers: `1h`, `8h`, `12h`, `24h` and `7d`.\n\nReference: https://docs.veriko.mx/en/v1/banxico-status/banxico-public-timeseries"
+            "description": "Devuelve el historial de salud del servicio de Banxico, agrupado por minuto o por hora.\n\nParámetros de consulta:\n- `metric` (opcional): Filtro: serie que se devuelve.\n- `window` (opcional): Filtro: ventana que cubre la serie: `1h`, `8h`, `12h`, `24h` y `7d`.\n\nReferencia: https://docs.veriko.mx/es/v1/banxico-status/banxico-public-timeseries"
           },
           "event": [
             {
@@ -4262,7 +4262,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -4273,11 +4273,11 @@
       ]
     },
     {
-      "name": "Plans",
-      "description": "Public plan catalog. These requests do not send the API key.",
+      "name": "Planes",
+      "description": "Catálogo público de planes. Estas peticiones no envían la clave de API.",
       "item": [
         {
-          "name": "List public plans",
+          "name": "Listar los planes públicos",
           "request": {
             "method": "GET",
             "header": [],
@@ -4292,7 +4292,7 @@
               ],
               "query": []
             },
-            "description": "Returns the active public plans with their prices and features.\n\nReference: https://docs.veriko.mx/en/v1/plans/list-public-plans\nGuide: https://docs.veriko.mx/en/how-to/show-plans-and-prices",
+            "description": "Devuelve los planes públicos activos con sus precios y características.\n\nReferencia: https://docs.veriko.mx/es/v1/plans/list-public-plans\nGuía: https://docs.veriko.mx/es/how-to/show-plans-and-prices",
             "auth": {
               "type": "noauth"
             }
@@ -4303,7 +4303,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -4312,7 +4312,7 @@
           ]
         },
         {
-          "name": "Get the plan comparison",
+          "name": "Consultar la comparación de planes",
           "request": {
             "method": "GET",
             "header": [],
@@ -4328,7 +4328,7 @@
               ],
               "query": []
             },
-            "description": "Returns the plan comparison table as structured data.\n\nReference: https://docs.veriko.mx/en/v1/plans/get-public-plan-comparison\nGuide: https://docs.veriko.mx/en/how-to/show-plans-and-prices",
+            "description": "Devuelve la tabla de comparación de planes como datos estructurados.\n\nReferencia: https://docs.veriko.mx/es/v1/plans/get-public-plan-comparison\nGuía: https://docs.veriko.mx/es/how-to/show-plans-and-prices",
             "auth": {
               "type": "noauth"
             }
@@ -4339,7 +4339,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -4350,10 +4350,10 @@
       ]
     },
     {
-      "name": "Billing",
+      "name": "Facturación",
       "item": [
         {
-          "name": "Get my subscription",
+          "name": "Consultar mi suscripción",
           "request": {
             "method": "GET",
             "header": [],
@@ -4368,7 +4368,7 @@
               ],
               "query": []
             },
-            "description": "Returns the active subscription of the account. Without one, it returns the default plan.\n\nReference: https://docs.veriko.mx/en/v1/billing/billing-get-subscription\nGuide: https://docs.veriko.mx/en/how-to/manage-my-subscription"
+            "description": "Devuelve la suscripción activa de la cuenta. Si no tiene una, devuelve el plan predeterminado.\n\nReferencia: https://docs.veriko.mx/es/v1/billing/billing-get-subscription\nGuía: https://docs.veriko.mx/es/how-to/manage-my-subscription"
           },
           "event": [
             {
@@ -4376,7 +4376,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]
@@ -4387,10 +4387,10 @@
       ]
     },
     {
-      "name": "Dashboard",
+      "name": "Panel",
       "item": [
         {
-          "name": "Get the dashboard summary",
+          "name": "Consultar el resumen del panel",
           "request": {
             "method": "GET",
             "header": [],
@@ -4409,7 +4409,7 @@
                 }
               ]
             },
-            "description": "Returns the aggregate counters of the account and its most recent validations.\n\nQuery parameters:\n- `limit` (optional): Filter, Maximum number of recent validations to return.\n\nReference: https://docs.veriko.mx/en/v1/dashboard/get-dashboard-summary"
+            "description": "Devuelve los contadores agregados de la cuenta y sus validaciones más recientes.\n\nParámetros de consulta:\n- `limit` (opcional): Filtro: número máximo de validaciones recientes que se devuelven.\n\nReferencia: https://docs.veriko.mx/es/v1/dashboard/get-dashboard-summary"
           },
           "event": [
             {
@@ -4417,7 +4417,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"responds with 200\", function () {",
+                  "pm.test(\"responde 200\", function () {",
                   "  pm.expect(pm.response.code).to.equal(200);",
                   "});"
                 ]

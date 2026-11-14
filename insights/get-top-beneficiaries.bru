@@ -1,5 +1,5 @@
 meta {
-  name: List the top beneficiaries
+  name: Listar los beneficiarios principales
   type: http
   seq: 4
 }
@@ -15,7 +15,7 @@ params:query {
 }
 
 tests {
-  test("responds with 200", function () {
+  test("responde 200", function () {
     expect(res.getStatus()).to.equal(200);
   });
 }
@@ -26,11 +26,11 @@ settings {
 }
 
 docs {
-  Lists the beneficiaries detected most often in the last 90 days.
+  Lista los beneficiarios que más se detectaron en los últimos 90 días.
 
-  Query parameters:
-  - `limit` (optional): Filter, Maximum number of beneficiaries to return.
+  Parámetros de consulta:
+  - `limit` (opcional): Filtro: número máximo de beneficiarios que se devuelven.
 
-  Reference: https://docs.veriko.mx/en/v1/insights/get-user-insights-top-beneficiaries
-  Guide: https://docs.veriko.mx/en/how-to/analyze-insights
+  Referencia: https://docs.veriko.mx/es/v1/insights/get-user-insights-top-beneficiaries
+  Guía: https://docs.veriko.mx/es/how-to/analyze-insights
 }
