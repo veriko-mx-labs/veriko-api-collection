@@ -1,92 +1,92 @@
-# Veriko API collection
+# Colección de la API de Veriko
 
-Requests for the [Veriko](https://veriko.mx) API, which verifies SPEI transfers against the Banxico CEP. The collection covers all 75 operations that accept an API key or need no authentication. It is available as a [Bruno](https://www.usebruno.com/) collection and as a Postman export.
+Peticiones para la API de [Veriko](https://veriko.mx), que verifica transferencias SPEI contra el CEP de Banxico. La colección cubre las 75 operaciones que aceptan una clave de API o no piden autenticación. Está disponible como colección de [Bruno](https://www.usebruno.com/) y como exportación de Postman.
 
-The full reference is at [docs.veriko.mx](https://docs.veriko.mx/en). To integrate from code, use the [Python SDK](https://github.com/veriko-mx-labs/veriko-python) or the [JavaScript SDK](https://github.com/veriko-mx-labs/veriko-js).
+La referencia completa está en [docs.veriko.mx](https://docs.veriko.mx/es). Para integrar desde código, usa el [SDK de Python](https://github.com/veriko-mx-labs/veriko-python) o el [SDK de JavaScript](https://github.com/veriko-mx-labs/veriko-js).
 
-## What the CEP is
+## Qué es el CEP
 
-The Electronic Payment Receipt (CEP, from the Spanish _Comprobante Electronico de Pago_) is the document that Banco de Mexico (Banxico) issues for each transfer that goes through SPEI, the Mexican interbank payment system. It carries the digital seal and the original string of the receiving institution, so it proves that a transfer happened and for how much. It has no tax effect and does not replace an invoice.
+El Comprobante Electrónico de Pago (CEP) es el documento que expide el Banco de México (Banxico) por cada transferencia que pasa por el SPEI, el sistema de pagos interbancarios de México. Lleva el sello digital y la cadena original de la institución receptora, así que acredita que una transferencia ocurrió y por qué monto. No tiene efectos fiscales ni sustituye a una factura.
 
-The API queries the CEP and returns a verdict:
+La API consulta el CEP y devuelve un veredicto:
 
-- `valid`: Banxico confirms the transfer.
-- `not_found`: no CEP matches the data.
-- `cep_unavailable`: Banxico did not answer in time.
-- `invalid`: Banxico did not return a recognizable verdict.
-- `returned`: the transfer settled and the receiving institution returned it later.
-- `failed`: the validation stopped because of the data sent.
-- `error`: the validation stopped because of a service failure.
+- `valid`: Banxico confirma la transferencia.
+- `not_found`: ningún CEP coincide con los datos.
+- `cep_unavailable`: Banxico no respondió a tiempo.
+- `invalid`: Banxico no devolvió un veredicto reconocible.
+- `returned`: la transferencia se liquidó y la institución receptora la devolvió después.
+- `failed`: la validación se detuvo por los datos que enviaste.
+- `error`: la validación se detuvo por una falla del servicio.
 
-`queued` and `processing` are not terminal. With a `valid` verdict, the CEP is available as XML and PDF.
+`queued` y `processing` no son estados finales. Con un veredicto `valid`, el CEP queda disponible en XML y en PDF.
 
-## Setup
+## Preparación
 
-1. Get an API key from the [console](https://app.veriko.mx). It starts with `veriko_`.
-2. Put it in the `VERIKO_API_KEY` environment variable, or in a `.env` file at the collection root. `.env.example` shows the format and `.env` is ignored by git.
-3. Open the collection folder in Bruno with **Open Collection** and select the `production` environment.
+1. Obtén una clave de API en el [panel](https://app.veriko.mx). Empieza con `veriko_`.
+2. Ponla en la variable de entorno `VERIKO_API_KEY` o en un archivo `.env` en la raíz de la colección. `.env.example` muestra el formato y git ignora `.env`.
+3. Abre la carpeta de la colección en Bruno con **Open Collection** y elige el entorno `production`.
 
-The `production` environment in `environments/production.bru` defines these variables:
+El entorno `production`, en `environments/production.bru`, define estas variables:
 
-| Variable               | Value                                                                                                            |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `base_url`             | `https://api.veriko.mx/v1`                                                                                       |
-| `api_key`              | Reads `VERIKO_API_KEY`.                                                                                          |
-| `webhook_receiver_url` | A public HTTPS receiver of your own, for example a temporary endpoint from [webhook.site](https://webhook.site). |
-| `receipt_image_url`    | A receipt image or PDF served over HTTPS, for the OCR requests.                                                  |
-| `receipt_image_base64` | The base64 of a receipt, for `validations/validate-ocr-image`.                                                   |
+| Variable               | Valor                                                                                                     |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| `base_url`             | `https://api.veriko.mx/v1`                                                                                |
+| `api_key`              | Lee `VERIKO_API_KEY`.                                                                                     |
+| `webhook_receiver_url` | Un receptor HTTPS público tuyo, por ejemplo un endpoint temporal de [webhook.site](https://webhook.site). |
+| `receipt_image_url`    | La imagen o el PDF de un comprobante, servido por HTTPS, para las peticiones de OCR.                      |
+| `receipt_image_base64` | El base64 de un comprobante, para `validations/validate-ocr-image`.                                       |
 
-The other variables hold ids and tokens that the requests save for the next ones, such as `validation_id`, `webhook_id`, `webhook_secret` and `import_id`.
+Las demás variables guardan identificadores y tokens que las peticiones conservan para las siguientes, como `validation_id`, `webhook_id`, `webhook_secret` e `import_id`.
 
-## Usage
+## Uso
 
-The `getting-started` folder is a numbered flow. Run it from 01 to 13:
+La carpeta `getting-started` (en Bruno aparece como «Flujo típico») es un flujo numerado. Córrelo del 01 al 13:
 
-1. Validate by fields. A `202` response with `sync_deadline` hands the validation to step 05.
-2. Validate by image.
-3. Enqueue by fields with `?async=1`.
-4. Enqueue by image with `POST /v1/validate-ocr?async=1`.
-5. Poll the verdict until a terminal state. The script waits for `Retry-After` or `meta.next_poll_after_seconds`, sends the last `ETag` in `If-None-Match`, and repeats up to 30 times. Run this step with the runner.
-6. Download the CEP.
-7. List the validation history.
-8. Register a webhook endpoint. It expects `201` and saves `webhook_id` and `webhook_secret`.
-9. Test the webhook.
-10. List the webhook deliveries.
-11. List the SPEI banks.
-12. Check the Banxico status.
-13. Delete the webhook endpoint.
+1. Validar por campos. Una respuesta `202` con `sync_deadline` pasa la validación al paso 05.
+2. Validar por imagen.
+3. Poner en cola por campos, con `?async=1`.
+4. Poner en cola por imagen, con `POST /v1/validate-ocr?async=1`.
+5. Sondear el veredicto hasta un estado final. El script espera `Retry-After` o `meta.next_poll_after_seconds`, envía el último `ETag` en `If-None-Match` y repite hasta 30 veces. Corre este paso con el ejecutor de colecciones.
+6. Descargar el CEP.
+7. Listar el historial de validaciones.
+8. Registrar un endpoint de webhook. Espera `201` y guarda `webhook_id` y `webhook_secret`.
+9. Probar el webhook.
+10. Listar las entregas del webhook.
+11. Listar los bancos SPEI.
+12. Consultar el estado de Banxico.
+13. Eliminar el endpoint de webhook.
 
-Run it with the Bruno CLI (`npm install -g @usebruno/cli`):
+Córrelo con la CLI de Bruno (`npm install -g @usebruno/cli`):
 
 ```bash
 bru run getting-started --env production
 ```
 
-Every other folder holds one request per operation, named after its spec tag:
+Cada una de las otras carpetas trae una petición por operación y lleva el nombre de su etiqueta del spec:
 
-| Folder            | Requests | Content                                                                        |
-| ----------------- | -------- | ------------------------------------------------------------------------------ |
-| `getting-started` | 13       | The guided flow above. It repeats operations from other folders.               |
-| `validations`     | 21       | Validate, list, get, CEP, retries, purge, plus queued and idempotent variants. |
-| `beneficiaries`   | 15       | Saved accounts. `imports/` holds the 8 bulk import requests.                   |
-| `webhooks`        | 10       | Endpoints, secret rotation, test and deliveries.                               |
-| `finance`         | 11       | Monthly reports. `cep-exports/` holds the 4 background CEP archive requests.   |
-| `usage`           | 7        | Quota, limits and activity.                                                    |
-| `insights`        | 4        | Metrics and trends.                                                            |
-| `users`           | 3        | Profile and default retry policy.                                              |
-| `public`          | 3        | Banks, BIN lookup and SPEI calendar. No API key.                               |
-| `banxico-status`  | 2        | Service status and time series.                                                |
-| `plans`           | 2        | Public plan catalog. No API key.                                               |
-| `billing`         | 1        | Active subscription.                                                           |
-| `dashboard`       | 1        | Account summary.                                                               |
+| Carpeta           | Peticiones | Contenido                                                                                     |
+| ----------------- | ---------- | --------------------------------------------------------------------------------------------- |
+| `getting-started` | 13         | El flujo guiado de arriba. Repite operaciones de otras carpetas.                              |
+| `validations`     | 21         | Validar, listar, consultar, CEP, reintentos, purga, y las variantes en cola e idempotentes.   |
+| `beneficiaries`   | 15         | Cuentas guardadas. `imports/` trae las 8 peticiones de importación masiva.                    |
+| `webhooks`        | 10         | Endpoints, rotación del secreto, prueba y entregas.                                           |
+| `finance`         | 11         | Reportes mensuales. `cep-exports/` trae las 4 peticiones del archivo de CEP en segundo plano. |
+| `usage`           | 7          | Cuota, límites y actividad.                                                                   |
+| `insights`        | 4          | Métricas y tendencias.                                                                        |
+| `users`           | 3          | Perfil y política de reintentos predeterminada.                                               |
+| `public`          | 3          | Bancos, búsqueda de BIN y calendario SPEI. Sin clave de API.                                  |
+| `banxico-status`  | 2          | Estado del servicio y serie de tiempo.                                                        |
+| `plans`           | 2          | Catálogo público de planes. Sin clave de API.                                                 |
+| `billing`         | 1          | Suscripción activa.                                                                           |
+| `dashboard`       | 1          | Resumen de la cuenta.                                                                         |
 
-Each request lists its query parameters in its docs. Optional parameters are disabled; enable the ones you need.
+Los docs de cada petición listan sus parámetros de consulta. Los opcionales vienen desactivados; activa los que necesites.
 
-## Quota and destructive requests
+## Cuota y peticiones destructivas
 
-`POST /v1/validate` and `POST /v1/validate-ocr` consume quota on every accepted request, with or without `?async=1`. A `not_found` is billed like a `valid`, and a receipt rejected with `422` is billed too. The API has no test host or test mode, and the example data returns `not_found`. These requests carry the `consumes-quota` tag and say so in their docs.
+`POST /v1/validate` y `POST /v1/validate-ocr` consumen cuota en cada petición aceptada, con `?async=1` o sin él. Un `not_found` se cobra igual que un `valid`, y un comprobante rechazado con `422` también se cobra. La API no tiene un servidor ni un modo de pruebas, y los datos de ejemplo devuelven `not_found`. Estas peticiones llevan la etiqueta `consumes-quota` y lo dicen en sus docs.
 
-Requests that change or delete data carry the `destructive` tag, `(destructive)` in their name and a warning in their docs. They are every `DELETE`, `PUT` and `PATCH`, the purge steps, `POST /v1/webhooks/{id}/regenerate-secret`, `POST /v1/beneficiaries/imports/{id}/commit` and `POST /v1/validations/{id}/cancel-retries`. To run a folder without them:
+Las peticiones que modifican o borran datos llevan la etiqueta `destructive`, `(destructiva)` en su nombre y un aviso en sus docs. Son todos los `DELETE`, `PUT` y `PATCH`, los pasos de purga, `POST /v1/webhooks/{id}/regenerate-secret`, `POST /v1/beneficiaries/imports/{id}/commit` y `POST /v1/validations/{id}/cancel-retries`. Para correr una carpeta sin ellas:
 
 ```bash
 bru run validations --env production --exclude-tags destructive
@@ -94,40 +94,40 @@ bru run validations --env production --exclude-tags destructive
 
 ## Postman
 
-`postman/postman_collection.json` is a Collection v2.1 generated from the Bruno files. It keeps the folders, docs, tests, `auth: none` on public requests and the scripts that save ids. `postman/production.postman_environment.json` is the matching environment.
+`postman/postman_collection.json` es una Collection v2.1 generada a partir de los archivos de Bruno. Conserva las carpetas, los docs, las pruebas, `auth: none` en las peticiones públicas y los scripts que guardan identificadores. `postman/production.postman_environment.json` es el entorno que le corresponde.
 
-1. Import both files in Postman.
-2. Select the `Veriko production` environment and set `api_key`. It is a secret variable and starts empty.
-3. Set `webhook_receiver_url`, `receipt_image_url` and `receipt_image_base64` before you run the webhook or OCR requests.
+1. Importa los dos archivos en Postman.
+2. Elige el entorno `Veriko producción` y define `api_key`. Es una variable secreta y empieza vacía.
+3. Define `webhook_receiver_url`, `receipt_image_url` y `receipt_image_base64` antes de correr las peticiones de webhooks o de OCR.
 
-Variables live in two places:
+Las variables viven en dos lugares:
 
-| Scope               | Variables                                                                                                                                                                                 |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Environment         | `base_url`, `api_key`, `webhook_receiver_url`, `receipt_image_url` and `receipt_image_base64`. You set them.                                                                              |
-| Collection variable | The ids, tokens and counters that the requests save, such as `validation_id` and `webhook_secret`. The environment does not define them: a value there would hide the one a script saves. |
+| Ámbito                | Variables                                                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Entorno               | `base_url`, `api_key`, `webhook_receiver_url`, `receipt_image_url` y `receipt_image_base64`. Las defines tú.                                                                          |
+| Variable de colección | Los identificadores, tokens y contadores que guardan las peticiones, como `validation_id` y `webhook_secret`. El entorno no las define: un valor ahí taparía el que guarda un script. |
 
-The collection also carries the five variables of the environment with their defaults, so it runs without the environment.
+La colección también trae las cinco variables del entorno con sus valores predeterminados, así que corre sin el entorno.
 
-Do not edit the two files by hand. `npm run gen:postman` regenerates them, and `npm run check:postman-fresh` fails when either differs.
+No edites los dos archivos a mano. `npm run gen:postman` los regenera y `npm run check:postman-fresh` falla cuando alguno difiere.
 
-## Tests
+## Pruebas
 
 ```bash
 npm ci
 npm test
 ```
 
-No check sends a request. `npm test` runs:
+Ninguna comprobación envía peticiones. `npm test` corre:
 
-- `check:spec-public`: `spec/openapi.yaml` is the public contract.
-- `validate`: every request matches its operation in the spec: method, path, query parameters, headers, body fields, required fields, auth mode, asserted statuses and docs.
-- `check:coverage`: the collection covers the 75 machine-to-machine operations of the spec.
-- `check:prose`: the text is English.
-- `check:postman-fresh`: the Postman collection and environment match the generator output.
+- `check:spec-public`: `spec/openapi.yaml` es el contrato público.
+- `validate`: cada petición coincide con su operación del spec: método, ruta, parámetros de consulta, cabeceras, campos del cuerpo, campos obligatorios, modo de autenticación, estados que se verifican y docs.
+- `check:coverage`: la colección cubre las 75 operaciones de máquina a máquina del spec.
+- `check:prose`: el texto es llano y no usa rayas largas.
+- `check:postman-fresh`: la colección y el entorno de Postman coinciden con lo que produce el generador.
 
-`npm run format:check` runs prettier and the `.bru` formatter. `npm run format` fixes both.
+`npm run format:check` corre prettier y el formateador de `.bru`. `npm run format` corrige ambos.
 
-## Contributing
+## Contribuir
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) to report a problem or propose a change. Report vulnerabilities as described in [`SECURITY.md`](SECURITY.md).
+Consulta [`CONTRIBUTING.md`](CONTRIBUTING.md) para reportar un problema o proponer un cambio. Reporta las vulnerabilidades como indica [`SECURITY.md`](SECURITY.md).

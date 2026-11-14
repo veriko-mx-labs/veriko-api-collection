@@ -1,7 +1,7 @@
 {
   "name": "veriko-api-collection",
   "version": "1.0.0",
-  "description": "Bruno and Postman collection for the Veriko API, which verifies SPEI transfers against the Banxico CEP",
+  "description": "Colección de Bruno y Postman para la API de Veriko, que verifica transferencias SPEI contra el CEP de Banxico",
   "private": true,
   "type": "module",
   "homepage": "https://docs.veriko.mx",

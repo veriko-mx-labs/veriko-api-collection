@@ -1,7 +1,7 @@
 /**
- * Check: the text of the repository is English and plain.
+ * Check: the text of the repository is plain.
  *
- * It rejects Spanish letters and punctuation, and em or en dashes, in the
+ * It rejects em and en dashes in the
  * requests, docs, README, CHANGELOG, SECURITY, scripts and workflows.
  */
 
@@ -12,10 +12,7 @@ import { collectionFiles } from './lib/bru.mjs';
 
 const SCANNED = /\.(bru|json|md|mjs|yml|csv)$/;
 const SKIPPED = /^(spec\/|node_modules\/|package-lock\.json|postman\/|scripts\/check-prose\.mjs)/;
-const FORBIDDEN = [
-  [/[áéíóúñÁÉÍÓÚÑüÜ¿¡]/, 'Spanish letter or punctuation'],
-  [/[—–]/, 'em or en dash'],
-];
+const FORBIDDEN = [[/[—–]/, 'em or en dash']];
 const failures = [];
 
 for (const file of collectionFiles()) {

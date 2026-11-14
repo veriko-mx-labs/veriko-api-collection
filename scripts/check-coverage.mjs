@@ -51,8 +51,8 @@ for (const request of requests.filter((r) => r.folders[0] === 'getting-started')
 }
 
 const readme = readFileSync(`${PROJECT_ROOT}README.md`, 'utf8');
-if (!readme.includes(`${expected.length} operations`)) {
-  failures.push(`README.md does not state "${expected.length} operations"`);
+if (!readme.includes(`${expected.length} operaciones`)) {
+  failures.push(`README.md does not state "${expected.length} operaciones"`);
 }
 
 const perFolder = {};
