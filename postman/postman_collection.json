@@ -1855,7 +1855,12 @@
           "name": "Enviar el CEP a Telegram",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$randomUUID}}"
+              }
+            ],
             "url": {
               "raw": "{{base_url}}/validations/{{validation_id}}/cep/send-telegram",
               "host": [
